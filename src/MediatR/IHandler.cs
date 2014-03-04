@@ -1,13 +1,13 @@
 ﻿namespace MediatR
 {
-    public interface ICommandHandler<in TMessage, out TResult>
-        where TMessage : ICommand<TResult>
+    public interface IRequestHandler<in TRequest, out TResponse>
+        where TRequest : IRequest<TResponse>
     {
-        TResult Handle(TMessage message);
+        TResponse Handle(TRequest message);
     }
 
-    public abstract class CommandHandler<TMessage> : ICommandHandler<TMessage, Unit>
-        where TMessage : ICommand
+    public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage, Unit>
+        where TMessage : IRequest
     {
         public Unit Handle(TMessage message)
         {
@@ -19,19 +19,8 @@
         protected abstract void HandleCore(TMessage message);
     }
 
-    public interface IQueryHandler<in TQuery, out TResponse>
-        where TQuery : IQuery<TResponse>
+    public interface IPostRequestHandler<in TRequest, in TResponse>
     {
-        TResponse Handle(TQuery query);
-    }
-
-    public interface ICommandResultHandler<in TMessage, in TResult>
-    {
-        void Handle(TMessage message, TResult result);
-    }
-
-    public interface IQueryResponseHandler<in TQuery, in TResponse>
-    {
-        void Handle(TQuery message, TResponse result);
+        void Handle(TRequest request, TResponse response);
     }
 }

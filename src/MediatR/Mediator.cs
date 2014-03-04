@@ -7,8 +7,7 @@
 
     public interface IMediator
     {
-        TResult Send<TResult>(ICommand<TResult> message);
-        TResponse Request<TResponse>(IQuery<TResponse> query);
+        TResponse Send<TResponse>(IRequest<TResponse> request);
     }
 
     public class Mediator : IMediator
@@ -20,157 +19,79 @@
             _serviceLocatorProvider = serviceLocatorProvider;
         }
 
-        public TResult Send<TResult>(ICommand<TResult> message)
+        public TResponse Send<TResponse>(IRequest<TResponse> request)
         {
-            var defaultHandler = GetHandler(message);
+            var defaultHandler = GetHandler(request);
 
-            TResult result = defaultHandler.Handle(message);
+            TResponse result = defaultHandler.Handle(request);
 
-            var resultHandlers = GetCommandResultHandlers(message);
+            var resultHandlers = GetPostRequestHandlers(request);
 
             foreach (var resultHandler in resultHandlers)
             {
-                resultHandler.Handle(message, result);
+                resultHandler.Handle(request, result);
             }
 
             return result;
         }
 
-        public TResponse Request<TResponse>(IQuery<TResponse> query)
+        private RequestHandler<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
-            var defaultHandler = GetHandler(query);
-
-            TResponse response = defaultHandler.Handle(query);
-
-            var responseHandlers = GetQueryResponseHandlers(query);
-
-            foreach (var responseHandler in responseHandlers)
-            {
-                responseHandler.Handle(query, response);
-            }
-
-            return response;
-        }
-
-        private QueryHandler<TResponse> GetHandler<TResponse>(IQuery<TResponse> query)
-        {
-            var handlerType = typeof(IQueryHandler<,>).MakeGenericType(query.GetType(), typeof(TResponse));
-            var wrapperType = typeof(QueryHandler<,>).MakeGenericType(query.GetType(), typeof(TResponse));
+            var handlerType = typeof(IRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
+            var wrapperType = typeof(RequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var handler = _serviceLocatorProvider().GetInstance(handlerType);
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (QueryHandler<TResponse>)wrapperHandler;
+            return (RequestHandler<TResponse>)wrapperHandler;
         }
 
-        private CommandHandler<TResult> GetHandler<TResult>(ICommand<TResult> message)
+        private IEnumerable<PostRequestHandler<TResponse>> GetPostRequestHandlers<TResponse>(IRequest<TResponse> request)
         {
-            var handlerType = typeof(ICommandHandler<,>).MakeGenericType(message.GetType(), typeof(TResult));
-            var wrapperType = typeof(CommandHandler<,>).MakeGenericType(message.GetType(), typeof(TResult));
-            var handler = _serviceLocatorProvider().GetInstance(handlerType);
-            var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (CommandHandler<TResult>)wrapperHandler;
-        }
-
-        private IEnumerable<CommandResultHandler<TResult>> GetCommandResultHandlers<TResult>(ICommand<TResult> message)
-        {
-            var handlerType = typeof(ICommandResultHandler<,>).MakeGenericType(message.GetType(), typeof(TResult));
-            var wrapperType = typeof(CommandResultHandler<,>).MakeGenericType(message.GetType(), typeof(TResult));
+            var handlerType = typeof(IPostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
+            var wrapperType = typeof(PostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var handlers = _serviceLocatorProvider().GetAllInstances(handlerType)
                 .Cast<object>()
-                .Select(handler => (CommandResultHandler<TResult>)Activator.CreateInstance(wrapperType, handler));
+                .Select(handler => (PostRequestHandler<TResponse>)Activator.CreateInstance(wrapperType, handler));
             return handlers;
         }
-
-        private IEnumerable<QueryResponseHandler<TResponse>> GetQueryResponseHandlers<TResponse>(IQuery<TResponse> query)
+        private abstract class RequestHandler<TResult>
         {
-            var handlerType = typeof(IQueryResponseHandler<,>).MakeGenericType(query.GetType(), typeof(TResponse));
-            var wrapperType = typeof(QueryResponseHandler<,>).MakeGenericType(query.GetType(), typeof(TResponse));
-            var handlers = _serviceLocatorProvider().GetAllInstances(handlerType)
-                .Cast<object>()
-                .Select(handler => (QueryResponseHandler<TResponse>)Activator.CreateInstance(wrapperType, handler));
-            return handlers;
+            public abstract TResult Handle(IRequest<TResult> message);
         }
 
-        private abstract class CommandHandler<TResult>
+        private class RequestHandler<TCommand, TResult> : RequestHandler<TResult> where TCommand : IRequest<TResult>
         {
-            public abstract TResult Handle(ICommand<TResult> message);
-        }
+            private readonly IRequestHandler<TCommand, TResult> _inner;
 
-        private class CommandHandler<TCommand, TResult> : CommandHandler<TResult> where TCommand : ICommand<TResult>
-        {
-            private readonly ICommandHandler<TCommand, TResult> _inner;
-
-            public CommandHandler(ICommandHandler<TCommand, TResult> inner)
+            public RequestHandler(IRequestHandler<TCommand, TResult> inner)
             {
                 _inner = inner;
             }
 
-            public override TResult Handle(ICommand<TResult> message)
+            public override TResult Handle(IRequest<TResult> message)
             {
                 return _inner.Handle((TCommand)message);
             }
         }
 
-        private abstract class CommandResultHandler<TResult>
+        private abstract class PostRequestHandler<TResult>
         {
-            public abstract void Handle(ICommand<TResult> message, TResult result);
+            public abstract void Handle(IRequest<TResult> message, TResult result);
         }
 
-        private class CommandResultHandler<TCommand, TResult> : CommandResultHandler<TResult>
-            where TCommand : ICommand<TResult>
+        private class PostRequestHandler<TCommand, TResult> : PostRequestHandler<TResult>
+            where TCommand : IRequest<TResult>
         {
-            private readonly ICommandResultHandler<TCommand, TResult> _inner;
+            private readonly IPostRequestHandler<TCommand, TResult> _inner;
 
-            public CommandResultHandler(ICommandResultHandler<TCommand, TResult> inner)
+            public PostRequestHandler(IPostRequestHandler<TCommand, TResult> inner)
             {
                 _inner = inner;
             }
 
-            public override void Handle(ICommand<TResult> message, TResult result)
+            public override void Handle(IRequest<TResult> message, TResult result)
             {
                 _inner.Handle((TCommand)message, result);
             }
         }
-
-        private abstract class QueryHandler<TResult>
-        {
-            public abstract TResult Handle(IQuery<TResult> message);
-        }
-
-        private class QueryHandler<TQuery, TResult> : QueryHandler<TResult> where TQuery : IQuery<TResult>
-        {
-            private readonly IQueryHandler<TQuery, TResult> _inner;
-
-            public QueryHandler(IQueryHandler<TQuery, TResult> inner)
-            {
-                _inner = inner;
-            }
-
-            public override TResult Handle(IQuery<TResult> message)
-            {
-                return _inner.Handle((TQuery)message);
-            }
-        }
-
-        private abstract class QueryResponseHandler<TResponse>
-        {
-            public abstract void Handle(IQuery<TResponse> query, TResponse response);
-        }
-
-        private class QueryResponseHandler<TQuery, TResponse> : QueryResponseHandler<TResponse>
-            where TQuery : IQuery<TResponse>
-        {
-            private readonly IQueryResponseHandler<TQuery, TResponse> _inner;
-
-            public QueryResponseHandler(IQueryResponseHandler<TQuery, TResponse> inner)
-            {
-                _inner = inner;
-            }
-
-            public override void Handle(IQuery<TResponse> query, TResponse response)
-            {
-                _inner.Handle((TQuery)query, response);
-            }
-        }
-
     }
 }
