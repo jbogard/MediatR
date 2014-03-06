@@ -23,4 +23,9 @@
     {
         void Handle(TRequest request, TResponse response);
     }
+
+    public interface INotificationHandler<in TNotification>
+    {
+        void Handle(TNotification notification);
+    }
 }

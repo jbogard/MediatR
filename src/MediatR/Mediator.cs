@@ -8,6 +8,7 @@
     public interface IMediator
     {
         TResponse Send<TResponse>(IRequest<TResponse> request);
+        void Publish<TNotification>(TNotification notification);
     }
 
     public class Mediator : IMediator
@@ -35,6 +36,16 @@
             return result;
         }
 
+        public void Publish<TNotification>(TNotification notification)
+        {
+            var notificationHandlers = GetNotificationHandlers<TNotification>();
+
+            foreach (var handler in notificationHandlers)
+            {
+                handler.Handle(notification);
+            }
+        }
+
         private RequestHandler<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
             var handlerType = typeof(IRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
@@ -53,6 +64,12 @@
                 .Select(handler => (PostRequestHandler<TResponse>)Activator.CreateInstance(wrapperType, handler));
             return handlers;
         }
+
+        private IEnumerable<INotificationHandler<TNotification>> GetNotificationHandlers<TNotification>()
+        {
+            return _serviceLocatorProvider().GetAllInstances<INotificationHandler<TNotification>>();
+        }
+
         private abstract class RequestHandler<TResult>
         {
             public abstract TResult Handle(IRequest<TResult> message);
