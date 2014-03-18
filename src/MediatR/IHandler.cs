@@ -1,9 +1,17 @@
 ﻿namespace MediatR
 {
+    using System.Threading.Tasks;
+
     public interface IRequestHandler<in TRequest, out TResponse>
         where TRequest : IRequest<TResponse>
     {
         TResponse Handle(TRequest message);
+    }
+
+    public interface IAsyncRequestHandler<in TRequest, TResponse>
+        where TRequest : IAsyncRequest<TResponse>
+    {
+        Task<TResponse> Handle(TRequest message);
     }
 
     public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage, Unit>
@@ -19,13 +27,43 @@
         protected abstract void HandleCore(TMessage message);
     }
 
-    public interface IPostRequestHandler<in TRequest, in TResponse>
+    public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage, Unit>
+        where TMessage : IAsyncRequest
     {
-        void Handle(TRequest request, TResponse response);
+        public Task<Unit> Handle(TMessage message)
+        {
+            return new Task<Unit>(() =>
+            {
+                HandleCore(message);
+
+                return Unit.Value;
+            });
+        }
+
+        protected abstract Task HandleCore(TMessage message);
+    }
+
+    public interface IPostRequestHandler<in TRequest, in TResponse>
+        where TRequest : IRequest<TResponse>
+    {
+        Task Handle(TRequest request, TResponse response);
+    }
+
+    public interface IAsyncPostRequestHandler<in TRequest, in TResponse>
+        where TRequest : IAsyncRequest<TResponse>
+    {
+        Task Handle(TRequest request, TResponse response);
     }
 
     public interface INotificationHandler<in TNotification>
+        where TNotification : INotification
     {
         void Handle(TNotification notification);
+    }
+
+    public interface IAsyncNotificationHandler<in TNotification>
+        where TNotification : IAsyncNotification
+    {
+        Task Handle(TNotification notification);
     }
 }
