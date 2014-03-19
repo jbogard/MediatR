@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples", "MediatR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Ninject", "MediatR.Examples.Ninject\MediatR.Examples.Ninject.csproj", "{4EDB4678-2D36-486A-A123-FDB57EB5F6A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Autofac", "MediatR.Examples.Autofac\MediatR.Examples.Autofac.csproj", "{18E4617F-7766-4102-AEB1-D8CCCC64C955}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{4EDB4678-2D36-486A-A123-FDB57EB5F6A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EDB4678-2D36-486A-A123-FDB57EB5F6A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EDB4678-2D36-486A-A123-FDB57EB5F6A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18E4617F-7766-4102-AEB1-D8CCCC64C955}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18E4617F-7766-4102-AEB1-D8CCCC64C955}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18E4617F-7766-4102-AEB1-D8CCCC64C955}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18E4617F-7766-4102-AEB1-D8CCCC64C955}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,5 +67,6 @@ Global
 		{C309CE69-7B72-4B6F-8456-A8936F740CF6} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{DE7E7466-B06A-4E8A-9CFC-443464D55923} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{4EDB4678-2D36-486A-A123-FDB57EB5F6A9} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
+		{18E4617F-7766-4102-AEB1-D8CCCC64C955} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 	EndGlobalSection
 EndGlobal
