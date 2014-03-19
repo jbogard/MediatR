@@ -60,6 +60,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AsyncSendTests.cs" />
     <Compile Include="AsyncSendVoidTests.cs" />
+    <Compile Include="AsyncPublishTests.cs" />
+    <Compile Include="PublishTests.cs" />
     <Compile Include="SendVoidTests.cs" />
     <Compile Include="SendTests.cs" />
     <Compile Include="StructureMapServiceLocator.cs" />
