@@ -19,6 +19,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{ED3AC9CD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Tests", "MediatR.Tests\MediatR.Tests.csproj", "{B81A30EB-BAC9-4FEA-8D65-FCBC2CDAC52B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.StructureMap", "MediatR.Examples.StructureMap\MediatR.Examples.StructureMap.csproj", "{C309CE69-7B72-4B6F-8456-A8936F740CF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{F0AA3786-7BBF-46D1-AE38-C1938F33EF20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples", "MediatR.Examples\MediatR.Examples.csproj", "{DE7E7466-B06A-4E8A-9CFC-443464D55923}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,8 +39,20 @@ Global
 		{B81A30EB-BAC9-4FEA-8D65-FCBC2CDAC52B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B81A30EB-BAC9-4FEA-8D65-FCBC2CDAC52B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B81A30EB-BAC9-4FEA-8D65-FCBC2CDAC52B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C309CE69-7B72-4B6F-8456-A8936F740CF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C309CE69-7B72-4B6F-8456-A8936F740CF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C309CE69-7B72-4B6F-8456-A8936F740CF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C309CE69-7B72-4B6F-8456-A8936F740CF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE7E7466-B06A-4E8A-9CFC-443464D55923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE7E7466-B06A-4E8A-9CFC-443464D55923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE7E7466-B06A-4E8A-9CFC-443464D55923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE7E7466-B06A-4E8A-9CFC-443464D55923}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C309CE69-7B72-4B6F-8456-A8936F740CF6} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
+		{DE7E7466-B06A-4E8A-9CFC-443464D55923} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 	EndGlobalSection
 EndGlobal
