@@ -4,6 +4,7 @@
     using System.IO;
     using CommonServiceLocator.AutofacAdapter.Unofficial;
     using global::Autofac;
+    using global::Autofac.Features.Variance;
     using Microsoft.Practices.ServiceLocation;
 
     internal class Program
@@ -18,13 +19,10 @@
         private static IMediator BuildMediator()
         {
             var builder = new ContainerBuilder();
+            builder.RegisterSource(new ContravariantRegistrationSource());
             builder.RegisterAssemblyTypes(typeof (IMediator).Assembly).AsImplementedInterfaces();
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (IRequestHandler<,>));
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (IAsyncRequestHandler<,>));
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (IPostRequestHandler<,>));
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (IAsyncPostRequestHandler<,>));
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (INotificationHandler<>));
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsClosedTypesOf(typeof (IAsyncNotificationHandler<>));
+            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsImplementedInterfaces();
+            builder.RegisterGeneric(typeof (GenericPostRequestHandler<,>)).As(typeof (IPostRequestHandler<,>));
             builder.RegisterInstance(Console.Out).As<TextWriter>();
 
             var lazy = new Lazy<IServiceLocator>(() => new AutofacServiceLocator(builder.Build()));
