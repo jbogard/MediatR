@@ -43,7 +43,7 @@
     public interface IPostRequestHandler<in TRequest, in TResponse>
         where TRequest : IRequest<TResponse>
     {
-        Task Handle(TRequest request, TResponse response);
+        void Handle(TRequest request, TResponse response);
     }
 
     public interface IAsyncPostRequestHandler<in TRequest, in TResponse>
