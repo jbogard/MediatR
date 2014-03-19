@@ -30,14 +30,11 @@
     public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage, Unit>
         where TMessage : IAsyncRequest
     {
-        public Task<Unit> Handle(TMessage message)
+        public async Task<Unit> Handle(TMessage message)
         {
-            return new Task<Unit>(() =>
-            {
-                HandleCore(message);
+            await HandleCore(message);
 
-                return Unit.Value;
-            });
+            return Unit.Value;
         }
 
         protected abstract Task HandleCore(TMessage message);
