@@ -26,6 +26,7 @@
         public TResponse Send<TResponse>(IRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
+
             var resultHandlers = GetPostRequestHandlers(request);
 
             TResponse result = defaultHandler.Handle(request);
@@ -73,11 +74,20 @@
             }
         }
 
+        private static InvalidOperationException BuildException(object message)
+        {
+            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.");
+        }
+
         private RequestHandler<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
             var handlerType = typeof(IRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var wrapperType = typeof(RequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var handler = _serviceLocatorProvider().GetInstance(handlerType);
+
+            if (handler == null)
+                throw BuildException(request);
+
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
             return (RequestHandler<TResponse>)wrapperHandler;
         }
@@ -97,6 +107,10 @@
             var handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var wrapperType = typeof(AsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var handler = _serviceLocatorProvider().GetInstance(handlerType);
+
+            if (handler == null)
+                throw BuildException(request);
+
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
             return (AsyncRequestHandler<TResponse>)wrapperHandler;
         }

@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncPostRequestTests.cs" />
+    <Compile Include="ExceptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AsyncSendTests.cs" />
     <Compile Include="AsyncSendVoidTests.cs" />
