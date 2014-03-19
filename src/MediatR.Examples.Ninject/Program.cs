@@ -5,6 +5,7 @@
     using CommonServiceLocator.NinjectAdapter.Unofficial;
     using global::Ninject;
     using global::Ninject.Extensions.Conventions;
+    using global::Ninject.Planning.Bindings.Resolvers;
     using Microsoft.Practices.ServiceLocation;
 
     internal class Program
@@ -19,18 +20,16 @@
         private static IMediator BuildMediator()
         {
             var kernel = new StandardKernel();
+            kernel.Components.Add<IBindingResolver, ContravariantBindingResolver>();
             kernel.Bind(scan => scan.FromAssemblyContaining<IMediator>().SelectAllClasses().BindDefaultInterface());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof (IRequestHandler<,>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IAsyncRequestHandler<,>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IPostRequestHandler<,>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IAsyncPostRequestHandler<,>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(INotificationHandler<>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IAsyncNotificationHandler<>)).BindAllInterfaces());
+            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().BindAllInterfaces());
             kernel.Bind<TextWriter>().ToConstant(Console.Out);
 
             var serviceLocator = new NinjectServiceLocator(kernel);
             var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
             kernel.Bind<ServiceLocatorProvider>().ToConstant(serviceLocatorProvider);
+
+            var handlers = kernel.GetAll<INotificationHandler<Pinged>>();
 
             var mediator = serviceLocator.GetInstance<IMediator>();
 
