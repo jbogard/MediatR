@@ -37,7 +37,7 @@
             var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
             container.Configure(cfg => cfg.For<ServiceLocatorProvider>().Use(serviceLocatorProvider));
 
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = serviceLocator.GetInstance<IMediator>();
 
             return mediator;
         }
