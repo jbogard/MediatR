@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MediatR")]
-[assembly: AssemblyDescription("Simle mediator implementation based on Common Service Locator")]
+[assembly: AssemblyDescription("Simple mediator implementation based on Common Service Locator")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jimmy Bogard")]
 [assembly: AssemblyProduct("MediatR")]
