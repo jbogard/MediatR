@@ -22,6 +22,7 @@
             container.Register(Classes.FromAssemblyContaining<IMediator>().Pick().WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().Pick().WithServiceAllInterfaces());
             container.Register(Component.For<TextWriter>().Instance(Console.Out));
+            container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
             var serviceLocator = new WindsorServiceLocator(container);
             var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
