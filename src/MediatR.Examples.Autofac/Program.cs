@@ -22,7 +22,6 @@
             builder.RegisterSource(new ContravariantRegistrationSource());
             builder.RegisterAssemblyTypes(typeof (IMediator).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsImplementedInterfaces();
-            builder.RegisterGeneric(typeof (GenericPostRequestHandler<,>)).As(typeof (IPostRequestHandler<,>));
             builder.RegisterInstance(Console.Out).As<TextWriter>();
 
             var lazy = new Lazy<IServiceLocator>(() => new AutofacServiceLocator(builder.Build()));

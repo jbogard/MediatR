@@ -40,18 +40,6 @@
         protected abstract Task HandleCore(TMessage message);
     }
 
-    public interface IPostRequestHandler<in TRequest, in TResponse>
-        where TRequest : IRequest<TResponse>
-    {
-        void Handle(TRequest request, TResponse response);
-    }
-
-    public interface IAsyncPostRequestHandler<in TRequest, in TResponse>
-        where TRequest : IAsyncRequest<TResponse>
-    {
-        Task Handle(TRequest request, TResponse response);
-    }
-
     public interface INotificationHandler<in TNotification>
         where TNotification : INotification
     {

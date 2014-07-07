@@ -27,14 +27,7 @@
         {
             var defaultHandler = GetHandler(request);
 
-            var resultHandlers = GetPostRequestHandlers(request);
-
             TResponse result = defaultHandler.Handle(request);
-
-            foreach (var resultHandler in resultHandlers)
-            {
-                resultHandler.Handle(request, result);
-            }
 
             return result;
         }
@@ -42,14 +35,8 @@
         public async Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
-            var resultHandlers = GetPostRequestHandlers(request);
 
             TResponse result = await defaultHandler.Handle(request);
-
-            foreach (var resultHandler in resultHandlers)
-            {
-                await resultHandler.Handle(request, result);
-            }
 
             return result;
         }
@@ -92,16 +79,6 @@
             return (RequestHandler<TResponse>)wrapperHandler;
         }
 
-        private IEnumerable<PostRequestHandler<TResponse>> GetPostRequestHandlers<TResponse>(IRequest<TResponse> request)
-        {
-            var handlerType = typeof(IPostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var wrapperType = typeof(PostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var handlers = _serviceLocatorProvider().GetAllInstances(handlerType)
-                .Cast<object>()
-                .Select(handler => (PostRequestHandler<TResponse>)Activator.CreateInstance(wrapperType, handler));
-            return handlers;
-        }
-
         private AsyncRequestHandler<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
         {
             var handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
@@ -113,16 +90,6 @@
 
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
             return (AsyncRequestHandler<TResponse>)wrapperHandler;
-        }
-
-        private IEnumerable<AsyncPostRequestHandler<TResponse>> GetPostRequestHandlers<TResponse>(IAsyncRequest<TResponse> request)
-        {
-            var handlerType = typeof(IAsyncPostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var wrapperType = typeof(AsyncPostRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var handlers = _serviceLocatorProvider().GetAllInstances(handlerType)
-                .Cast<object>()
-                .Select(handler => (AsyncPostRequestHandler<TResponse>)Activator.CreateInstance(wrapperType, handler));
-            return handlers;
         }
 
         private IEnumerable<INotificationHandler<TNotification>> GetNotificationHandlers<TNotification>()
@@ -175,48 +142,6 @@
             public override Task<TResult> Handle(IAsyncRequest<TResult> message)
             {
                 return _inner.Handle((TCommand)message);
-            }
-        }
-
-        private abstract class PostRequestHandler<TResult>
-        {
-            public abstract void Handle(IRequest<TResult> message, TResult result);
-        }
-
-        private class PostRequestHandler<TCommand, TResult> : PostRequestHandler<TResult>
-            where TCommand : IRequest<TResult>
-        {
-            private readonly IPostRequestHandler<TCommand, TResult> _inner;
-
-            public PostRequestHandler(IPostRequestHandler<TCommand, TResult> inner)
-            {
-                _inner = inner;
-            }
-
-            public override void Handle(IRequest<TResult> message, TResult result)
-            {
-                _inner.Handle((TCommand)message, result);
-            }
-        }
-
-        private abstract class AsyncPostRequestHandler<TResult>
-        {
-            public abstract Task Handle(IAsyncRequest<TResult> message, TResult result);
-        }
-
-        private class AsyncPostRequestHandler<TCommand, TResult> : AsyncPostRequestHandler<TResult>
-            where TCommand : IAsyncRequest<TResult>
-        {
-            private readonly IAsyncPostRequestHandler<TCommand, TResult> _inner;
-
-            public AsyncPostRequestHandler(IAsyncPostRequestHandler<TCommand, TResult> inner)
-            {
-                _inner = inner;
-            }
-
-            public override Task Handle(IAsyncRequest<TResult> message, TResult result)
-            {
-                return _inner.Handle((TCommand)message, result);
             }
         }
     }

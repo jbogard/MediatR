@@ -51,8 +51,6 @@
     <Compile Include="PingedAsyncHandler.cs" />
     <Compile Include="PingedHandler.cs" />
     <Compile Include="PingHandler.cs" />
-    <Compile Include="PingPongAsyncHandler.cs" />
-    <Compile Include="PingPongHandler.cs" />
     <Compile Include="Pong.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runner.cs" />
