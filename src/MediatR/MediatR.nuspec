@@ -12,4 +12,7 @@
     <description>$description$</description>
     <copyright>Copyright 2014 Jimmy Bogard</copyright>
   </metadata>
+  <files>    
+    <file src="..\MediatR451\bin\Release\MediatR.dll" target="lib\net451\MediatR.dll" />
+  </files>  
 </package>
