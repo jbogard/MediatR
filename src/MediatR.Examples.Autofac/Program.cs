@@ -14,6 +14,8 @@
             var mediator = BuildMediator();
 
             Runner.Run(mediator, Console.Out);
+
+            Console.ReadKey();
         }
 
         private static IMediator BuildMediator()
