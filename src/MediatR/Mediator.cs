@@ -6,18 +6,54 @@
     using System.Threading.Tasks;
     using Microsoft.Practices.ServiceLocation;
 
+    /// <summary>
+    /// Defines a mediator to encapsulate request/response and publishing interaction patterns
+    /// </summary>
     public interface IMediator
     {
+        /// <summary>
+        /// Send a request to a single handler
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        /// <returns>Response</returns>
         TResponse Send<TResponse>(IRequest<TResponse> request);
+
+        /// <summary>
+        /// Asynchronously send a request to a single handler 
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
         Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request);
+
+        /// <summary>
+        /// Send a notification to multiple handlers
+        /// </summary>
+        /// <typeparam name="TNotification">Notification type</typeparam>
+        /// <param name="notification">Notification object</param>
         void Publish<TNotification>(TNotification notification) where TNotification : INotification;
+
+        /// <summary>
+        /// Asynchronously send a notification to multiple handlers
+        /// </summary>
+        /// <typeparam name="TNotification">Notification type</typeparam>
+        /// <param name="notification">Notification object</param>
+        /// <returns>A task that represents the publish operation.</returns>
         Task PublishAsync<TNotification>(TNotification notification) where TNotification : IAsyncNotification;
     }
 
+    /// <summary>
+    /// Default mediator implementation relying on Common Service Locator for resolving handlers
+    /// </summary>
     public class Mediator : IMediator
     {
         private readonly ServiceLocatorProvider _serviceLocatorProvider;
 
+        /// <summary>
+        /// Constructs a Mediator instance with the supplied service locator provider delegate
+        /// </summary>
+        /// <param name="serviceLocatorProvider">Provider delegate for instantiating a service locator. Invoked on every request/notification</param>
         public Mediator(ServiceLocatorProvider serviceLocatorProvider)
         {
             _serviceLocatorProvider = serviceLocatorProvider;
