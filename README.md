@@ -11,7 +11,7 @@ Examples in the [wiki](https://github.com/jbogard/MediatR/wiki).
 
 ### Installing MediatR
 
-You should install MediatR with NuGet:
+You should install [MediatR with NuGet](https://www.nuget.org/packages/MediatR):
 
     Install-Package MediatR
 
