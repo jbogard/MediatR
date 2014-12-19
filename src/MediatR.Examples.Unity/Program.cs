@@ -22,6 +22,7 @@
             container.RegisterTypes(AllClasses.FromAssemblies(typeof (IMediator).Assembly), WithMappings.FromAllInterfaces);
             container.RegisterTypes(AllClasses.FromAssemblies(typeof(Ping).Assembly), WithMappings.FromAllInterfaces, GetName, GetLifetimeManager);
             container.RegisterType(typeof(INotificationHandler<>), typeof(GenericHandler), GetName(typeof(GenericHandler)));
+            container.RegisterType(typeof(IAsyncNotificationHandler<>), typeof(GenericAsyncHandler), GetName(typeof(GenericAsyncHandler)));
             container.RegisterInstance(Console.Out);
 
             var serviceLocator = new UnityServiceLocator(container);
