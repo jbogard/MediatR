@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "MediatR\MediatR.csproj", "{D0CDC351-9F10-4531-BDFF-D9796487E9CE}"
 EndProject
@@ -32,6 +32,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Windsor", "MediatR.Examples.Windsor\MediatR.Examples.Windsor.csproj", "{7B35EF61-0636-4BC5-8D14-18939AF867D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Unity", "MediatR.Examples.Unity\MediatR.Examples.Unity.csproj", "{EA6A7157-A8CD-4B85-947E-3F3C399B8A29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.SimpleInjector", "MediatR.Examples.SimpleInjector\MediatR.Examples.SimpleInjector.csproj", "{6F2DECD8-AC23-446E-96E4-F462EF76817A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,10 @@ Global
 		{EA6A7157-A8CD-4B85-947E-3F3C399B8A29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA6A7157-A8CD-4B85-947E-3F3C399B8A29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA6A7157-A8CD-4B85-947E-3F3C399B8A29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F2DECD8-AC23-446E-96E4-F462EF76817A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F2DECD8-AC23-446E-96E4-F462EF76817A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F2DECD8-AC23-446E-96E4-F462EF76817A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F2DECD8-AC23-446E-96E4-F462EF76817A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +88,6 @@ Global
 		{18E4617F-7766-4102-AEB1-D8CCCC64C955} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{7B35EF61-0636-4BC5-8D14-18939AF867D4} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{EA6A7157-A8CD-4B85-947E-3F3C399B8A29} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
+		{6F2DECD8-AC23-446E-96E4-F462EF76817A} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 	EndGlobalSection
 EndGlobal
