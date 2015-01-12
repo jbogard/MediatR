@@ -31,8 +31,8 @@
             container.RegisterManyForOpenGeneric(typeof(IAsyncNotificationHandler<>), container.RegisterAll, assemblies);
             container.Register(() => Console.Out);
 
-            IServiceProvider serviceLocator = new SimpleInjectorServiceLocatorAdapter(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => (IServiceLocator)serviceLocator);
+            var serviceLocator = new SimpleInjectorServiceLocatorAdapter(container);
+            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
             container.Register(() => serviceLocatorProvider);
 
             container.Verify();
