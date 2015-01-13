@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="GenericAsyncHandler.cs" />
     <Compile Include="GenericHandler.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="PingAsync.cs" />
