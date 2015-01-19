@@ -34,8 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LightInject">
-      <HintPath>..\packages\LightInject.3.0.2.1\lib\net45\LightInject.dll</HintPath>
+    <Reference Include="LightInject, Version=3.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\LightInject.3.0.2.2\lib\net45\LightInject.dll</HintPath>
     </Reference>
     <Reference Include="LightInject.ServiceLocation">
       <HintPath>..\packages\LightInject.ServiceLocation.1.0.0.2\lib\net45\LightInject.ServiceLocation.dll</HintPath>
@@ -57,7 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj">

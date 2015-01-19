@@ -10,7 +10,7 @@ namespace MediatR.Examples.LightInject
         static void Main(string[] args)
         {
             var mediator = BuildMediator();
-
+            
             Runner.Run(mediator, Console.Out);
 
             Console.ReadKey();
@@ -20,14 +20,11 @@ namespace MediatR.Examples.LightInject
         {
             var serviceContainer = new ServiceContainer();
             serviceContainer.Register<IMediator, Mediator>();
-            serviceContainer.RegisterAssembly(typeof (Ping).Assembly);
-            serviceContainer.RegisterAssembly(typeof(IMediator).Assembly);
-
+            serviceContainer.RegisterAssembly(typeof(Ping).Assembly, (serviceType, implementingType) => !serviceType.IsClass);
+            serviceContainer.RegisterAssembly(typeof(IMediator).Assembly, (serviceType, implementingType) => !serviceType.IsClass);
             serviceContainer.RegisterInstance(Console.Out);
-
             var serviceLocator = new LightInjectServiceLocator(serviceContainer);
             serviceContainer.RegisterInstance(new ServiceLocatorProvider(() => serviceLocator));
-
             return serviceContainer.GetInstance<IMediator>(); 
         }
     }
