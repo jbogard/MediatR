@@ -34,9 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LightInject, Version=3.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="LightInject, Version=3.0.2.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\LightInject.3.0.2.2\lib\net45\LightInject.dll</HintPath>
+      <HintPath>..\packages\LightInject.3.0.2.3\lib\net45\LightInject.dll</HintPath>
     </Reference>
     <Reference Include="LightInject.ServiceLocation">
       <HintPath>..\packages\LightInject.ServiceLocation.1.0.0.2\lib\net45\LightInject.ServiceLocation.dll</HintPath>

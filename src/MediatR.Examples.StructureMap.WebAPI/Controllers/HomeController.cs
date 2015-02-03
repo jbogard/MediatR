@@ -8,9 +8,18 @@ namespace MediatR.Examples.StructureMap.WebAPI.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IMediator _mediator;
+
+        public HomeController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
+            var result = _mediator.Send(new Ping());
+
+            ViewBag.Title = result.Message;
 
             return View();
         }

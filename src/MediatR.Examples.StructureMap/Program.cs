@@ -1,6 +1,7 @@
 ﻿namespace MediatR.Examples.StructureMap
 {
     using System;
+    using System.CodeDom;
     using System.Diagnostics;
     using System.IO;
     using global::StructureMap;
@@ -26,10 +27,10 @@
                     scanner.AssemblyContainingType<Ping>();
                     scanner.AssemblyContainingType<IMediator>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                    scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
-                    scanner.AddAllTypesOf(typeof(INotificationHandler<>));
-                    scanner.AddAllTypesOf(typeof(IAsyncNotificationHandler<>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncRequestHandler<,>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncNotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(Console.Out);
             });
