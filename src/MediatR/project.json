@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0-*",
+    "authors": [ "Jimmy Bogard" ],
+    "description": "Simple, unambitious mediator implementation in .NET",
+    "frameworks": {
+        "aspnet50": {
+        },
+        "aspnetcore50": {
+            "dependencies": {
+                "System.Threading.Tasks": "4.0.10.0-beta-22530",
+                "System.ComponentModel": "4.0.0.0-beta-22530",
+                "System.Linq": "4.0.0.0-beta-22615"
+            }
+        }
+    }
+}

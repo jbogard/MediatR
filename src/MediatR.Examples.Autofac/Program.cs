@@ -1,11 +1,10 @@
 ﻿namespace MediatR.Examples.Autofac
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
-    using CommonServiceLocator.AutofacAdapter.Unofficial;
     using global::Autofac;
     using global::Autofac.Features.Variance;
-    using Microsoft.Practices.ServiceLocation;
 
     internal class Program
     {
@@ -25,12 +24,18 @@
             builder.RegisterAssemblyTypes(typeof (IMediator).Assembly).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsImplementedInterfaces();
             builder.RegisterInstance(Console.Out).As<TextWriter>();
+            builder.Register<SingleInstanceFactory>(ctx =>
+            {
+                var c = ctx.Resolve<IComponentContext>();
+                return t => c.Resolve(t);
+            });
+            builder.Register<MultiInstanceFactory>(ctx =>
+            {
+                var c = ctx.Resolve<IComponentContext>();
+                return t => (IEnumerable<object>) c.Resolve(typeof (IEnumerable<>).MakeGenericType(t));
+            });
 
-            var lazy = new Lazy<IServiceLocator>(() => new AutofacServiceLocator(builder.Build()));
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => lazy.Value);
-            builder.RegisterInstance(serviceLocatorProvider);
-            
-            var mediator = serviceLocatorProvider().GetInstance<IMediator>();
+            var mediator = builder.Build().Resolve<IMediator>();
 
             return mediator;
         }

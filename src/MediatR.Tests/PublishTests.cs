@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using System.Text;
-    using Microsoft.Practices.ServiceLocation;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -60,12 +59,12 @@
                     scanner.AddAllTypesOf(typeof (INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
             });
 
-            var serviceLocator = new StructureMapServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-
-            var mediator = new Mediator(serviceLocatorProvider);
+            var mediator = container.GetInstance<IMediator>();
 
             mediator.Publish(new Ping { Message = "Ping" });
 

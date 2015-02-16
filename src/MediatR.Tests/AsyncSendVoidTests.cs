@@ -3,7 +3,6 @@
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Practices.ServiceLocation;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -44,14 +43,14 @@
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (IAsyncRequestHandler<,>));
                 });
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<IMediator>().Use<Mediator>();
             });
 
 
-            var serviceLocator = new StructureMapServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-
-            var mediator = new Mediator(serviceLocatorProvider);
+            var mediator = container.GetInstance<IMediator>();
 
             var response = mediator.SendAsync(new Ping { Message = "Ping" });
 

@@ -1,15 +1,38 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <id>MediatR</id>
+    <version>2.0.0-beta-001</version>
+    <title>MediatR</title>
+    <authors>Jimmy Bogard</authors>
+    <owners>Jimmy Bogard</owners>
     <licenseUrl>https://github.com/jbogard/MediatR/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/jbogard/MediatR</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>Simple, unambitious mediator implementation in .NET</description>
     <copyright>Copyright 2014 Jimmy Bogard</copyright>
+    <dependencies>
+      <group targetFramework="Asp.NetCore5.0">
+        <dependency id="System.Threading.Tasks" version="4.0.10.0-beta-22530" />
+        <dependency id="System.ComponentModel" version="4.0.0.0-beta-22530" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="mscorlib" targetFramework="Asp.Net5.0" />
+      <frameworkAssembly assemblyName="System" targetFramework="Asp.Net5.0" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="Asp.Net5.0" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="Asp.Net5.0" />
+    </frameworkAssemblies>
   </metadata>
+  <files>
+    <file src="..\MediatR\bin\Release\MediatR.dll" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.dll" />
+    <file src="..\MediatR\bin\Release\MediatR.pdb" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.pdb" />
+    <file src="..\MediatR\bin\Release\MediatR.xml" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.xml" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnet50\MediatR.dll" target="lib\aspnet50\MediatR.dll" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnet50\MediatR.pdb" target="lib\aspnet50\MediatR.pdb" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnet50\MediatR.xml" target="lib\aspnet50\MediatR.xml" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.dll" target="lib\aspnetcore50\MediatR.dll" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.pdb" target="lib\aspnetcore50\MediatR.pdb" />
+    <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.xml" target="lib\aspnetcore50\MediatR.xml" />
+  </files>
 </package>

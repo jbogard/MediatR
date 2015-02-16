@@ -1,11 +1,10 @@
 ﻿namespace MediatR.Examples.Windsor
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using CommonServiceLocator.WindsorAdapter.Unofficial;
-    using Microsoft.Practices.ServiceLocation;
 
     internal class Program
     {
@@ -21,14 +20,12 @@
         private static IMediator BuildMediator()
         {
             var container = new WindsorContainer();
-            container.Register(Classes.FromAssemblyContaining<IMediator>().Pick().WithServiceAllInterfaces());
+            container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Classes.FromAssemblyContaining<Ping>().Pick().WithServiceAllInterfaces());
             container.Register(Component.For<TextWriter>().Instance(Console.Out));
             container.Kernel.AddHandlersFilter(new ContravariantFilter());
-
-            var serviceLocator = new WindsorServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-            container.Register(Component.For<ServiceLocatorProvider>().Instance(serviceLocatorProvider));
+            container.Register(Component.For<SingleInstanceFactory>().UsingFactoryMethod<SingleInstanceFactory>(k => t => k.Resolve(t)));
+            container.Register(Component.For<MultiInstanceFactory>().UsingFactoryMethod<MultiInstanceFactory>(k => t => (IEnumerable<object>)k.ResolveAll(t)));
 
             var mediator = container.Resolve<IMediator>();
 

@@ -53,6 +53,12 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Threading.Tasks" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MediatR\MediatR.csproj">
       <Project>{d0cdc351-9f10-4531-bdff-d9796487e9ce}</Project>
       <Name>MediatR</Name>

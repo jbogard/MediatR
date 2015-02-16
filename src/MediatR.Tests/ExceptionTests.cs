@@ -2,13 +2,12 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Practices.ServiceLocation;
     using Shouldly;
     using StructureMap;
 
     public class ExceptionTests
     {
-        private readonly Mediator _mediator;
+        private readonly IMediator _mediator;
 
         public class Ping : IRequest<Pong> { }
         public class Pong {}
@@ -20,11 +19,13 @@
 
         public ExceptionTests()
         {
-            var container = new Container();
-            var serviceLocator = new StructureMapServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-
-            _mediator = new Mediator(serviceLocatorProvider);
+            var container = new Container(cfg =>
+            {
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+            _mediator = container.GetInstance<IMediator>();
         }
 
         public void Should_throw_for_send()

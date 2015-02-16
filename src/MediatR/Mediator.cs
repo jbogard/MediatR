@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Defines a mediator to encapsulate request/response and publishing interaction patterns
@@ -43,20 +42,26 @@
         Task PublishAsync<TNotification>(TNotification notification) where TNotification : IAsyncNotification;
     }
 
+    public delegate object SingleInstanceFactory(Type serviceType);
+    public delegate IEnumerable<object> MultiInstanceFactory(Type serviceType);
+
     /// <summary>
     /// Default mediator implementation relying on Common Service Locator for resolving handlers
     /// </summary>
     public class Mediator : IMediator
     {
-        private readonly ServiceLocatorProvider _serviceLocatorProvider;
+        private readonly SingleInstanceFactory _singleInstanceFactory;
+        private readonly MultiInstanceFactory _multiInstanceFactory;
 
-        /// <summary>
-        /// Constructs a Mediator instance with the supplied service locator provider delegate
-        /// </summary>
-        /// <param name="serviceLocatorProvider">Provider delegate for instantiating a service locator. Invoked on every request/notification</param>
-        public Mediator(ServiceLocatorProvider serviceLocatorProvider)
+        public Mediator(SingleInstanceFactory singleInstanceFactory)
+            : this(singleInstanceFactory, t => (IEnumerable<object>)singleInstanceFactory(typeof(IEnumerable<>).MakeGenericType(t)))
         {
-            _serviceLocatorProvider = serviceLocatorProvider;
+        }
+
+        public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
+        {
+            _singleInstanceFactory = singleInstanceFactory;
+            _multiInstanceFactory = multiInstanceFactory;
         }
 
         public TResponse Send<TResponse>(IRequest<TResponse> request)
@@ -97,20 +102,27 @@
             }
         }
 
-        private static InvalidOperationException BuildException(object message)
+        private static InvalidOperationException BuildException(object message, Exception inner = null)
         {
-            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.");
+            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", inner);
         }
 
         private RequestHandler<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
             var handlerType = typeof(IRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var wrapperType = typeof(RequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var handler = _serviceLocatorProvider().GetInstance(handlerType);
+            object handler;
+            try
+            {
+                handler = _singleInstanceFactory(handlerType);
 
-            if (handler == null)
-                throw BuildException(request);
-
+                if (handler == null)
+                    throw BuildException(request);
+            }
+            catch (Exception e)
+            {
+                throw BuildException(request, e);
+            }
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
             return (RequestHandler<TResponse>)wrapperHandler;
         }
@@ -119,10 +131,18 @@
         {
             var handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
             var wrapperType = typeof(AsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var handler = _serviceLocatorProvider().GetInstance(handlerType);
+            object handler;
+            try
+            {
+                handler = _singleInstanceFactory(handlerType);
 
-            if (handler == null)
-                throw BuildException(request);
+                if (handler == null)
+                    throw BuildException(request);
+            }
+            catch (Exception e)
+            {
+                throw BuildException(request, e);
+            }
 
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
             return (AsyncRequestHandler<TResponse>)wrapperHandler;
@@ -131,13 +151,13 @@
         private IEnumerable<INotificationHandler<TNotification>> GetNotificationHandlers<TNotification>()
             where TNotification : INotification
         {
-            return _serviceLocatorProvider().GetAllInstances<INotificationHandler<TNotification>>();
+            return _multiInstanceFactory(typeof(INotificationHandler<TNotification>)).Cast<INotificationHandler<TNotification>>();
         }
 
         private IEnumerable<IAsyncNotificationHandler<TNotification>> GetAsyncNotificationHandlers<TNotification>()
             where TNotification : IAsyncNotification
         {
-            return _serviceLocatorProvider().GetAllInstances<IAsyncNotificationHandler<TNotification>>();
+            return _multiInstanceFactory(typeof(IAsyncNotificationHandler<TNotification>)).Cast<IAsyncNotificationHandler<TNotification>>();
         }
 
         private abstract class RequestHandler<TResult>

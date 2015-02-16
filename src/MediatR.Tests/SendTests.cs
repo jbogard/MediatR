@@ -1,6 +1,5 @@
 ﻿namespace MediatR.Tests
 {
-    using Microsoft.Practices.ServiceLocation;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -28,18 +27,20 @@
         public void Should_resolve_main_handler()
         {
             var container = new Container(cfg =>
+            {
                 cfg.Scan(scanner =>
                 {
                     scanner.TheCallingAssembly();
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                }));
+                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                });
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
 
-            var serviceLocator = new StructureMapServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-
-            var mediator = new Mediator(serviceLocatorProvider);
+            var mediator = container.GetInstance<IMediator>();
 
             var response = mediator.Send(new Ping { Message = "Ping" });
 

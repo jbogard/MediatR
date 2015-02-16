@@ -1,7 +1,5 @@
 ﻿using System;
 using LightInject;
-using LightInject.ServiceLocation;
-using Microsoft.Practices.ServiceLocation;
 
 namespace MediatR.Examples.LightInject
 {
@@ -23,8 +21,7 @@ namespace MediatR.Examples.LightInject
             serviceContainer.RegisterAssembly(typeof(Ping).Assembly, (serviceType, implementingType) => !serviceType.IsClass);
             serviceContainer.RegisterAssembly(typeof(IMediator).Assembly, (serviceType, implementingType) => !serviceType.IsClass);
             serviceContainer.RegisterInstance(Console.Out);
-            var serviceLocator = new LightInjectServiceLocator(serviceContainer);
-            serviceContainer.RegisterInstance(new ServiceLocatorProvider(() => serviceLocator));
+            serviceContainer.Register<SingleInstanceFactory>(fac => t => fac.GetInstance(t));
             return serviceContainer.GetInstance<IMediator>(); 
         }
     }

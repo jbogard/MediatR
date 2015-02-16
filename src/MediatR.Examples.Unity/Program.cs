@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-    using Microsoft.Practices.ServiceLocation;
     using Microsoft.Practices.Unity;
 
     internal class Program
@@ -19,15 +18,13 @@
         private static IMediator BuildMediator()
         {
             var container = new UnityContainer();
-            container.RegisterTypes(AllClasses.FromAssemblies(typeof (IMediator).Assembly), WithMappings.FromAllInterfaces);
+            container.RegisterType<IMediator, Mediator>();
             container.RegisterTypes(AllClasses.FromAssemblies(typeof(Ping).Assembly), WithMappings.FromAllInterfaces, GetName, GetLifetimeManager);
             container.RegisterType(typeof(INotificationHandler<>), typeof(GenericHandler), GetName(typeof(GenericHandler)));
             container.RegisterType(typeof(IAsyncNotificationHandler<>), typeof(GenericAsyncHandler), GetName(typeof(GenericAsyncHandler)));
             container.RegisterInstance(Console.Out);
-
-            var serviceLocator = new UnityServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-            container.RegisterInstance(serviceLocatorProvider);
+            container.RegisterInstance<SingleInstanceFactory>(t => container.Resolve(t));
+            container.RegisterInstance<MultiInstanceFactory>(t => container.ResolveAll(t));
 
             var mediator = container.Resolve<IMediator>();
 

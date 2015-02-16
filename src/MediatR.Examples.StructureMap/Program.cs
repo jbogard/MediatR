@@ -1,11 +1,8 @@
 ﻿namespace MediatR.Examples.StructureMap
 {
     using System;
-    using System.CodeDom;
-    using System.Diagnostics;
     using System.IO;
     using global::StructureMap;
-    using Microsoft.Practices.ServiceLocation;
 
     class Program
     {
@@ -32,14 +29,13 @@
                     scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncNotificationHandler<>));
                 });
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<TextWriter>().Use(Console.Out);
             });
 
-            var serviceLocator = new StructureMapServiceLocator(container);
-            var serviceLocatorProvider = new ServiceLocatorProvider(() => serviceLocator);
-            container.Configure(cfg => cfg.For<ServiceLocatorProvider>().Use(serviceLocatorProvider));
 
-            var mediator = serviceLocator.GetInstance<IMediator>();
+            var mediator = container.GetInstance<IMediator>();
 
             return mediator;
         }

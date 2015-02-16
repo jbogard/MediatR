@@ -38,13 +38,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\LightInject.3.0.2.3\lib\net45\LightInject.dll</HintPath>
     </Reference>
-    <Reference Include="LightInject.ServiceLocation">
-      <HintPath>..\packages\LightInject.ServiceLocation.1.0.0.2\lib\net45\LightInject.ServiceLocation.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -69,7 +62,7 @@
       <Name>MediatR.Examples</Name>
     </ProjectReference>
     <ProjectReference Include="..\MediatR\MediatR.csproj">
-      <Project>{D0CDC351-9F10-4531-BDFF-D9796487E9CE}</Project>
+      <Project>{d0cdc351-9f10-4531-bdff-d9796487e9ce}</Project>
       <Name>MediatR</Name>
     </ProjectReference>
   </ItemGroup>
