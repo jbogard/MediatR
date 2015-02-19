@@ -42,7 +42,18 @@
         Task PublishAsync<TNotification>(TNotification notification) where TNotification : IAsyncNotification;
     }
 
+    /// <summary>
+    /// Factory method for creating single instances. Used to build instances of <see cref="IRequestHandler{TRequest,TResponse}"/> and <see cref="IAsyncRequestHandler{TRequest,TResponse}"/>
+    /// </summary>
+    /// <param name="serviceType">Type of service to resolve</param>
+    /// <returns>An instance of type <paramref name="serviceType" /></returns>
     public delegate object SingleInstanceFactory(Type serviceType);
+
+    /// <summary>
+    /// Factory method for creating multiple instances. Used to build instances of <see cref="INotificationHandler{TNotification}"/> and <see cref="IAsyncNotificationHandler{TNotification}"/>
+    /// </summary>
+    /// <param name="serviceType">Type of service to resolve</param>
+    /// <returns>An enumerable of instances of type <paramref name="serviceType" /></returns>
     public delegate IEnumerable<object> MultiInstanceFactory(Type serviceType);
 
     /// <summary>

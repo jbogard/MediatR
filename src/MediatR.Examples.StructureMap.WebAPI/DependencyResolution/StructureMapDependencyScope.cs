@@ -77,11 +77,6 @@ namespace MediatR.Examples.StructureMap.WebAPI.DependencyResolution {
                 return;
             }
             CurrentNestedContainer = Container.GetNestedContainer();
-            CurrentNestedContainer.Configure(cfg =>
-            {
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
-            });
         }
 
         public void Dispose() {

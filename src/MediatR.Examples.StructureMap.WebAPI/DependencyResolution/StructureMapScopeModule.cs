@@ -14,8 +14,6 @@ namespace MediatR.Examples.StructureMap.WebAPI.DependencyResolution {
             context.BeginRequest += (sender, e) =>
             {
                 StructuremapMvc.StructureMapDependencyScope.CreateNestedContainer();
-                var serviceLocatorProvider = new ServiceLocatorProvider(() => StructuremapMvc.StructureMapDependencyScope);
-                StructuremapMvc.StructureMapDependencyScope.CurrentNestedContainer.Configure(cfg => cfg.For<ServiceLocatorProvider>().Use(serviceLocatorProvider));
             };
             context.EndRequest += (sender, e) => {
                 HttpContextLifecycle.DisposeAndClearAll();

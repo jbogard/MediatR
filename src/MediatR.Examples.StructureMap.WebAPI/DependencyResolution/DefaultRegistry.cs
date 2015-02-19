@@ -35,6 +35,8 @@ namespace MediatR.Examples.StructureMap.WebAPI.DependencyResolution {
                     scan.AddAllTypesOf(typeof(IAsyncNotificationHandler<>));
                 });
             For<IMediator>().Use<Mediator>();
+            For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+            For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
         }
 
         #endregion
