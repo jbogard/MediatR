@@ -7,10 +7,12 @@
     <authors>Jimmy Bogard</authors>
     <owners>Jimmy Bogard</owners>
     <licenseUrl>https://github.com/jbogard/MediatR/blob/master/LICENSE</licenseUrl>
+    <iconUrl>https://raw.githubusercontent.com/jbogard/MediatR/master/assets/logo/gradient_128x128.png</iconUrl>
     <projectUrl>https://github.com/jbogard/MediatR</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Simple, unambitious mediator implementation in .NET</description>
-    <copyright>Copyright 2014 Jimmy Bogard</copyright>
+    <tags>mediator request response queries commands notifications</tags>
+    <copyright>Copyright 2014-2015 Jimmy Bogard</copyright>
     <dependencies>
       <group targetFramework="Asp.NetCore5.0">
         <dependency id="System.Threading.Tasks" version="4.0.10.0-beta-22530" />
