@@ -17,9 +17,9 @@
     public interface IRequest<out TResponse> { }
 
     /// <summary>
-    /// Marker interface to represent an asynchronous request with a void response
+    /// Marker interface to represent an asynchronous request with a response
     /// </summary>
-    /// <typeparam name="TResponse"></typeparam>
+    /// <typeparam name="TResponse">Response type</typeparam>
     public interface IAsyncRequest<out TResponse> { }
 
     /// <summary>
