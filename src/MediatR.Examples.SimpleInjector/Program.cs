@@ -22,13 +22,14 @@
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
-            container.Register<IMediator>(() => new Mediator(container.GetInstance<SingleInstanceFactory>()));
+            container.Register<IMediator>(() => new Mediator(container.GetInstance<SingleInstanceFactory>(), container.GetInstance<MultiInstanceFactory>()));
             container.RegisterManyForOpenGeneric(typeof(IRequestHandler<,>), assemblies);
             container.RegisterManyForOpenGeneric(typeof(IAsyncRequestHandler<,>), assemblies);
             container.RegisterManyForOpenGeneric(typeof(INotificationHandler<>), container.RegisterAll, assemblies);
             container.RegisterManyForOpenGeneric(typeof(IAsyncNotificationHandler<>), container.RegisterAll, assemblies);
             container.Register(() => Console.Out);
             container.Register<SingleInstanceFactory>(() => t => container.GetInstance(t));
+            container.Register<MultiInstanceFactory>(() => t => container.GetAllInstances(t));
 
             container.Verify();
 
