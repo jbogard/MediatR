@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22310.1
+VisualStudioVersion = 14.0.22728.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8746A13B-A2BE-45A3-B261-782BC92689AA}"
 	ProjectSection(SolutionItems) = preProject
@@ -37,7 +37,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.LightInjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.StructureMap.WebAPI", "MediatR.Examples.StructureMap.WebAPI\MediatR.Examples.StructureMap.WebAPI.csproj", "{13A843A3-F162-4FF0-A133-A01DD15D21BD}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MediatR.CoreCLR", "MediatR\MediatR.CoreCLR.kproj", "{57017221-8D9F-457B-9923-A31307CF5262}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MediatR.CoreCLR", "MediatR\MediatR.CoreCLR.xproj", "{57017221-8D9F-457B-9923-A31307CF5262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "MediatR\MediatR.csproj", "{D0CDC351-9F10-4531-BDFF-D9796487E9CE}"
 EndProject

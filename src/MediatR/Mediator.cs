@@ -29,17 +29,15 @@
         /// <summary>
         /// Send a notification to multiple handlers
         /// </summary>
-        /// <typeparam name="TNotification">Notification type</typeparam>
         /// <param name="notification">Notification object</param>
-        void Publish<TNotification>(TNotification notification) where TNotification : INotification;
+        void Publish(INotification notification);
 
         /// <summary>
         /// Asynchronously send a notification to multiple handlers
         /// </summary>
-        /// <typeparam name="TNotification">Notification type</typeparam>
         /// <param name="notification">Notification object</param>
         /// <returns>A task that represents the publish operation.</returns>
-        Task PublishAsync<TNotification>(TNotification notification) where TNotification : IAsyncNotification;
+        Task PublishAsync(IAsyncNotification notification);
     }
 
     /// <summary>
@@ -63,11 +61,6 @@
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
         private readonly MultiInstanceFactory _multiInstanceFactory;
-
-        public Mediator(SingleInstanceFactory singleInstanceFactory)
-            : this(singleInstanceFactory, t => (IEnumerable<object>)singleInstanceFactory(typeof(IEnumerable<>).MakeGenericType(t)))
-        {
-        }
 
         public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
         {
@@ -93,9 +86,9 @@
             return result;
         }
 
-        public void Publish<TNotification>(TNotification notification) where TNotification : INotification
+        public void Publish(INotification notification)
         {
-            var notificationHandlers = GetNotificationHandlers<TNotification>();
+            var notificationHandlers = GetNotificationHandlers(notification);
 
             foreach (var handler in notificationHandlers)
             {
@@ -103,9 +96,9 @@
             }
         }
 
-        public async Task PublishAsync<TNotification>(TNotification notification) where TNotification : IAsyncNotification
+        public async Task PublishAsync(IAsyncNotification notification)
         {
-            var notificationHandlers = GetAsyncNotificationHandlers<TNotification>();
+            var notificationHandlers = GetAsyncNotificationHandlers(notification);
 
             foreach (var handler in notificationHandlers)
             {
@@ -159,16 +152,24 @@
             return (AsyncRequestHandler<TResponse>)wrapperHandler;
         }
 
-        private IEnumerable<INotificationHandler<TNotification>> GetNotificationHandlers<TNotification>()
-            where TNotification : INotification
+        private IEnumerable<NotificationHandler> GetNotificationHandlers(INotification notification)
         {
-            return _multiInstanceFactory(typeof(INotificationHandler<TNotification>)).Cast<INotificationHandler<TNotification>>();
+            var handlerType = typeof(INotificationHandler<>).MakeGenericType(notification.GetType());
+            var wrapperType = typeof(NotificationHandler<>).MakeGenericType(notification.GetType());
+
+            var handlers = _multiInstanceFactory(handlerType);
+
+            return handlers.Select(handler => (NotificationHandler) Activator.CreateInstance(wrapperType, handler)).ToList();
         }
 
-        private IEnumerable<IAsyncNotificationHandler<TNotification>> GetAsyncNotificationHandlers<TNotification>()
-            where TNotification : IAsyncNotification
+        private IEnumerable<AsyncNotificationHandler> GetAsyncNotificationHandlers(IAsyncNotification notification)
         {
-            return _multiInstanceFactory(typeof(IAsyncNotificationHandler<TNotification>)).Cast<IAsyncNotificationHandler<TNotification>>();
+            var handlerType = typeof(IAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
+            var wrapperType = typeof(AsyncNotificationHandler<>).MakeGenericType(notification.GetType());
+
+            var handlers = _multiInstanceFactory(handlerType);
+
+            return handlers.Select(handler => (AsyncNotificationHandler)Activator.CreateInstance(wrapperType, handler)).ToList();
         }
 
         private abstract class RequestHandler<TResult>
@@ -191,6 +192,26 @@
             }
         }
 
+        private abstract class NotificationHandler
+        {
+            public abstract void Handle(INotification message);
+        }
+
+        private class NotificationHandler<TNotification> : NotificationHandler where TNotification : INotification
+        {
+            private readonly INotificationHandler<TNotification> _inner;
+
+            public NotificationHandler(INotificationHandler<TNotification> inner)
+            {
+                _inner = inner;
+            }
+
+            public override void Handle(INotification message)
+            {
+                _inner.Handle((TNotification)message);
+            }
+        }
+
         private abstract class AsyncRequestHandler<TResult>
         {
             public abstract Task<TResult> Handle(IAsyncRequest<TResult> message);
@@ -209,6 +230,27 @@
             public override Task<TResult> Handle(IAsyncRequest<TResult> message)
             {
                 return _inner.Handle((TCommand)message);
+            }
+        }
+
+        private abstract class AsyncNotificationHandler
+        {
+            public abstract Task Handle(IAsyncNotification message);
+        }
+
+        private class AsyncNotificationHandler<TNotification> : AsyncNotificationHandler
+            where TNotification : IAsyncNotification
+        {
+            private readonly IAsyncNotificationHandler<TNotification> _inner;
+
+            public AsyncNotificationHandler(IAsyncNotificationHandler<TNotification> inner)
+            {
+                _inner = inner;
+            }
+
+            public override Task Handle(IAsyncNotification message)
+            {
+                return _inner.Handle((TNotification)message);
             }
         }
     }
