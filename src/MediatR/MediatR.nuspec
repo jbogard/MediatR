@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>MediatR</id>
-    <version>2.0.0-beta-001</version>
+    <version>2.0.0-beta-002</version>
     <title>MediatR</title>
     <authors>Jimmy Bogard</authors>
     <owners>Jimmy Bogard</owners>
