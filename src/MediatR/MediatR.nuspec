@@ -27,6 +27,7 @@
     </frameworkAssemblies>
   </metadata>
   <files>
+    <!--
     <file src="..\MediatR\bin\Release\MediatR.dll" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.dll" />
     <file src="..\MediatR\bin\Release\MediatR.pdb" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.pdb" />
     <file src="..\MediatR\bin\Release\MediatR.xml" target="lib\portable-net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10\MediatR.xml" />
@@ -36,5 +37,6 @@
     <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.dll" target="lib\aspnetcore50\MediatR.dll" />
     <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.pdb" target="lib\aspnetcore50\MediatR.pdb" />
     <file src="..\artifacts\bin\MediatR.CoreCLR\Release\aspnetcore50\MediatR.xml" target="lib\aspnetcore50\MediatR.xml" />
+    -->
   </files>
 </package>

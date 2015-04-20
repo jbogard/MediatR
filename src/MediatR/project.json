@@ -3,9 +3,24 @@
     "authors": [ "Jimmy Bogard" ],
     "description": "Simple, unambitious mediator implementation in .NET",
     "frameworks": {
-        "aspnet50": {
+
+        "net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10": {
+            "frameworkAssemblies": {
+                "System.Collections": "",
+                "System.Linq": "",
+                "System.Runtime": "",
+                "System.Threading.Tasks": ""
+            }
         },
-        "aspnetcore50": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Collections": "",
+                "System.Linq": "",
+                "System.Runtime": "",
+                "System.Threading.Tasks": ""
+            }
+        },
+        "dnxcore50": {
             "dependencies": {
                 "System.Threading.Tasks": "4.0.10.0-beta-22530",
                 "System.ComponentModel": "4.0.0.0-beta-22530",
