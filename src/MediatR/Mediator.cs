@@ -88,22 +88,20 @@
 
         public void Publish(INotification notification)
         {
-            var notificationHandlers = GetNotificationHandlers(notification);
+            var notificationHandlers = GetNotificationHandlers(notification)
+                .Select(handler => Task.Run(() => handler.Handle(notification)))
+                .ToArray();
 
-            foreach (var handler in notificationHandlers)
-            {
-                handler.Handle(notification);
-            }
+            Task.WaitAll(notificationHandlers);
         }
 
         public async Task PublishAsync(IAsyncNotification notification)
         {
-            var notificationHandlers = GetAsyncNotificationHandlers(notification);
+            var notificationHandlers = GetAsyncNotificationHandlers(notification)
+                .Select(handler => Task.Run(() => handler.Handle(notification)))
+                .ToArray();
 
-            foreach (var handler in notificationHandlers)
-            {
-                await handler.Handle(notification);
-            }
+            await Task.WhenAll(notificationHandlers);
         }
 
         private static InvalidOperationException BuildException(object message, Exception inner = null)
