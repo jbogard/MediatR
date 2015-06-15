@@ -11,6 +11,11 @@
     public interface IAsyncRequest : IAsyncRequest<Unit> { }
 
     /// <summary>
+    /// Marker interface to represent a cancellable, asynchronous request with a void response
+    /// </summary>
+    public interface ICancellableAsyncRequest : ICancellableAsyncRequest<Unit> { }
+
+    /// <summary>
     /// Marker interface to represent a request with a response
     /// </summary>
     /// <typeparam name="TResponse">Response type</typeparam>
@@ -23,6 +28,12 @@
     public interface IAsyncRequest<out TResponse> { }
 
     /// <summary>
+    /// Marker interface to represent a cancellable, asynchronous request with a response
+    /// </summary>
+    /// <typeparam name="TResponse">Response type</typeparam>
+    public interface ICancellableAsyncRequest<out TResponse> { }
+
+    /// <summary>
     /// Marker interface to represent a notification
     /// </summary>
     public interface INotification { }
@@ -31,4 +42,9 @@
     /// Marker interface to represent an asynchronous notification
     /// </summary>
     public interface IAsyncNotification { }
+
+    /// <summary>
+    /// Marker interface to represent a cancellable, asynchronous notification
+    /// </summary>
+    public interface ICancellableAsyncNotification { }
 }

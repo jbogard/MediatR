@@ -1,4 +1,6 @@
-﻿namespace MediatR
+﻿using System.Threading;
+
+namespace MediatR
 {
     using System;
     using System.Collections.Generic;
@@ -27,6 +29,15 @@
         Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request);
 
         /// <summary>
+        /// Asynchronously send a cancellable request to a single handler
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
+        Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Send a notification to multiple handlers
         /// </summary>
         /// <param name="notification">Notification object</param>
@@ -38,6 +49,14 @@
         /// <param name="notification">Notification object</param>
         /// <returns>A task that represents the publish operation.</returns>
         Task PublishAsync(IAsyncNotification notification);
+
+        /// <summary>
+        /// Asynchronously send a cancellable notification to multiple handlers
+        /// </summary>
+        /// <param name="notification">Notification object</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the publish operation.</returns>
+        Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -86,6 +105,15 @@
             return result;
         }
 
+        public async Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
+        {
+            var defaultHandler = GetHandler(request);
+
+            TResponse result = await defaultHandler.Handle(request, cancellationToken);
+
+            return result;
+        }
+
         public void Publish(INotification notification)
         {
             var notificationHandlers = GetNotificationHandlers(notification);
@@ -98,11 +126,21 @@
 
         public async Task PublishAsync(IAsyncNotification notification)
         {
-            var notificationHandlers = GetAsyncNotificationHandlers(notification);
+            var notificationHandlers = GetNotificationHandlers(notification);
 
             foreach (var handler in notificationHandlers)
             {
                 await handler.Handle(notification);
+            }
+        }
+
+        public async Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
+        {
+            var notificationHandlers = GetNotificationHandlers(notification);
+
+            foreach (var handler in notificationHandlers)
+            {
+                await handler.Handle(notification, cancellationToken);
             }
         }
 
@@ -127,8 +165,9 @@
             {
                 throw BuildException(request, e);
             }
+            
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (RequestHandler<TResponse>)wrapperHandler;
+            return (RequestHandler<TResponse>) wrapperHandler;
         }
 
         private AsyncRequestHandler<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
@@ -149,7 +188,28 @@
             }
 
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (AsyncRequestHandler<TResponse>)wrapperHandler;
+            return (AsyncRequestHandler<TResponse>) wrapperHandler;
+        }
+
+        private CancellableAsyncRequestHandler<TResponse> GetHandler<TResponse>(ICancellableAsyncRequest<TResponse> request)
+        {
+            var handlerType = typeof(ICancellableAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
+            var wrapperType = typeof(CancellableAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
+            object handler;
+            try
+            {
+                handler = _singleInstanceFactory(handlerType);
+
+                if (handler == null)
+                    throw BuildException(request);
+            }
+            catch (Exception e)
+            {
+                throw BuildException(request, e);
+            }
+
+            var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
+            return (CancellableAsyncRequestHandler<TResponse>)wrapperHandler;
         }
 
         private IEnumerable<NotificationHandler> GetNotificationHandlers(INotification notification)
@@ -159,17 +219,33 @@
 
             var handlers = _multiInstanceFactory(handlerType);
 
-            return handlers.Select(handler => (NotificationHandler) Activator.CreateInstance(wrapperType, handler)).ToList();
+            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
+                .Cast<NotificationHandler>()
+                .ToList();
         }
 
-        private IEnumerable<AsyncNotificationHandler> GetAsyncNotificationHandlers(IAsyncNotification notification)
+        private IEnumerable<AsyncNotificationHandler> GetNotificationHandlers(IAsyncNotification notification)
         {
             var handlerType = typeof(IAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
             var wrapperType = typeof(AsyncNotificationHandler<>).MakeGenericType(notification.GetType());
 
             var handlers = _multiInstanceFactory(handlerType);
 
-            return handlers.Select(handler => (AsyncNotificationHandler)Activator.CreateInstance(wrapperType, handler)).ToList();
+            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
+                .Cast<AsyncNotificationHandler>()
+                .ToList();
+        }
+
+        private IEnumerable<CancellableAsyncNotificationHandler> GetNotificationHandlers(ICancellableAsyncNotification notification)
+        {
+            var handlerType = typeof(ICancellableAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
+            var wrapperType = typeof(CancellableAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
+
+            var handlers = _multiInstanceFactory(handlerType);
+
+            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
+                .Cast<CancellableAsyncNotificationHandler>()
+                .ToList();
         }
 
         private abstract class RequestHandler<TResult>
@@ -188,7 +264,7 @@
 
             public override TResult Handle(IRequest<TResult> message)
             {
-                return _inner.Handle((TCommand)message);
+                return _inner.Handle((TCommand) message);
             }
         }
 
@@ -208,7 +284,7 @@
 
             public override void Handle(INotification message)
             {
-                _inner.Handle((TNotification)message);
+                _inner.Handle((TNotification) message);
             }
         }
 
@@ -229,7 +305,28 @@
 
             public override Task<TResult> Handle(IAsyncRequest<TResult> message)
             {
-                return _inner.Handle((TCommand)message);
+                return _inner.Handle((TCommand) message);
+            }
+        }
+
+        private abstract class CancellableAsyncRequestHandler<TResult>
+        {
+            public abstract Task<TResult> Handle(ICancellableAsyncRequest<TResult> message, CancellationToken cancellationToken);
+        }
+
+        private class CancellableAsyncRequestHandler<TCommand, TResult> : CancellableAsyncRequestHandler<TResult>
+            where TCommand : ICancellableAsyncRequest<TResult>
+        {
+            private readonly ICancellableAsyncRequestHandler<TCommand, TResult> _inner;
+
+            public CancellableAsyncRequestHandler(ICancellableAsyncRequestHandler<TCommand, TResult> inner)
+            {
+                _inner = inner;
+            }
+
+            public override Task<TResult> Handle(ICancellableAsyncRequest<TResult> message, CancellationToken cancellationToken)
+            {
+                return _inner.Handle((TCommand) message, cancellationToken);
             }
         }
 
@@ -250,7 +347,28 @@
 
             public override Task Handle(IAsyncNotification message)
             {
-                return _inner.Handle((TNotification)message);
+                return _inner.Handle((TNotification) message);
+            }
+        }
+
+        private abstract class CancellableAsyncNotificationHandler
+        {
+            public abstract Task Handle(ICancellableAsyncNotification message, CancellationToken canellationToken);
+        }
+
+        private class CancellableAsyncNotificationHandler<TNotification> : CancellableAsyncNotificationHandler
+            where TNotification : ICancellableAsyncNotification
+        {
+            private readonly ICancellableAsyncNotificationHandler<TNotification> _inner;
+
+            public CancellableAsyncNotificationHandler(ICancellableAsyncNotificationHandler<TNotification> inner)
+            {
+                _inner = inner;
+            }
+
+            public override Task Handle(ICancellableAsyncNotification message, CancellationToken cancellationToken)
+            {
+                return _inner.Handle((TNotification) message, cancellationToken);
             }
         }
     }

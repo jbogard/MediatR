@@ -1,4 +1,6 @@
-﻿namespace MediatR
+﻿using System.Threading;
+
+namespace MediatR
 {
     using System.Threading.Tasks;
 
@@ -32,6 +34,23 @@
         /// <param name="message">The request message</param>
         /// <returns>A task representing the response from the request</returns>
         Task<TResponse> Handle(TRequest message);
+    }
+
+    /// <summary>
+    /// Defines a cancellable, asynchronous handler for a request
+    /// </summary>
+    /// <typeparam name="TRequest">The type of request being handled</typeparam>
+    /// <typeparam name="TResponse">The type of response from the handler</typeparam>
+    public interface ICancellableAsyncRequestHandler<in TRequest, TResponse>
+        where TRequest : ICancellableAsyncRequest<TResponse>
+    {
+        /// <summary>
+        /// Handles a cancellable, asynchronous request
+        /// </summary>
+        /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <returns>A task representing the response from the request</returns>
+        Task<TResponse> Handle(TRequest message, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -78,6 +97,29 @@
     }
 
     /// <summary>
+    /// Helper class for cancellable, asynchronous requests that return a void response
+    /// </summary>
+    /// <typeparam name="TMessage">The type of void request being handled</typeparam>
+    public abstract class CancellableAsyncRequestHandler<TMessage> : ICancellableAsyncRequestHandler<TMessage, Unit>
+        where TMessage : ICancellableAsyncRequest
+    {
+        public async Task<Unit> Handle(TMessage message, CancellationToken cancellationToken)
+        {
+            await HandleCore(message, cancellationToken);
+
+            return Unit.Value;
+        }
+
+        /// <summary>
+        /// Handles a void request
+        /// </summary>
+        /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <returns>A task representing the void response from the request</returns>
+        protected abstract Task HandleCore(TMessage message, CancellationToken cancellationToken);
+    }
+
+    /// <summary>
     /// Defines a handler for a notification
     /// </summary>
     /// <typeparam name="TNotification">The type of notification being handled</typeparam>
@@ -104,5 +146,21 @@
         /// <param name="notification">The notification message</param>
         /// <returns>A task representing handling the notification</returns>
         Task Handle(TNotification notification);
+    }
+
+    /// <summary>
+    /// Defines a cancellable, asynchronous handler for a notification
+    /// </summary>
+    /// <typeparam name="TNotification">The type of notification being handled</typeparam>
+    public interface ICancellableAsyncNotificationHandler<in TNotification>
+        where TNotification : ICancellableAsyncNotification
+    {
+        /// <summary>
+        /// Handles a cancellable, asynchronous notification
+        /// </summary>
+        /// <param name="notification">The notification message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <returns>A task representing handling the notification</returns>
+        Task Handle(TNotification notification, CancellationToken cancellationToken);
     }
 }
