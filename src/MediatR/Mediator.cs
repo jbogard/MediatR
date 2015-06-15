@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -23,8 +24,9 @@
         /// </summary>
         /// <typeparam name="TResponse">Response type</typeparam>
         /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">An optional cancellation token</param>
         /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
-        Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request);
+        Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Send a notification to multiple handlers
@@ -36,8 +38,9 @@
         /// Asynchronously send a notification to multiple handlers
         /// </summary>
         /// <param name="notification">Notification object</param>
+        /// <param name="cancellationToken">An optional cancellation token</param>
         /// <returns>A task that represents the publish operation.</returns>
-        Task PublishAsync(IAsyncNotification notification);
+        Task PublishAsync(IAsyncNotification notification, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     /// <summary>
@@ -77,11 +80,11 @@
             return result;
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
+        public async Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var defaultHandler = GetHandler(request);
 
-            TResponse result = await defaultHandler.Handle(request);
+            TResponse result = await defaultHandler.Handle(request, cancellationToken);
 
             return result;
         }
@@ -96,13 +99,13 @@
             }
         }
 
-        public async Task PublishAsync(IAsyncNotification notification)
+        public async Task PublishAsync(IAsyncNotification notification, CancellationToken cancellationToken = default(CancellationToken))
         {
             var notificationHandlers = GetAsyncNotificationHandlers(notification);
 
             foreach (var handler in notificationHandlers)
             {
-                await handler.Handle(notification);
+                await handler.Handle(notification, cancellationToken);
             }
         }
 
@@ -127,8 +130,9 @@
             {
                 throw BuildException(request, e);
             }
+            
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (RequestHandler<TResponse>)wrapperHandler;
+            return (RequestHandler<TResponse>) wrapperHandler;
         }
 
         private AsyncRequestHandler<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
@@ -149,7 +153,7 @@
             }
 
             var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (AsyncRequestHandler<TResponse>)wrapperHandler;
+            return (AsyncRequestHandler<TResponse>) wrapperHandler;
         }
 
         private IEnumerable<NotificationHandler> GetNotificationHandlers(INotification notification)
@@ -169,7 +173,7 @@
 
             var handlers = _multiInstanceFactory(handlerType);
 
-            return handlers.Select(handler => (AsyncNotificationHandler)Activator.CreateInstance(wrapperType, handler)).ToList();
+            return handlers.Select(handler => (AsyncNotificationHandler) Activator.CreateInstance(wrapperType, handler)).ToList();
         }
 
         private abstract class RequestHandler<TResult>
@@ -188,7 +192,7 @@
 
             public override TResult Handle(IRequest<TResult> message)
             {
-                return _inner.Handle((TCommand)message);
+                return _inner.Handle((TCommand) message);
             }
         }
 
@@ -208,13 +212,13 @@
 
             public override void Handle(INotification message)
             {
-                _inner.Handle((TNotification)message);
+                _inner.Handle((TNotification) message);
             }
         }
 
         private abstract class AsyncRequestHandler<TResult>
         {
-            public abstract Task<TResult> Handle(IAsyncRequest<TResult> message);
+            public abstract Task<TResult> Handle(IAsyncRequest<TResult> message, CancellationToken cancellationToken);
         }
 
         private class AsyncRequestHandler<TCommand, TResult> : AsyncRequestHandler<TResult>
@@ -227,15 +231,15 @@
                 _inner = inner;
             }
 
-            public override Task<TResult> Handle(IAsyncRequest<TResult> message)
+            public override Task<TResult> Handle(IAsyncRequest<TResult> message, CancellationToken cancellationToken)
             {
-                return _inner.Handle((TCommand)message);
+                return _inner.Handle((TCommand) message, cancellationToken);
             }
         }
 
         private abstract class AsyncNotificationHandler
         {
-            public abstract Task Handle(IAsyncNotification message);
+            public abstract Task Handle(IAsyncNotification message, CancellationToken cancellationToken);
         }
 
         private class AsyncNotificationHandler<TNotification> : AsyncNotificationHandler
@@ -248,9 +252,9 @@
                 _inner = inner;
             }
 
-            public override Task Handle(IAsyncNotification message)
+            public override Task Handle(IAsyncNotification message, CancellationToken cancellationToken)
             {
-                return _inner.Handle((TNotification)message);
+                return _inner.Handle((TNotification) message, cancellationToken);
             }
         }
     }

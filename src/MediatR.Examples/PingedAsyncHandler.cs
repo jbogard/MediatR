@@ -1,6 +1,7 @@
 ﻿namespace MediatR.Examples
 {
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public class PingedAsyncHandler : IAsyncNotificationHandler<PingedAsync>
@@ -12,7 +13,7 @@
             _writer = writer;
         }
 
-        public async Task Handle(PingedAsync notification)
+        public async Task Handle(PingedAsync notification, CancellationToken cancellationToken)
         {
             await _writer.WriteLineAsync("Got pinged async.");
         }
@@ -27,7 +28,7 @@
             _writer = writer;
         }
 
-        public async Task Handle(PingedAsync notification)
+        public async Task Handle(PingedAsync notification, CancellationToken cancellationToken)
         {
             await _writer.WriteLineAsync("Got pinged also async.");
         }

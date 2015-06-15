@@ -1,4 +1,6 @@
-﻿namespace MediatR
+﻿using System.Threading;
+
+namespace MediatR
 {
     using System.Threading.Tasks;
 
@@ -30,8 +32,9 @@
         /// Handles an asynchronous request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>A task representing the response from the request</returns>
-        Task<TResponse> Handle(TRequest message);
+        Task<TResponse> Handle(TRequest message, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -62,9 +65,9 @@
     public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage, Unit>
         where TMessage : IAsyncRequest
     {
-        public async Task<Unit> Handle(TMessage message)
+        public async Task<Unit> Handle(TMessage message, CancellationToken cancellationToken)
         {
-            await HandleCore(message);
+            await HandleCore(message, cancellationToken);
 
             return Unit.Value;
         }
@@ -73,8 +76,9 @@
         /// Handles a void request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>A task representing the void response from the request</returns>
-        protected abstract Task HandleCore(TMessage message);
+        protected abstract Task HandleCore(TMessage message, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -102,7 +106,8 @@
         /// Handles an asynchronous notification
         /// </summary>
         /// <param name="notification">The notification message</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>A task representing handling the notification</returns>
-        Task Handle(TNotification notification);
+        Task Handle(TNotification notification, CancellationToken cancellationToken);
     }
 }

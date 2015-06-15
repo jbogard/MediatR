@@ -7,6 +7,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using System.Threading;
 
     public class AsyncPublishTests
     {
@@ -24,7 +25,7 @@
                 _writer = writer;
             }
 
-            public async Task Handle(Ping message)
+            public async Task Handle(Ping message, CancellationToken cancellationToken)
             {
                 await _writer.WriteLineAsync(message.Message + " Pong");
             }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Examples
@@ -12,7 +13,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public async Task Handle(IAsyncNotification notification)
+        public async Task Handle(IAsyncNotification notification, CancellationToken cancellationToken)
         {
             await _writer.WriteLineAsync("Got notified also async.");
         }
