@@ -18,7 +18,7 @@
                 "System.Threading.Tasks": ""
             }
         },
-        "dnx451": {
+        "dnx46": {
             "frameworkAssemblies": {
                 "System.Collections": "",
                 "System.Linq": "",
@@ -28,9 +28,9 @@
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Threading.Tasks": "4.0.10.0-beta-*",
-                "System.ComponentModel": "4.0.0.0-beta-*",
-                "System.Linq": "4.0.0.0-beta-*"
+                "System.Threading.Tasks": "4.0.10-beta-23019",
+                "System.ComponentModel": "4.0.0-beta-23019",
+                "System.Linq": "4.0.0-beta-23019"
             }
         }
     }
