@@ -6,6 +6,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using System.Threading;
 
     public class AsyncSendVoidTests
     {
@@ -23,7 +24,7 @@
                 _writer = writer;
             }
 
-            protected async override Task HandleCore(Ping message)
+            protected async override Task HandleCore(Ping message, CancellationToken cancellationToken)
             {
                 await _writer.WriteAsync(message.Message + " Pong");
             }
