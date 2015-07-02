@@ -1,10 +1,10 @@
-﻿using System.Threading;
-
+﻿
 namespace MediatR
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -79,6 +79,7 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
+
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
         public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
@@ -91,7 +92,7 @@ namespace MediatR
         {
             var defaultHandler = GetHandler(request);
 
-            TResponse result = defaultHandler.Handle(request);
+            var result = defaultHandler.Handle(request);
 
             return result;
         }
@@ -100,7 +101,7 @@ namespace MediatR
         {
             var defaultHandler = GetHandler(request);
 
-            TResponse result = await defaultHandler.Handle(request);
+            var result = await defaultHandler.Handle(request);
 
             return result;
         }
@@ -109,7 +110,7 @@ namespace MediatR
         {
             var defaultHandler = GetHandler(request);
 
-            TResponse result = await defaultHandler.Handle(request, cancellationToken);
+            var result = await defaultHandler.Handle(request, cancellationToken);
 
             return result;
         }
@@ -144,108 +145,98 @@ namespace MediatR
             }
         }
 
-        private static InvalidOperationException BuildException(object message, Exception inner = null)
-        {
-            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", inner);
-        }
-
         private RequestHandler<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
-            var handlerType = typeof(IRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var wrapperType = typeof(RequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            object handler;
-            try
-            {
-                handler = _singleInstanceFactory(handlerType);
-
-                if (handler == null)
-                    throw BuildException(request);
-            }
-            catch (Exception e)
-            {
-                throw BuildException(request, e);
-            }
-            
-            var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (RequestHandler<TResponse>) wrapperHandler;
+            return GetHandler<RequestHandler<TResponse>, TResponse>(request,
+                typeof(IRequestHandler<,>),
+                typeof(RequestHandler<,>));
         }
 
         private AsyncRequestHandler<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
         {
-            var handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var wrapperType = typeof(AsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            object handler;
-            try
-            {
-                handler = _singleInstanceFactory(handlerType);
-
-                if (handler == null)
-                    throw BuildException(request);
-            }
-            catch (Exception e)
-            {
-                throw BuildException(request, e);
-            }
-
-            var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (AsyncRequestHandler<TResponse>) wrapperHandler;
+            return GetHandler<AsyncRequestHandler<TResponse>, TResponse>(request,
+                typeof(IAsyncRequestHandler<,>),
+                typeof(AsyncRequestHandler<,>));
         }
 
         private CancellableAsyncRequestHandler<TResponse> GetHandler<TResponse>(ICancellableAsyncRequest<TResponse> request)
         {
-            var handlerType = typeof(ICancellableAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            var wrapperType = typeof(CancellableAsyncRequestHandler<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-            object handler;
+            return GetHandler<CancellableAsyncRequestHandler<TResponse>, TResponse>(request,
+                typeof(ICancellableAsyncRequestHandler<,>),
+                typeof(CancellableAsyncRequestHandler<,>));
+        }
+
+        private TWrapper GetHandler<TWrapper, TResponse>(object request, Type handlerType, Type wrapperType)
+        {
+            var requestType = request.GetType();
+
+            var genericHandlerType = handlerType.MakeGenericType(requestType, typeof(TResponse));
+            var genericWrapperType = wrapperType.MakeGenericType(requestType, typeof(TResponse));
+
+            var handler = GetHandler(request, genericHandlerType);
+
+            return (TWrapper) Activator.CreateInstance(genericWrapperType, handler);
+        }
+
+        private object GetHandler(object request, Type handlerType)
+        {
             try
             {
-                handler = _singleInstanceFactory(handlerType);
-
-                if (handler == null)
-                    throw BuildException(request);
+                return _singleInstanceFactory(handlerType);
             }
             catch (Exception e)
             {
                 throw BuildException(request, e);
             }
-
-            var wrapperHandler = Activator.CreateInstance(wrapperType, handler);
-            return (CancellableAsyncRequestHandler<TResponse>)wrapperHandler;
         }
 
         private IEnumerable<NotificationHandler> GetNotificationHandlers(INotification notification)
         {
-            var handlerType = typeof(INotificationHandler<>).MakeGenericType(notification.GetType());
-            var wrapperType = typeof(NotificationHandler<>).MakeGenericType(notification.GetType());
-
-            var handlers = _multiInstanceFactory(handlerType);
-
-            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
-                .Cast<NotificationHandler>()
-                .ToList();
+            return GetNotificationHandlers<NotificationHandler>(notification,
+                typeof(INotificationHandler<>),
+                typeof(NotificationHandler<>));
         }
 
         private IEnumerable<AsyncNotificationHandler> GetNotificationHandlers(IAsyncNotification notification)
         {
-            var handlerType = typeof(IAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
-            var wrapperType = typeof(AsyncNotificationHandler<>).MakeGenericType(notification.GetType());
-
-            var handlers = _multiInstanceFactory(handlerType);
-
-            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
-                .Cast<AsyncNotificationHandler>()
-                .ToList();
+            return GetNotificationHandlers<AsyncNotificationHandler>(notification,
+                typeof(IAsyncNotificationHandler<>),
+                typeof(AsyncNotificationHandler<>));
         }
 
         private IEnumerable<CancellableAsyncNotificationHandler> GetNotificationHandlers(ICancellableAsyncNotification notification)
         {
-            var handlerType = typeof(ICancellableAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
-            var wrapperType = typeof(CancellableAsyncNotificationHandler<>).MakeGenericType(notification.GetType());
+            return GetNotificationHandlers<CancellableAsyncNotificationHandler>(notification,
+                typeof (ICancellableAsyncNotificationHandler<>),
+                typeof (CancellableAsyncNotificationHandler<>));
+        }
 
-            var handlers = _multiInstanceFactory(handlerType);
+        private IEnumerable<TWrapper> GetNotificationHandlers<TWrapper>(object notification, Type handlerType, Type wrapperType)
+        {
+            var genericHandlerType = handlerType.MakeGenericType(notification.GetType());
+            var genericWrapperType = wrapperType.MakeGenericType(notification.GetType());
 
-            return handlers.Select(handler => Activator.CreateInstance(wrapperType, handler))
-                .Cast<CancellableAsyncNotificationHandler>()
+            return GetNotificationHandlers(notification, genericHandlerType)
+                .Select(handler => Activator.CreateInstance(genericWrapperType, handler))
+                .Cast<TWrapper>()
                 .ToList();
+        }
+
+        private IEnumerable<object> GetNotificationHandlers(object notification, Type handlerType)
+        {
+            try
+            {
+                return _multiInstanceFactory(handlerType);
+            }
+            catch (Exception e)
+            {
+                throw BuildException(notification, e);
+            }
+        }
+
+        private static InvalidOperationException BuildException(object message, Exception inner)
+        {
+            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", inner);
         }
 
         private abstract class RequestHandler<TResult>
