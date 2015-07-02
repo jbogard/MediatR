@@ -1,5 +1,5 @@
 {
-    "version": "2.0.0-beta-004",
+    "version": "2.0.0-beta-005",
     "authors": [ "Jimmy Bogard" ],
     "owners": [ "Jimmy Bogard" ],
     "licenseUrl": "https://github.com/jbogard/MediatR/blob/master/LICENSE",
@@ -10,7 +10,7 @@
     "copyright": "Copyright 2014-2015 Jimmy Bogard",
     "frameworks": {
 
-        "net45+win+wpa81+wp80+MonoAndroid10+Xamarin.iOS10+MonoTouch10": {
+        ".NETPortable,Version=v4.5,Profile=Profile259": {
             "frameworkAssemblies": {
                 "System.Collections": "",
                 "System.Linq": "",
@@ -18,7 +18,14 @@
                 "System.Threading.Tasks": ""
             }
         },
-        "dnx46": {
+        "wp8": {
+            "frameworkAssemblies": {
+                "mscorlib": "",
+                "System": "",
+                "System.Core": ""
+            },
+        },
+        "wpa81": {
             "frameworkAssemblies": {
                 "System.Collections": "",
                 "System.Linq": "",
@@ -26,6 +33,16 @@
                 "System.Threading.Tasks": ""
             }
         },
+        "net45": { },
+        "netcore45": {
+            "frameworkAssemblies": {
+                "System.Collections": "",
+                "System.Linq": "",
+                "System.Runtime": "",
+                "System.Threading.Tasks": ""
+            }
+        },
+        "dnx46": { },
         "dnxcore50": {
             "dependencies": {
                 "System.Threading.Tasks": "4.0.10-beta-23019",
