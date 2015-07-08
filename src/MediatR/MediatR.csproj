@@ -37,10 +37,32 @@
     <DocumentationFile>bin\Release\MediatR.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Internal\AsyncNotificationHandlerWrapper.cs" />
+    <Compile Include="AsyncRequestHandler.cs" />
+    <Compile Include="Internal\AsyncRequestHandlerWrapper.cs" />
+    <Compile Include="Internal\CancellableAsyncNotificationHandlerWrapper.cs" />
+    <Compile Include="CancellableAsyncRequestHandler.cs" />
+    <Compile Include="Internal\CancellableAsyncRequestHandlerWrapper.cs" />
+    <Compile Include="IAsyncNotification.cs" />
+    <Compile Include="IAsyncNotificationHandler.cs" />
+    <Compile Include="IAsyncRequest.cs" />
+    <Compile Include="IAsyncRequestHandler.cs" />
+    <Compile Include="ICancellableAsyncNotification.cs" />
+    <Compile Include="ICancellableAsyncNotificationHandler.cs" />
+    <Compile Include="ICancellableAsyncRequest.cs" />
+    <Compile Include="ICancellableAsyncRequestHandler.cs" />
+    <Compile Include="IMediator.cs" />
+    <Compile Include="INotification.cs" />
+    <Compile Include="INotificationHandler.cs" />
     <Compile Include="IRequest.cs" />
-    <Compile Include="IHandler.cs" />
+    <Compile Include="Internal\NotificationHandlerWrapper.cs" />
+    <Compile Include="RequestHandler.cs" />
+    <Compile Include="IRequestHandler.cs" />
     <Compile Include="Mediator.cs" />
+    <Compile Include="MultiInstanceFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Internal\RequestHandlerWrapper.cs" />
+    <Compile Include="SingleInstanceFactory.cs" />
     <Compile Include="Unit.cs" />
   </ItemGroup>
   <ItemGroup>
