@@ -9,7 +9,7 @@ namespace MediatR
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Default mediator implementation relying on Common Service Locator for resolving handlers
+    /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
     /// </summary>
     public class Mediator : IMediator
     {
@@ -17,6 +17,11 @@ namespace MediatR
 
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Mediator"/> class.
+        /// </summary>
+        /// <param name="singleInstanceFactory">The single instance factory.</param>
+        /// <param name="multiInstanceFactory">The multi instance factory.</param>
         public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
         {
             _singleInstanceFactory = singleInstanceFactory;
