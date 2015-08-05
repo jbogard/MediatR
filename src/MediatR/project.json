@@ -1,15 +1,25 @@
 {
-    "version": "2.0.0-beta-005",
-    "authors": [ "Jimmy Bogard" ],
-    "owners": [ "Jimmy Bogard" ],
+    "version": "2.0.2",
+    "authors": [
+        "Jimmy Bogard"
+    ],
+    "owners": [
+        "Jimmy Bogard"
+    ],
     "licenseUrl": "https://github.com/jbogard/MediatR/blob/master/LICENSE",
     "iconUrl": "https://raw.githubusercontent.com/jbogard/MediatR/master/assets/logo/gradient_128x128.png",
     "projectUrl": "https://github.com/jbogard/MediatR",
     "description": "Simple, unambitious mediator implementation in .NET",
-    "tags": [ "mediator", "request", "response", "queries", "commands", "notifications" ],
+    "tags": [
+        "mediator",
+        "request",
+        "response",
+        "queries",
+        "commands",
+        "notifications"
+    ],
     "copyright": "Copyright 2014-2015 Jimmy Bogard",
     "frameworks": {
-
         ".NETPortable,Version=v4.5,Profile=Profile259": {
             "frameworkAssemblies": {
                 "System.Collections": "",
@@ -23,7 +33,7 @@
                 "mscorlib": "",
                 "System": "",
                 "System.Core": ""
-            },
+            }
         },
         "wpa81": {
             "frameworkAssemblies": {
@@ -34,6 +44,11 @@
             }
         },
         "net45": { },
+        "net40": {
+            "dependencies": {
+                "Microsoft.Bcl.Async": "1.0.168"
+            }
+        },
         "netcore45": {
             "frameworkAssemblies": {
                 "System.Collections": "",
@@ -42,13 +57,12 @@
                 "System.Threading.Tasks": ""
             }
         },
-        "dnx46": { },
-        "dnxcore50": {
+        "dotnet": {
             "dependencies": {
-                "System.Threading.Tasks": "4.0.10-beta-23019",
-                "System.ComponentModel": "4.0.0-beta-23019",
-                "System.Linq": "4.0.0-beta-23019"
-            }
+                "Microsoft.NETCore": "5.0.0",
+                "Microsoft.NETCore.Portable.Compatibility": "1.0.0"
+            },
+            "imports": "portable-net452+win81"
         }
     }
 }
