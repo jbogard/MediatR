@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Reflection;
     using global::SimpleInjector;
-    using global::SimpleInjector.Extensions;
 
     internal class Program
     {
@@ -22,14 +21,14 @@
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
-            container.Register<IMediator>(() => new Mediator(container.GetInstance<SingleInstanceFactory>(), container.GetInstance<MultiInstanceFactory>()));
-            container.RegisterManyForOpenGeneric(typeof(IRequestHandler<,>), assemblies);
-            container.RegisterManyForOpenGeneric(typeof(IAsyncRequestHandler<,>), assemblies);
-            container.RegisterManyForOpenGeneric(typeof(INotificationHandler<>), container.RegisterAll, assemblies);
-            container.RegisterManyForOpenGeneric(typeof(IAsyncNotificationHandler<>), container.RegisterAll, assemblies);
-            container.Register(() => Console.Out);
-            container.Register<SingleInstanceFactory>(() => t => container.GetInstance(t));
-            container.Register<MultiInstanceFactory>(() => t => container.GetAllInstances(t));
+            container.RegisterSingleton<IMediator, Mediator>();
+            container.Register(typeof(IRequestHandler<,>), assemblies);
+            container.Register(typeof(IAsyncRequestHandler<,>), assemblies);
+            container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
+            container.RegisterCollection(typeof(IAsyncNotificationHandler<>), assemblies);
+            container.RegisterSingleton(Console.Out);
+            container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
+            container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
 
             container.Verify();
 
