@@ -67,22 +67,20 @@ namespace MediatR
 
         public async Task PublishAsync(IAsyncNotification notification)
         {
-            var notificationHandlers = GetNotificationHandlers(notification);
+            var notificationHandlers = GetNotificationHandlers(notification)
+                .Select(handler => handler.Handle(notification))
+                .ToArray();
 
-            foreach (var handler in notificationHandlers)
-            {
-                await handler.Handle(notification);
-            }
+            await Task.WhenAll(notificationHandlers);
         }
 
         public async Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
         {
-            var notificationHandlers = GetNotificationHandlers(notification);
+            var notificationHandlers = GetNotificationHandlers(notification)
+                .Select(handler => handler.Handle(notification, cancellationToken))
+                .ToArray();
 
-            foreach (var handler in notificationHandlers)
-            {
-                await handler.Handle(notification, cancellationToken);
-            }
+            await Task.WhenAll(notificationHandlers);
         }
 
         private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
