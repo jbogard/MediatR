@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22728.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8746A13B-A2BE-45A3-B261-782BC92689AA}"
 	ProjectSection(SolutionItems) = preProject
@@ -42,6 +42,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "MediatR\MediatR.csproj", "{D0CDC351-9F10-4531-BDFF-D9796487E9CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.NoContainer", "MediatR.Examples.NoContainer\MediatR.Examples.NoContainer.csproj", "{616E03A2-46DC-4193-AB9A-E71E2BFC4D52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.DryIoc", "MediatR.Examples.DryIoc\MediatR.Examples.DryIoc.csproj", "{14E7708C-9FBF-4C3C-B9B1-D819093D15DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 		{616E03A2-46DC-4193-AB9A-E71E2BFC4D52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{616E03A2-46DC-4193-AB9A-E71E2BFC4D52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{616E03A2-46DC-4193-AB9A-E71E2BFC4D52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14E7708C-9FBF-4C3C-B9B1-D819093D15DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14E7708C-9FBF-4C3C-B9B1-D819093D15DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14E7708C-9FBF-4C3C-B9B1-D819093D15DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14E7708C-9FBF-4C3C-B9B1-D819093D15DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,5 +122,6 @@ Global
 		{363449D4-8541-4DE2-82B2-64CE7A2DDAE2} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{13A843A3-F162-4FF0-A133-A01DD15D21BD} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 		{616E03A2-46DC-4193-AB9A-E71E2BFC4D52} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
+		{14E7708C-9FBF-4C3C-B9B1-D819093D15DD} = {F0AA3786-7BBF-46D1-AE38-C1938F33EF20}
 	EndGlobalSection
 EndGlobal
