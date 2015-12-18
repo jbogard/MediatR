@@ -39,8 +39,8 @@
 
         private static IEnumerable<Assembly> GetAssemblies()
         {
-            yield return typeof(IMediator).Assembly;
-            yield return typeof(Ping).Assembly;
+            yield return typeof(IMediator).GetTypeInfo().Assembly;
+            yield return typeof(Ping).GetTypeInfo().Assembly;
         }
     }
 }
