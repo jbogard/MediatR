@@ -1,4 +1,6 @@
-﻿namespace MediatR.Examples.Autofac
+﻿using System.Reflection;
+
+namespace MediatR.Examples.Autofac
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +8,7 @@
     using global::Autofac;
     using global::Autofac.Features.Variance;
 
-    internal class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {
@@ -21,8 +23,8 @@
         {
             var builder = new ContainerBuilder();
             builder.RegisterSource(new ContravariantRegistrationSource());
-            builder.RegisterAssemblyTypes(typeof (IMediator).Assembly).AsImplementedInterfaces();
-            builder.RegisterAssemblyTypes(typeof (Ping).Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof (IMediator).GetTypeInfo().Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof (Ping).GetTypeInfo().Assembly).AsImplementedInterfaces();
             builder.RegisterInstance(Console.Out).As<TextWriter>();
             builder.Register<SingleInstanceFactory>(ctx =>
             {
