@@ -6,7 +6,11 @@
         "structuremap": "4.0.0.315"
     },
 
+    "commands": {
+        "MediatR.Tests": "MediatR.Tests"
+    },
+
     "frameworks": {
-        "net451": { }
+        "dnx451": { }
     }
 }

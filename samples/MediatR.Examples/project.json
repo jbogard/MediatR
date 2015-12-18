@@ -5,6 +5,7 @@
 
     "frameworks": {
         "net40": { },
+        "net45": { },
         "dotnet5.1": {
             "dependencies": {
                 "Microsoft.CSharp": "4.0.1-beta-23516",

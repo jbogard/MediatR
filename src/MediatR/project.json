@@ -15,6 +15,7 @@
                 "Microsoft.Bcl.Async": "1.0.168"
             }
         },
+        "net45": { },
         "dotnet5.1": {
             "dependencies": {
                 "System.Linq": "4.0.1-beta-23516",
