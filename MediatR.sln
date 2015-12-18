@@ -27,6 +27,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MediatR.Examples.SimpleInje
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MediatR.Examples.StructureMap", "samples\MediatR.Examples.StructureMap\MediatR.Examples.StructureMap.xproj", "{7487E97A-CDA0-454D-8F62-CEE376DD3C3E}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MediatR.Examples.Unity", "samples\MediatR.Examples.Unity\MediatR.Examples.Unity.xproj", "{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{7487E97A-CDA0-454D-8F62-CEE376DD3C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7487E97A-CDA0-454D-8F62-CEE376DD3C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7487E97A-CDA0-454D-8F62-CEE376DD3C3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,5 +89,6 @@ Global
 		{71DBDCD2-AEFA-4E39-BCB0-A80D4A7D4F27} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{7487E97A-CDA0-454D-8F62-CEE376DD3C3E} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
+		{DB0D5202-F21C-4096-9FD8-A5B2D3BF9E36} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 	EndGlobalSection
 EndGlobal
