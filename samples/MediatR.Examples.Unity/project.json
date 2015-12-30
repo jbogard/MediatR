@@ -1,0 +1,18 @@
+﻿{
+    "dependencies": {
+        "Unity": "4.0.1",
+        "MediatR.Examples": { "target": "project" }
+    },
+
+    "commands": {
+        "MediatR.Examples.Unity": "MediatR.Examples.Unity"
+    },
+
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Runtime": "4.0.10.0"
+            }
+        }
+    }
+}

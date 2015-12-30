@@ -1,0 +1,16 @@
+﻿{
+    "dependencies": {
+        "Fixie": "1.0.0.39",
+        "MediatR": { "target": "project" },
+        "Shouldly": "2.6.0",
+        "structuremap": "4.0.0.315"
+    },
+
+    "commands": {
+        "MediatR.Tests": "MediatR.Tests"
+    },
+
+    "frameworks": {
+        "dnx451": { }
+    }
+}
