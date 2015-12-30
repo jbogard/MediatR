@@ -18,8 +18,8 @@
         "net45": { },
         "dotnet5.1": {
             "dependencies": {
-                "System.Linq": "4.0.1-beta-23516",
-                "System.Threading": "4.0.11-beta-23516"
+                "System.Linq": "4.0.0",
+                "System.Threading": "4.0.10"
             }
         }
     }
