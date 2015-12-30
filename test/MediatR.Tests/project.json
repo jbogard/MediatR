@@ -1,16 +1,17 @@
 ﻿{
-    "dependencies": {
-        "Fixie": "1.0.0.39",
-        "MediatR": { "target": "project" },
-        "Shouldly": "2.6.0",
-        "structuremap": "4.0.0.315"
-    },
+  "dependencies": {
+    "MediatR": { "target": "project" },
+    "Shouldly": "2.6.0",
+    "structuremap": "4.0.0.315",
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-*"
+  },
 
-    "commands": {
-        "MediatR.Tests": "MediatR.Tests"
-    },
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
 
-    "frameworks": {
-        "dnx451": { }
-    }
+  "frameworks": {
+    "dnx451": { }
+  }
 }

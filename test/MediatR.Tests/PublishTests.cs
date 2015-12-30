@@ -6,6 +6,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using Xunit;
 
     public class PublishTests
     {
@@ -44,6 +45,7 @@
             }
         }
 
+        [Fact]
         public void Should_resolve_main_handler()
         {
             var builder = new StringBuilder();

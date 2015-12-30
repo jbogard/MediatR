@@ -1,5 +1,5 @@
 ﻿{
-    "version": "2.0.2-*",
+    "version": "2.1.0-beta-*",
     "authors": [ "Jimmy Bogard" ],
     "copyright": "Copyright 2014-2015 Jimmy Bogard",
     "description": "Simple, unambitious mediator implementation in .NET",
@@ -10,16 +10,11 @@
     "projectUrl": "https://github.com/jbogard/MediatR",
 
     "frameworks": {
-        "net40": {
-            "dependencies": {
-                "Microsoft.Bcl.Async": "1.0.168"
-            }
-        },
         "net45": { },
         "dotnet5.1": {
             "dependencies": {
-                "System.Linq": "4.0.0",
-                "System.Threading": "4.0.10"
+              "System.Linq": "4.0.0",
+              "System.Threading": "4.0.10"
             }
         }
     }

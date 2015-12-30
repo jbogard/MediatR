@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
+    using Xunit;
 
     public class ExceptionTests
     {
@@ -28,21 +29,25 @@
             _mediator = container.GetInstance<IMediator>();
         }
 
+        [Fact]
         public void Should_throw_for_send()
         {
             Should.Throw<InvalidOperationException>(() => _mediator.Send(new Ping()));
         }
 
+        [Fact]
         public void Should_throw_for_void_send()
         {
             Should.Throw<InvalidOperationException>(() => _mediator.Send(new VoidPing()));
         }
 
+        [Fact]
         public void Should_not_throw_for_publish()
         {
             Should.NotThrow(() => _mediator.Publish(new Pinged()));
         }
 
+        [Fact]
         public void Should_throw_for_async_send()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -53,6 +58,7 @@
             });
         }
 
+        [Fact]
         public void Should_throw_for_async_void_send()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -63,6 +69,7 @@
             });
         }
 
+        [Fact]
         public void Should_not_throw_for_async_publish()
         {
             Should.NotThrow(() =>

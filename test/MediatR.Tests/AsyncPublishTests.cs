@@ -7,6 +7,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using Xunit;
 
     public class AsyncPublishTests
     {
@@ -45,6 +46,7 @@
             }
         }
 
+        [Fact]
         public void Should_resolve_main_handler()
         {
             var builder = new StringBuilder();

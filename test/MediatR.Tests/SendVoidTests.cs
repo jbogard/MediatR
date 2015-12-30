@@ -5,6 +5,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using Xunit;
 
     public class SendVoidTests
     {
@@ -28,6 +29,7 @@
             }
         }
 
+        [Fact]
         public void Should_resolve_main_void_handler()
         {
             var builder = new StringBuilder();

@@ -3,6 +3,7 @@
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
+    using Xunit;
 
     public class SendTests
     {
@@ -24,6 +25,7 @@
             }
         }
 
+        [Fact]
         public void Should_resolve_main_handler()
         {
             var container = new Container(cfg =>
