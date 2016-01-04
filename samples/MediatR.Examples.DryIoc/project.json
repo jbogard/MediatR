@@ -1,0 +1,20 @@
+﻿{
+    "dependencies": {
+        "DryIoc.Dnx": "2.1.1-*",
+        "MediatR.Examples": { "target": "project" }
+    },
+
+    "commands": {
+        "MediatR.Examples.DryIoc": "MediatR.Examples.DryIoc"
+    },
+
+    "frameworks": {
+        "dnx451": { },
+        "dnxcore50": {
+            "dependencies": {
+                "System.Console": "4.0.0-*",
+                "System.Reflection": "4.1.0-*"
+            }
+        }
+    }
+}
