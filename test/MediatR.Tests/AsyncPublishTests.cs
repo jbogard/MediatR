@@ -25,9 +25,9 @@
                 _writer = writer;
             }
 
-            public async Task Handle(Ping message)
+            public Task Handle(Ping message)
             {
-                await _writer.WriteLineAsync(message.Message + " Pong");
+                return _writer.WriteLineAsync(message.Message + " Pong");
             }
         }
 
@@ -40,14 +40,14 @@
                 _writer = writer;
             }
 
-            public async Task Handle(Ping message)
+            public Task Handle(Ping message)
             {
-                await _writer.WriteLineAsync(message.Message + " Pung");
+                return _writer.WriteLineAsync(message.Message + " Pung");
             }
         }
 
         [Fact]
-        public void Should_resolve_main_handler()
+        public async Task Should_resolve_main_handler()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -69,9 +69,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = mediator.PublishAsync(new Ping { Message = "Ping" });
-
-            Task.WaitAll(response);
+            await mediator.PublishAsync(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");

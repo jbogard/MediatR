@@ -50,34 +50,19 @@
         [Fact]
         public void Should_throw_for_async_send()
         {
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                var response = _mediator.SendAsync(new AsyncPing());
-                Task.WaitAll(response);
-                return response;
-            });
+            Should.Throw<InvalidOperationException>(() => _mediator.SendAsync(new AsyncPing()));
         }
 
         [Fact]
         public void Should_throw_for_async_void_send()
         {
-            Should.Throw<InvalidOperationException>(() =>
-            {
-                var response = _mediator.SendAsync(new AsyncVoidPing());
-                Task.WaitAll(response);
-                return response;
-            });
+            Should.Throw<InvalidOperationException>(() => _mediator.SendAsync(new AsyncVoidPing()));
         }
 
         [Fact]
         public void Should_not_throw_for_async_publish()
         {
-            Should.NotThrow(() =>
-            {
-                var response = _mediator.PublishAsync(new AsyncPinged());
-                Task.WaitAll(response);
-                return response;
-            });
+            Should.NotThrow(() => _mediator.PublishAsync(new AsyncPinged()));
         }
     }
 }
