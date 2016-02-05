@@ -21,14 +21,14 @@
 
         public class PingHandler : IAsyncRequestHandler<Ping, Pong>
         {
-            public async Task<Pong> Handle(Ping message)
+            public Task<Pong> Handle(Ping message)
             {
-                return await Task.Factory.StartNew(() => new Pong {Message = message.Message + " Pong"});
+                return Task.FromResult(new Pong { Message = message.Message + " Pong" });
             }
         }
 
         [Fact]
-        public void Should_resolve_main_handler()
+        public async Task Should_resolve_main_handler()
         {
             var container = new Container(cfg =>
             {
@@ -46,11 +46,9 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = mediator.SendAsync(new Ping { Message = "Ping" });
+            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
 
-            Task.WaitAll(response);
-
-            response.Result.Message.ShouldBe("Ping Pong");
+            response.Message.ShouldBe("Ping Pong");
         }
     }
 }

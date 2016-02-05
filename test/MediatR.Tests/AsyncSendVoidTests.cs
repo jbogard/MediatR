@@ -24,14 +24,14 @@
                 _writer = writer;
             }
 
-            protected async override Task HandleCore(Ping message)
+            protected override Task HandleCore(Ping message)
             {
-                await _writer.WriteAsync(message.Message + " Pong");
+                return _writer.WriteAsync(message.Message + " Pong");
             }
         }
 
         [Fact]
-        public void Should_resolve_main_void_handler()
+        public async Task Should_resolve_main_void_handler()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -54,9 +54,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = mediator.SendAsync(new Ping { Message = "Ping" });
-
-            Task.WaitAll(response);
+            await mediator.SendAsync(new Ping { Message = "Ping" });
 
             builder.ToString().ShouldBe("Ping Pong");
         }
