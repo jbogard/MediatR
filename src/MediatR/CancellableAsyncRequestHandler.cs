@@ -12,7 +12,7 @@ namespace MediatR
     {
         public async Task<Unit> Handle(TMessage message, CancellationToken cancellationToken)
         {
-            await HandleCore(message, cancellationToken).ConfigureAwait(false);
+            await HandleCore(message, cancellationToken);
 
             return Unit.Value;
         }
