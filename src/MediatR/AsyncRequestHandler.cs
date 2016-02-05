@@ -11,7 +11,7 @@ namespace MediatR
     {
         public async Task<Unit> Handle(TMessage message)
         {
-            await HandleCore(message).ConfigureAwait(false);
+            await HandleCore(message);
 
             return Unit.Value;
         }
