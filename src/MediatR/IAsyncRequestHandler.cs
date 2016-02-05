@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR
@@ -14,7 +15,8 @@ namespace MediatR
         /// Handles an asynchronous request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A task representing the response from the request</returns>
-        Task<TResponse> Handle(TRequest message);
+        Task<TResponse> Handle(TRequest message, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

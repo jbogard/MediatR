@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR
@@ -9,9 +10,9 @@ namespace MediatR
     public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage, Unit>
         where TMessage : IAsyncRequest
     {
-        public async Task<Unit> Handle(TMessage message)
+        public async Task<Unit> Handle(TMessage message, CancellationToken cancellationToken = default(CancellationToken))
         {
-            await HandleCore(message).ConfigureAwait(false);
+            await HandleCore(message, cancellationToken).ConfigureAwait(false);
 
             return Unit.Value;
         }
@@ -20,7 +21,8 @@ namespace MediatR
         /// Handles a void request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task representing the void response from the request</returns>
-        protected abstract Task HandleCore(TMessage message);
+        protected abstract Task HandleCore(TMessage message, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
