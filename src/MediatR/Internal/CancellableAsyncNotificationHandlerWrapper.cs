@@ -5,7 +5,7 @@ namespace MediatR.Internal
 {
     internal abstract class CancellableAsyncNotificationHandlerWrapper
     {
-        public abstract Task Handle(ICancellableAsyncNotification message, CancellationToken canellationToken);
+        public abstract Task Handle(ICancellableAsyncNotification message, CancellationToken cancellationToken);
     }
 
     internal class CancellableAsyncNotificationHandlerWrapper<TNotification> : CancellableAsyncNotificationHandlerWrapper
