@@ -114,8 +114,8 @@ namespace MediatR
         {
             var requestType = request.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType.MakeGenericType(requestType, typeof(TResponse)));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType.MakeGenericType(requestType, typeof(TResponse)));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
 
             var handler = GetHandler(request, genericHandlerType);
 
@@ -159,8 +159,8 @@ namespace MediatR
         {
             var notificationType = notification.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, handlerType.MakeGenericType(notificationType));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, wrapperType.MakeGenericType(notificationType));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, handlerType, (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, wrapperType, (type, root) => root.MakeGenericType(type));
 
             return GetNotificationHandlers(notification, genericHandlerType)
                 .Select(handler => Activator.CreateInstance(genericWrapperType, handler))
