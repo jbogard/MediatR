@@ -37,20 +37,20 @@ namespace MediatR
             return result;
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
+        public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = await defaultHandler.Handle(request);
+            var result = defaultHandler.Handle(request);
 
             return result;
         }
 
-        public async Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
+        public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = await defaultHandler.Handle(request, cancellationToken);
+            var result = defaultHandler.Handle(request, cancellationToken);
 
             return result;
         }
@@ -65,22 +65,22 @@ namespace MediatR
             }
         }
 
-        public async Task PublishAsync(IAsyncNotification notification)
+        public Task PublishAsync(IAsyncNotification notification)
         {
             var notificationHandlers = GetNotificationHandlers(notification)
                 .Select(handler => handler.Handle(notification))
                 .ToArray();
 
-            await Task.WhenAll(notificationHandlers);
+            return Task.WhenAll(notificationHandlers);
         }
 
-        public async Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
+        public Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
         {
             var notificationHandlers = GetNotificationHandlers(notification)
                 .Select(handler => handler.Handle(notification, cancellationToken))
                 .ToArray();
 
-            await Task.WhenAll(notificationHandlers);
+            return Task.WhenAll(notificationHandlers);
         }
 
         private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
