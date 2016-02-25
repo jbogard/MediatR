@@ -4,6 +4,7 @@ namespace MediatR
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -17,6 +18,9 @@ namespace MediatR
 
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
+        private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
+        private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
@@ -26,6 +30,8 @@ namespace MediatR
         {
             _singleInstanceFactory = singleInstanceFactory;
             _multiInstanceFactory = multiInstanceFactory;
+            _genericHandlerCache = new ConcurrentDictionary<Type, Type>();
+            _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
         }
 
         public TResponse Send<TResponse>(IRequest<TResponse> request)
@@ -108,8 +114,8 @@ namespace MediatR
         {
             var requestType = request.GetType();
 
-            var genericHandlerType = handlerType.MakeGenericType(requestType, typeof(TResponse));
-            var genericWrapperType = wrapperType.MakeGenericType(requestType, typeof(TResponse));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
 
             var handler = GetHandler(request, genericHandlerType);
 
@@ -153,8 +159,8 @@ namespace MediatR
         {
             var notificationType = notification.GetType();
 
-            var genericHandlerType = handlerType.MakeGenericType(notificationType);
-            var genericWrapperType = wrapperType.MakeGenericType(notificationType);
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, handlerType, (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, wrapperType, (type, root) => root.MakeGenericType(type));
 
             return GetNotificationHandlers(notification, genericHandlerType)
                 .Select(handler => Activator.CreateInstance(genericWrapperType, handler))

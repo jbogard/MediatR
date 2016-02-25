@@ -14,7 +14,8 @@
         "dotnet5.1": {
             "dependencies": {
               "System.Linq": "4.0.0",
-              "System.Threading": "4.0.10"
+              "System.Threading": "4.0.10",
+              "System.Collections.Concurrent": "4.0.10"
             }
         }
     }
