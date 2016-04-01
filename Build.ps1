@@ -47,8 +47,7 @@ function Build-TestProjects
 function Test-Projects
 {
     param([string] $DirectoryName)
-	#Waiting for Shouldly to support dnxcore
-    #& dnx -p ("""" + $DirectoryName + """") test; if($LASTEXITCODE -ne 0) { exit 2 }
+	& dnx -p ("""" + $DirectoryName + """") test; if($LASTEXITCODE -ne 0) { exit 2 }
 }
 
 function Remove-PathVariable
@@ -99,6 +98,7 @@ Get-ChildItem -Path .\test -Filter *.xproj -Recurse | ForEach-Object { Test-Proj
 dnvm use $dnxVersion -r CoreCLR
 
 # Test again
-Get-ChildItem -Path .\test -Filter *.xproj -Recurse | ForEach-Object { Test-Projects $_.DirectoryName }
+#Waiting for Shouldly to support dnxcore
+#Get-ChildItem -Path .\test -Filter *.xproj -Recurse | ForEach-Object { Test-Projects $_.DirectoryName }
 
 Pop-Location

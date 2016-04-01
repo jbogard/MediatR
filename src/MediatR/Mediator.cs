@@ -18,8 +18,8 @@ namespace MediatR
 
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
-        private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
-        private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
+        private static readonly ConcurrentDictionary<Type, Type> _genericHandlerCache = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -30,8 +30,6 @@ namespace MediatR
         {
             _singleInstanceFactory = singleInstanceFactory;
             _multiInstanceFactory = multiInstanceFactory;
-            _genericHandlerCache = new ConcurrentDictionary<Type, Type>();
-            _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
         }
 
         public TResponse Send<TResponse>(IRequest<TResponse> request)
