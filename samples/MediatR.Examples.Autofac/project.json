@@ -1,20 +1,20 @@
 ﻿{
   "dependencies": {
-    "Autofac": "4.0.0-*",
-    "MediatR.Examples": { "target": "project" }
+    "Autofac": "4.0.0-rc2-240",
+    "MediatR.Examples": { "target": "project" },
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-3002702"
+    }
   },
 
-  "commands": {
-    "MediatR.Examples.Autofac": "MediatR.Examples.Autofac"
+  "buildOptions": {
+    "emitEntryPoint": true
   },
 
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Console": "4.0.0-*",
-        "System.Reflection": "4.1.0-*"
-      }
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
     }
   }
 }
