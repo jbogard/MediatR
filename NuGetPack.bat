@@ -1,2 +1,0 @@
-.\RefGen.exe ".NETPlatform,Version=v5.0" "dotnet" .\src\MediatR\MediatR.nuspec .\src\MediatR\MediatR.xproj .\src\MediatR\bin\release\dotnet\MediatR.dll
-.\src\.nuget\NuGet.exe pack -Symbols .\src\MediatR\MediatR.nuspec

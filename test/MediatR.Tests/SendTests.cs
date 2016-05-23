@@ -32,7 +32,7 @@
             {
                 cfg.Scan(scanner =>
                 {
-                    scanner.TheCallingAssembly();
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
