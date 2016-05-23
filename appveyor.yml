@@ -14,7 +14,7 @@ artifacts:
   name: NuGet
 deploy:
 - provider: NuGet
-  server: https://www.myget.org/F/htmltags-ci/api/v2/package
+  server: https://www.myget.org/F/mediatr-ci/api/v2/package
   api_key:
     secure: zKeQZmIv9PaozHQRJmrlRHN+jMCI64Uvzmb/vwePdXFR5CUNEHalnZdOCg0vrh8t
   skip_symbols: true
