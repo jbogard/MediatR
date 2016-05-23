@@ -1,20 +1,20 @@
 ﻿{
   "dependencies": {
-    "structuremap": "4.0.0.315",
-    "MediatR.Examples": { "target": "project" }
+    "structuremap": "4.2.0.402",
+    "MediatR.Examples": { "target": "project" },
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-3002702"
+    }
   },
 
-  "commands": {
-    "MediatR.Examples.StructureMap": "MediatR.Examples.StructureMap"
+  "buildOptions": {
+    "emitEntryPoint": true
   },
 
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": {
-      "dependencies": {
-        "System.Console": "4.0.0-*",
-        "System.Reflection": "4.0.10"
-      }
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
     }
   }
 }
