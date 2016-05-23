@@ -1,22 +1,28 @@
 ﻿{
-    "version": "2.1.0-beta-*",
-    "authors": [ "Jimmy Bogard" ],
-    "copyright": "Copyright 2014-2015 Jimmy Bogard",
-    "description": "Simple, unambitious mediator implementation in .NET",
+  "version": "2.1.0-beta-*",
+  "authors": [ "Jimmy Bogard" ],
+  "copyright": "Copyright 2014-2015 Jimmy Bogard",
+  "description": "Simple, unambitious mediator implementation in .NET",
+  "packOptions": {
     "tags": [ "mediator", "request", "response", "queries", "commands", "notifications" ],
 
     "licenseUrl": "https://github.com/jbogard/MediatR/blob/master/LICENSE",
     "iconUrl": "https://raw.githubusercontent.com/jbogard/MediatR/master/assets/logo/gradient_128x128.png",
     "projectUrl": "https://github.com/jbogard/MediatR",
-
-    "frameworks": {
-        "net45": { },
-        "dotnet5.1": {
-            "dependencies": {
-              "System.Linq": "4.0.0",
-              "System.Threading": "4.0.10",
-              "System.Collections.Concurrent": "4.0.10"
-            }
-        }
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/jbogard/mediatr"
     }
+  },
+
+  "frameworks": {
+    "net45": { },
+    "netstandard1.1": {
+      "dependencies": {
+        "System.Linq": "4.1.0-rc2-24027",
+        "System.Threading": "4.0.11-rc2-24027",
+        "System.Collections.Concurrent": "4.0.12-rc2-24027"
+      }
+    }
+  }
 }

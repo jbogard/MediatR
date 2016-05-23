@@ -1,14 +1,15 @@
 ﻿{
-    "dependencies": {
-        "Castle.Windsor": "3.3.0",
-        "MediatR.Examples": { "target": "project" }
-    },
+  "dependencies": {
+    "Castle.Windsor": "3.3.0",
+    "MediatR.Examples": { "target": "project" }
+  },
 
-    "commands": {
-        "MediatR.Examples.Windsor": "MediatR.Examples.Windsor"
-    },
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
 
-    "frameworks": {
-        "dnx451": { }
+  "frameworks": {
+    "net451": {
     }
+  }
 }

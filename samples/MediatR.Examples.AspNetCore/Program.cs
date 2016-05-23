@@ -21,7 +21,7 @@ namespace MediatR.Examples.AspNetCore
             services.AddScoped<SingleInstanceFactory>(p => t => p.GetRequiredService(t));
             services.AddScoped<MultiInstanceFactory>(p => t => p.GetRequiredServices(t));
 
-            services.AddInstance(Console.Out);
+            services.AddSingleton(Console.Out);
 
             // Use Scrutor to scan and register all
             // classes as their implemented interfaces.

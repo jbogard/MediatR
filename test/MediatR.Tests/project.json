@@ -1,17 +1,30 @@
 ﻿{
+  "testRunner": "xunit",
   "dependencies": {
     "MediatR": { "target": "project" },
-    "Shouldly": "2.6.0",
-    "structuremap": "4.0.0.315",
+    "Shouldly": "2.7.0",
+    "structuremap": "4.2.0.402",
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-*"
-  },
-
-  "commands": {
-    "test": "xunit.runner.dnx"
+    "dotnet-test-xunit": "1.0.0-rc3-*"
   },
 
   "frameworks": {
-    "dnx451": { }
+    "net452": {
+      "dependencies": {
+        "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027"
+      }
+    },
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0-rc2-3002702"
+        }
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
   }
 }

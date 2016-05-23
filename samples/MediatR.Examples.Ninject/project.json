@@ -1,14 +1,14 @@
 ﻿{
-    "dependencies": {
-        "ninject.extensions.conventions": "3.2.0",
-        "MediatR.Examples": { "target": "project" }
-    },
+  "dependencies": {
+    "ninject.extensions.conventions": "3.2.0",
+    "MediatR.Examples": { "target": "project" }
+  },
 
-    "commands": {
-        "MediatR.Examples.Ninject": "MediatR.Examples.Ninject"
-    },
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
 
-    "frameworks": {
-        "dnx451": { }
-    }
+  "frameworks": {
+    "net451": { }
+  }
 }
