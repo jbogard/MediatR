@@ -119,9 +119,6 @@ namespace MediatR
 
             var handler = GetHandler(request, genericHandlerType);
 
-            if (handler is Array)
-                handler = ((Array) handler).GetValue(0);
-
             return (TWrapper) Activator.CreateInstance(genericWrapperType, handler);
         }
 
