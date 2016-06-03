@@ -6,7 +6,7 @@ namespace MediatR
     /// Defines an asynchronous handler for a notification
     /// </summary>
     /// <typeparam name="TNotification">The type of notification being handled</typeparam>
-    public interface IAsyncNotificationHandler<in TNotification>
+    public interface IAsyncNotificationHandler<in TNotification> : IHandler
         where TNotification : IAsyncNotification
     {
         /// <summary>
