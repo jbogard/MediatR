@@ -122,7 +122,7 @@ namespace MediatR
             return (TWrapper) Activator.CreateInstance(genericWrapperType, handler);
         }
 
-        private object GetHandler(object request, Type handlerType)
+        protected virtual object GetHandler(object request, Type handlerType)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace MediatR
                 .ToList();
         }
 
-        private IEnumerable<object> GetNotificationHandlers(object notification, Type handlerType)
+        protected virtual IEnumerable<object> GetNotificationHandlers(object notification, Type handlerType)
         {
             try
             {
