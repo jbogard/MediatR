@@ -4,7 +4,7 @@
     "MediatR": { "target": "project" },
     "Shouldly": "2.7.0",
     "structuremap": "4.2.0.402",
-    "xunit": "2.1.0",
+    "xunit": "2.2.0-beta2-build3300",
     "dotnet-test-xunit": "2.2.0-preview2-build1029"
   },
 
