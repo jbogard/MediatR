@@ -1,11 +1,11 @@
 ﻿{
   "dependencies": {
     "MediatR.Examples": { "target": "project" },
-    "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
+    "Microsoft.Extensions.DependencyInjection": "1.0.0",
     "Scrutor": "1.6.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-3002702"
+      "version": "1.0.0"
     }
   },
 
