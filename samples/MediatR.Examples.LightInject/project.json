@@ -1,10 +1,10 @@
 ﻿{
   "dependencies": {
-    "LightInject": "4.0.9",
+    "LightInject": "4.0.10",
     "MediatR.Examples": { "target": "project" },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-3002702"
+      "version": "1.0.0"
     }
   },
 

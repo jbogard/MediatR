@@ -1,10 +1,10 @@
 ﻿{
   "dependencies": {
-    "SimpleInjector": "3.2.0-alpha2",
+    "SimpleInjector": "3.2.0",
     "MediatR.Examples": { "target": "project" },
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-3002702"
+      "version": "1.0.0"
     }
   },
 
