@@ -1,7 +1,7 @@
 ﻿{
-  "version": "2.1.0-beta-*",
+  "version": "2.1.0",
   "authors": [ "Jimmy Bogard" ],
-  "copyright": "Copyright 2014-2015 Jimmy Bogard",
+  "copyright": "Copyright Jimmy Bogard",
   "description": "Simple, unambitious mediator implementation in .NET",
   "packOptions": {
     "tags": [ "mediator", "request", "response", "queries", "commands", "notifications" ],
@@ -19,9 +19,7 @@
     "net45": { },
     "netstandard1.1": {
       "dependencies": {
-        "System.Linq": "4.1.0",
-        "System.Threading": "4.0.11",
-        "System.Collections.Concurrent": "4.0.12"
+        "NETStandard.Library": "1.6.0"
       }
     }
   }
