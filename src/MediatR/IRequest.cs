@@ -3,7 +3,7 @@
     /// <summary>
     /// Marker interface to represent a request with a void response
     /// </summary>
-    public interface IRequest : IRequest<Unit> { }
+    public interface IRequest { }
 
     /// <summary>
     /// Marker interface to represent a request with a response

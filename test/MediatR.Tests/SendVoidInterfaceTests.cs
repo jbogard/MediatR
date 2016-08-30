@@ -1,4 +1,4 @@
-﻿namespace MediatR.Tests
+namespace MediatR.Tests
 {
     using System.IO;
     using System.Text;
@@ -7,14 +7,14 @@
     using StructureMap.Graph;
     using Xunit;
 
-    public class SendVoidTests
+    public class SendVoidInterfaceTests
     {
         public class Ping : IRequest
         {
             public string Message { get; set; }
         }
 
-        public class PingHandler : RequestHandler<Ping>
+        public class PingHandler : IRequestHandler<Ping>
         {
             private readonly TextWriter _writer;
 
@@ -23,7 +23,7 @@
                 _writer = writer;
             }
 
-            protected override void HandleCore(Ping message)
+            public void Handle(Ping message)
             {
                 _writer.Write(message.Message + " Pong");
             }
@@ -42,7 +42,7 @@
                     scanner.AssemblyContainingType(typeof(AsyncPublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof (IRequestHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));

@@ -17,7 +17,14 @@ namespace MediatR
         TResponse Send<TResponse>(IRequest<TResponse> request);
 
         /// <summary>
-        /// Asynchronously send a request to a single handler 
+        /// Send a request to a single handler without expecting a response
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        void Send(IRequest request);
+
+        /// <summary>
+        /// Asynchronously send a request to a single handler
         /// </summary>
         /// <typeparam name="TResponse">Response type</typeparam>
         /// <param name="request">Request object</param>
