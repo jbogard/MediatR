@@ -6,14 +6,12 @@ namespace MediatR
     /// Helper class for asynchronous requests that return a void response
     /// </summary>
     /// <typeparam name="TMessage">The type of void request being handled</typeparam>
-    public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage, Unit>
+    public abstract class AsyncRequestHandler<TMessage> : IAsyncRequestHandler<TMessage>
         where TMessage : IAsyncRequest
     {
-        public async Task<Unit> Handle(TMessage message)
+        public async Task Handle(TMessage message)
         {
             await HandleCore(message).ConfigureAwait(false);
-
-            return Unit.Value;
         }
 
         /// <summary>

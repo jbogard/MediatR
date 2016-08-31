@@ -3,7 +3,7 @@ namespace MediatR
     /// <summary>
     /// Marker interface to represent an asynchronous request with a void response
     /// </summary>
-    public interface IAsyncRequest : IAsyncRequest<Unit> { }
+    public interface IAsyncRequest { }
 
     /// <summary>
     /// Marker interface to represent an asynchronous request with a response

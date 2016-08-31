@@ -1,5 +1,6 @@
 ﻿namespace MediatR.Tests
 {
+    using System;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -8,14 +9,14 @@
     using StructureMap.Graph;
     using Xunit;
 
-    public class AsyncSendVoidTests
+    public class AsyncSendVoidInterfaceTests
     {
         public class Ping : IAsyncRequest
         {
             public string Message { get; set; }
         }
 
-        public class PingHandler : AsyncRequestHandler<Ping>
+        public class PingHandler : IAsyncRequestHandler<Ping>
         {
             private readonly TextWriter _writer;
 
@@ -24,7 +25,7 @@
                 _writer = writer;
             }
 
-            protected override Task HandleCore(Ping message)
+            public Task Handle(Ping message)
             {
                 return _writer.WriteAsync(message.Message + " Pong");
             }

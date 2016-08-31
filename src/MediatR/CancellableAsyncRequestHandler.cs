@@ -7,14 +7,12 @@ namespace MediatR
     /// Helper class for cancellable, asynchronous requests that return a void response
     /// </summary>
     /// <typeparam name="TMessage">The type of void request being handled</typeparam>
-    public abstract class CancellableAsyncRequestHandler<TMessage> : ICancellableAsyncRequestHandler<TMessage, Unit>
+    public abstract class CancellableAsyncRequestHandler<TMessage> : ICancellableAsyncRequestHandler<TMessage>
         where TMessage : ICancellableAsyncRequest
     {
-        public async Task<Unit> Handle(TMessage message, CancellationToken cancellationToken)
+        public async Task Handle(TMessage message, CancellationToken cancellationToken)
         {
             await HandleCore(message, cancellationToken);
-
-            return Unit.Value;
         }
 
         /// <summary>
