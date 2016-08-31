@@ -3,7 +3,7 @@ namespace MediatR
     /// <summary>
     /// Marker interface to represent a cancellable, asynchronous request with a void response
     /// </summary>
-    public interface ICancellableAsyncRequest : ICancellableAsyncRequest<Unit> { }
+    public interface ICancellableAsyncRequest { }
 
     /// <summary>
     /// Marker interface to represent a cancellable, asynchronous request with a response

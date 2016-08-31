@@ -58,6 +58,13 @@ namespace MediatR
             return result;
         }
 
+        public Task SendAsync(IAsyncRequest request)
+        {
+            var handler = GetHandler(request);
+
+            return handler.Handle(request);
+        }
+
         public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var defaultHandler = GetHandler(request);
@@ -65,6 +72,13 @@ namespace MediatR
             var result = defaultHandler.Handle(request, cancellationToken);
 
             return result;
+        }
+
+        public Task SendAsync(ICancellableAsyncRequest request, CancellationToken cancellationToken)
+        {
+            var handler = GetHandler(request);
+
+            return handler.Handle(request, cancellationToken);
         }
 
         public void Publish(INotification notification)
@@ -98,8 +112,8 @@ namespace MediatR
         private RequestHandlerWrapper GetHandler(IRequest request)
         {
             return GetVoidHandler<RequestHandlerWrapper>(request,
-            typeof(IRequestHandler<>),
-            typeof(RequestHandlerWrapperImpl<>));
+                typeof(IRequestHandler<>),
+                typeof(RequestHandlerWrapperImpl<>));
         }
 
         private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
@@ -109,18 +123,32 @@ namespace MediatR
                 typeof(RequestHandlerWrapperImpl<,>));
         }
 
+        private AsyncRequestHandlerWrapper GetHandler(IAsyncRequest request)
+        {
+            return GetVoidHandler<AsyncRequestHandlerWrapper>(request,
+                typeof(IAsyncRequestHandler<>),
+                typeof(AsyncRequestHandlerWrapperImpl<>));
+        }
+
         private AsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
         {
             return GetHandler<AsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(IAsyncRequestHandler<,>),
-                typeof(AsyncRequestHandlerWrapper<,>));
+                typeof(AsyncRequestHandlerWrapperImpl<,>));
+        }
+
+        private CancellableAsyncRequestHandlerWrapper GetHandler(ICancellableAsyncRequest request)
+        {
+            return GetVoidHandler<CancellableAsyncRequestHandlerWrapper>(request,
+                typeof(ICancellableAsyncRequestHandler<>),
+                typeof(CancellableAsyncRequestHandlerWrapperImpl<>));
         }
 
         private CancellableAsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(ICancellableAsyncRequest<TResponse> request)
         {
             return GetHandler<CancellableAsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(ICancellableAsyncRequestHandler<,>),
-                typeof(CancellableAsyncRequestHandlerWrapper<,>));
+                typeof(CancellableAsyncRequestHandlerWrapperImpl<,>));
         }
 
         private TWrapper GetHandler<TWrapper, TResponse>(object request, Type handlerType, Type wrapperType)
