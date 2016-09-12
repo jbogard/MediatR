@@ -21,7 +21,7 @@ namespace MediatR
         private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
         private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
 
-        private PublishAsyncOptions _publishOption;
+        private readonly PublishAsyncOptions _publishOption;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -29,7 +29,7 @@ namespace MediatR
         /// <param name="singleInstanceFactory">The single instance factory.</param>
         /// <param name="multiInstanceFactory">The multi instance factory.</param>
         public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory) :
-            this(singleInstanceFactory, multiInstanceFactory, new MediatorConfiguration())
+            this(singleInstanceFactory, multiInstanceFactory, new MediatorConfiguration() { PublishAsyncOptions = PublishAsyncOptions.Parallel})
         {
         }
 
@@ -125,8 +125,7 @@ namespace MediatR
         private Task PublishParallelAsync(IAsyncNotification notification, IEnumerable<AsyncNotificationHandlerWrapper> notificationHandlers)
         {
             var tasks = notificationHandlers
-                .Select(handler => handler.Handle(notification))
-                .ToArray();
+                .Select(handler => handler.Handle(notification));
 
             return Task.WhenAll(tasks);
         }
@@ -135,8 +134,7 @@ namespace MediatR
             IEnumerable<CancellableAsyncNotificationHandlerWrapper> notificationHandlers)
         {
             var tasks = notificationHandlers
-                .Select(handler => handler.Handle(notification, cancellationToken))
-                .ToArray();
+                .Select(handler => handler.Handle(notification, cancellationToken));
 
             return Task.WhenAll(tasks);
         }
