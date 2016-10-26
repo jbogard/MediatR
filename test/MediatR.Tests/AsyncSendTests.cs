@@ -1,4 +1,6 @@
-﻿namespace MediatR.Tests
+﻿using System.Threading;
+
+namespace MediatR.Tests
 {
     using System.Threading.Tasks;
     using Shouldly;
@@ -21,7 +23,7 @@
 
         public class PingHandler : IAsyncRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping message)
+            public Task<Pong> Handle(Ping message, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new Pong { Message = message.Message + " Pong" });
             }

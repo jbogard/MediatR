@@ -43,16 +43,7 @@ namespace MediatR
             return result;
         }
 
-        public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
-        {
-            var defaultHandler = GetHandler(request);
-
-            var result = defaultHandler.Handle(request);
-
-            return result;
-        }
-
-        public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
+        public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var defaultHandler = GetHandler(request);
 
@@ -71,16 +62,7 @@ namespace MediatR
             }
         }
 
-        public Task PublishAsync(IAsyncNotification notification)
-        {
-            var notificationHandlers = GetNotificationHandlers(notification)
-                .Select(handler => handler.Handle(notification))
-                .ToArray();
-
-            return Task.WhenAll(notificationHandlers);
-        }
-
-        public Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
+        public Task PublishAsync(IAsyncNotification notification, CancellationToken cancellationToken = default(CancellationToken))
         {
             var notificationHandlers = GetNotificationHandlers(notification)
                 .Select(handler => handler.Handle(notification, cancellationToken))
@@ -101,13 +83,6 @@ namespace MediatR
             return GetHandler<AsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(IAsyncRequestHandler<,>),
                 typeof(AsyncRequestHandlerWrapper<,>));
-        }
-
-        private CancellableAsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(ICancellableAsyncRequest<TResponse> request)
-        {
-            return GetHandler<CancellableAsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
-                typeof(ICancellableAsyncRequestHandler<,>),
-                typeof(CancellableAsyncRequestHandlerWrapper<,>));
         }
 
         private TWrapper GetHandler<TWrapper, TResponse>(object request, Type handlerType, Type wrapperType)
@@ -146,13 +121,6 @@ namespace MediatR
             return GetNotificationHandlers<AsyncNotificationHandlerWrapper>(notification,
                 typeof(IAsyncNotificationHandler<>),
                 typeof(AsyncNotificationHandlerWrapper<>));
-        }
-
-        private IEnumerable<CancellableAsyncNotificationHandlerWrapper> GetNotificationHandlers(ICancellableAsyncNotification notification)
-        {
-            return GetNotificationHandlers<CancellableAsyncNotificationHandlerWrapper>(notification,
-                typeof (ICancellableAsyncNotificationHandler<>),
-                typeof(CancellableAsyncNotificationHandlerWrapper<>));
         }
 
         private IEnumerable<TWrapper> GetNotificationHandlers<TWrapper>(object notification, Type handlerType, Type wrapperType)

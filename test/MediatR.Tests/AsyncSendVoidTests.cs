@@ -1,4 +1,6 @@
-﻿namespace MediatR.Tests
+﻿using System.Threading;
+
+namespace MediatR.Tests
 {
     using System.IO;
     using System.Text;
@@ -24,7 +26,7 @@
                 _writer = writer;
             }
 
-            protected override Task HandleCore(Ping message)
+            protected override Task HandleCore(Ping message, CancellationToken cancellationToken = new CancellationToken())
             {
                 return _writer.WriteAsync(message.Message + " Pong");
             }

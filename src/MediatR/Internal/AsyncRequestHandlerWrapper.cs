@@ -1,10 +1,11 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Internal
 {
     internal abstract class AsyncRequestHandlerWrapper<TResult>
     {
-        public abstract Task<TResult> Handle(IAsyncRequest<TResult> message);
+        public abstract Task<TResult> Handle(IAsyncRequest<TResult> message, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     internal class AsyncRequestHandlerWrapper<TCommand, TResult> : AsyncRequestHandlerWrapper<TResult>
@@ -17,9 +18,9 @@ namespace MediatR.Internal
             _inner = inner;
         }
 
-        public override Task<TResult> Handle(IAsyncRequest<TResult> message)
+        public override Task<TResult> Handle(IAsyncRequest<TResult> message, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return _inner.Handle((TCommand)message);
+            return _inner.Handle((TCommand)message, cancellationToken);
         }
     }
 }

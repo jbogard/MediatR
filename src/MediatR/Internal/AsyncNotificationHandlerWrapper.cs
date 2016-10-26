@@ -1,10 +1,11 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Internal
 {
     internal abstract class AsyncNotificationHandlerWrapper
     {
-        public abstract Task Handle(IAsyncNotification message);
+        public abstract Task Handle(IAsyncNotification message, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     internal class AsyncNotificationHandlerWrapper<TNotification> : AsyncNotificationHandlerWrapper
@@ -17,9 +18,9 @@ namespace MediatR.Internal
             _inner = inner;
         }
 
-        public override Task Handle(IAsyncNotification message)
+        public override Task Handle(IAsyncNotification message, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return _inner.Handle((TNotification)message);
+            return _inner.Handle((TNotification)message, cancellationToken);
         }
     }
 }

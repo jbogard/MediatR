@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR
@@ -13,7 +14,8 @@ namespace MediatR
         /// Handles an asynchronous notification
         /// </summary>
         /// <param name="notification">The notification message</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A task representing handling the notification</returns>
-        Task Handle(TNotification notification);
+        Task Handle(TNotification notification, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
