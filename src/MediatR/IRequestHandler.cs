@@ -5,7 +5,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     /// <typeparam name="TResponse">The type of response from the handler</typeparam>
-    public interface IRequestHandler<in TRequest, out TResponse>
+    public interface IRequestHandler<in TRequest, out TResponse> : IHandler
         where TRequest : IRequest<TResponse>
     {
         /// <summary>

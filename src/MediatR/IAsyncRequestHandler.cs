@@ -7,7 +7,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     /// <typeparam name="TResponse">The type of response from the handler</typeparam>
-    public interface IAsyncRequestHandler<in TRequest, TResponse>
+    public interface IAsyncRequestHandler<in TRequest, TResponse> : IHandler
         where TRequest : IAsyncRequest<TResponse>
     {
         /// <summary>
