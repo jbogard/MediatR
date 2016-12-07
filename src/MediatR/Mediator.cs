@@ -15,7 +15,6 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
-
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
         private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
@@ -43,6 +42,13 @@ namespace MediatR
             return result;
         }
 
+        public void Send(IRequest request)
+        {
+            var handler = GetHandler(request);
+
+            handler.Handle(request);
+        }
+
         public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
@@ -52,6 +58,13 @@ namespace MediatR
             return result;
         }
 
+        public Task SendAsync(IAsyncRequest request)
+        {
+            var handler = GetHandler(request);
+
+            return handler.Handle(request);
+        }
+
         public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var defaultHandler = GetHandler(request);
@@ -59,6 +72,13 @@ namespace MediatR
             var result = defaultHandler.Handle(request, cancellationToken);
 
             return result;
+        }
+
+        public Task SendAsync(ICancellableAsyncRequest request, CancellationToken cancellationToken)
+        {
+            var handler = GetHandler(request);
+
+            return handler.Handle(request, cancellationToken);
         }
 
         public void Publish(INotification notification)
@@ -89,25 +109,46 @@ namespace MediatR
             return Task.WhenAll(notificationHandlers);
         }
 
+        private RequestHandlerWrapper GetHandler(IRequest request)
+        {
+            return GetVoidHandler<RequestHandlerWrapper>(request,
+                typeof(IRequestHandler<>),
+                typeof(RequestHandlerWrapperImpl<>));
+        }
+
         private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {
             return GetHandler<RequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(IRequestHandler<,>),
-                typeof(RequestHandlerWrapper<,>));
+                typeof(RequestHandlerWrapperImpl<,>));
+        }
+
+        private AsyncRequestHandlerWrapper GetHandler(IAsyncRequest request)
+        {
+            return GetVoidHandler<AsyncRequestHandlerWrapper>(request,
+                typeof(IAsyncRequestHandler<>),
+                typeof(AsyncRequestHandlerWrapperImpl<>));
         }
 
         private AsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
         {
             return GetHandler<AsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(IAsyncRequestHandler<,>),
-                typeof(AsyncRequestHandlerWrapper<,>));
+                typeof(AsyncRequestHandlerWrapperImpl<,>));
+        }
+
+        private CancellableAsyncRequestHandlerWrapper GetHandler(ICancellableAsyncRequest request)
+        {
+            return GetVoidHandler<CancellableAsyncRequestHandlerWrapper>(request,
+                typeof(ICancellableAsyncRequestHandler<>),
+                typeof(CancellableAsyncRequestHandlerWrapperImpl<>));
         }
 
         private CancellableAsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(ICancellableAsyncRequest<TResponse> request)
         {
             return GetHandler<CancellableAsyncRequestHandlerWrapper<TResponse>, TResponse>(request,
                 typeof(ICancellableAsyncRequestHandler<,>),
-                typeof(CancellableAsyncRequestHandlerWrapper<,>));
+                typeof(CancellableAsyncRequestHandlerWrapperImpl<,>));
         }
 
         private TWrapper GetHandler<TWrapper, TResponse>(object request, Type handlerType, Type wrapperType)
@@ -116,6 +157,17 @@ namespace MediatR
 
             var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
             var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+
+            var handler = GetHandler(request, genericHandlerType);
+
+            return (TWrapper) Activator.CreateInstance(genericWrapperType, handler);
+        }
+
+        private TWrapper GetVoidHandler<TWrapper>(object request, Type handlerType, Type wrapperType) {
+            var requestType = request.GetType();
+
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type));
 
             var handler = GetHandler(request, genericHandlerType);
 

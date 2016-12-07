@@ -4,14 +4,12 @@
     /// Helper class for requests that return a void response
     /// </summary>
     /// <typeparam name="TMessage">The type of void request being handled</typeparam>
-    public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage, Unit>
+    public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage>
         where TMessage : IRequest
     {
-        public Unit Handle(TMessage message)
+        public void Handle(TMessage message)
         {
             HandleCore(message);
-
-            return Unit.Value;
         }
 
         /// <summary>

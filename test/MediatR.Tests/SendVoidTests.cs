@@ -42,7 +42,7 @@
                     scanner.AssemblyContainingType(typeof(AsyncPublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof (IRequestHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
