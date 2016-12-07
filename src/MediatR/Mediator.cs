@@ -20,17 +20,32 @@ namespace MediatR
         private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
         private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
 
+        private readonly PublishAsyncOptions _publishOption;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
         /// <param name="singleInstanceFactory">The single instance factory.</param>
         /// <param name="multiInstanceFactory">The multi instance factory.</param>
-        public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
+        public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory) :
+            this(singleInstanceFactory, multiInstanceFactory, new MediatorConfiguration() { PublishAsyncOptions = PublishAsyncOptions.Parallel})
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Mediator"/> class.
+        /// </summary>
+        /// <param name="singleInstanceFactory">The single instance factory.</param>
+        /// <param name="multiInstanceFactory">The multi instance factory.</param>
+        /// <param name="configuration">The configuration options</param>
+        public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory, MediatorConfiguration configuration)
         {
             _singleInstanceFactory = singleInstanceFactory;
             _multiInstanceFactory = multiInstanceFactory;
             _genericHandlerCache = new ConcurrentDictionary<Type, Type>();
             _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
+
+            _publishOption = configuration.PublishAsyncOptions;
         }
 
         public TResponse Send<TResponse>(IRequest<TResponse> request)
@@ -93,20 +108,63 @@ namespace MediatR
 
         public Task PublishAsync(IAsyncNotification notification)
         {
-            var notificationHandlers = GetNotificationHandlers(notification)
-                .Select(handler => handler.Handle(notification))
-                .ToArray();
+            var notificationHandlers = GetNotificationHandlers(notification);
 
-            return Task.WhenAll(notificationHandlers);
+            if (_publishOption == PublishAsyncOptions.Parallel)
+            {
+                return PublishParallelAsync(notification, notificationHandlers);
+            }
+            else
+            {
+                return PublishSequentialAsync(notification, notificationHandlers);
+            }
         }
 
         public Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
         {
-            var notificationHandlers = GetNotificationHandlers(notification)
-                .Select(handler => handler.Handle(notification, cancellationToken))
-                .ToArray();
+            var notificationHandlers = GetNotificationHandlers(notification);
 
-            return Task.WhenAll(notificationHandlers);
+            if (_publishOption == PublishAsyncOptions.Parallel)
+            {
+                return PublishParallelAsync(notification, cancellationToken, notificationHandlers);
+            }
+            else
+            {
+                return PublishSequentialAsync(notification, cancellationToken, notificationHandlers);
+            }
+        }
+
+        private async Task PublishSequentialAsync(IAsyncNotification notification, IEnumerable<AsyncNotificationHandlerWrapper> notificationHandlers)
+        {
+            foreach (var handler in notificationHandlers)
+            {
+                await handler.Handle(notification);
+            }
+        }
+
+        private Task PublishParallelAsync(IAsyncNotification notification, IEnumerable<AsyncNotificationHandlerWrapper> notificationHandlers)
+        {
+            var tasks = notificationHandlers
+                .Select(handler => handler.Handle(notification));
+
+            return Task.WhenAll(tasks);
+        }
+
+        private Task PublishParallelAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken,
+            IEnumerable<CancellableAsyncNotificationHandlerWrapper> notificationHandlers)
+        {
+            var tasks = notificationHandlers
+                .Select(handler => handler.Handle(notification, cancellationToken));
+
+            return Task.WhenAll(tasks);
+        }
+
+        private async Task PublishSequentialAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken, IEnumerable<CancellableAsyncNotificationHandlerWrapper> notificationHandlers)
+        {
+            foreach (var handler in notificationHandlers)
+            {
+                await handler.Handle(notification, cancellationToken);
+            }
         }
 
         private RequestHandlerWrapper GetHandler(IRequest request)

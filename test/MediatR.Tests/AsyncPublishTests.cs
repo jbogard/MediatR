@@ -75,5 +75,37 @@
             result.ShouldContain("Ping Pong");
             result.ShouldContain("Ping Pung");
         }
+
+        [Fact]
+        public async Task Should_invoke_handlers_in_order_when_Sequential_Publishing_is_chosen()
+        {
+            var builder = new StringBuilder();
+            var writer = new StringWriter(builder);
+
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                });
+                cfg.For<IAsyncNotificationHandler<Ping>>().Add<PungHandler>();
+                cfg.For<IAsyncNotificationHandler<Ping>>().Add<PongHandler>();
+                cfg.For<TextWriter>().Use(writer);
+                cfg.For<MediatorConfiguration>()
+                    .Use(new MediatorConfiguration() {PublishAsyncOptions = PublishAsyncOptions.Sequential});
+                cfg.For<IMediator>().Use<Mediator>();
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            await mediator.PublishAsync(new Ping { Message = "Ping" });
+
+            var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            result.ShouldBe(new[] { "Ping Pung", "Ping Pong"});
+        }
     }
 }
