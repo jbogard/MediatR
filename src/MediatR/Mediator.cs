@@ -17,8 +17,8 @@ namespace MediatR
         private readonly SingleInstanceFactory _singleInstanceFactory;
         private readonly MultiInstanceFactory _multiInstanceFactory;
 
-        private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
-        private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
+        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>> _genericHandlerCache;
+        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>> _wrapperHandlerCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -29,8 +29,8 @@ namespace MediatR
         {
             _singleInstanceFactory = singleInstanceFactory;
             _multiInstanceFactory = multiInstanceFactory;
-            _genericHandlerCache = new ConcurrentDictionary<Type, Type>();
-            _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
+            _genericHandlerCache = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>>();
+            _wrapperHandlerCache = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>>();
         }
 
         public TResponse Send<TResponse>(IRequest<TResponse> request)
@@ -155,8 +155,10 @@ namespace MediatR
         {
             var requestType = request.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(handlerType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(wrapperType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type, typeof(TResponse)));
 
             var handler = GetHandler(request, genericHandlerType);
 
@@ -211,8 +213,10 @@ namespace MediatR
         {
             var notificationType = notification.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, handlerType, (type, root) => root.MakeGenericType(type));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, wrapperType, (type, root) => root.MakeGenericType(type));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(handlerType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(notificationType, handlerType, (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(wrapperType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(notificationType, wrapperType, (type, root) => root.MakeGenericType(type));
 
             return GetNotificationHandlers(notification, genericHandlerType)
                 .Select(handler => Activator.CreateInstance(genericWrapperType, handler))
