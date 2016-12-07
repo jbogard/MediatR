@@ -168,8 +168,10 @@ namespace MediatR
         private TWrapper GetVoidHandler<TWrapper>(object request, Type handlerType, Type wrapperType) {
             var requestType = request.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(handlerType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(requestType, handlerType, (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(wrapperType, new ConcurrentDictionary<Type, Type>())
+                .GetOrAdd(requestType, wrapperType, (type, root) => root.MakeGenericType(type));
 
             var handler = GetHandler(request, genericHandlerType);
 
