@@ -1,5 +1,6 @@
 ﻿namespace MediatR.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
