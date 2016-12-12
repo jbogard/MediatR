@@ -3,10 +3,10 @@
     using System;
     using System.Threading.Tasks;
 
-    public delegate Task<object> RequestHandlerDelegate();
+    public delegate Task<TResponse> RequestHandlerDelegate<TResponse>();
 
-    public interface IPipelineBehavior
+    public interface IPipelineBehavior<in TRequest, TResponse>
     {
-        Task<object> Handle(object request, RequestHandlerDelegate next);
+        Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next);
     }
 }
