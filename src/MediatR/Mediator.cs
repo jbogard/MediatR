@@ -37,48 +37,78 @@ namespace MediatR
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request);
+            var pipeline = CreatePipeline(request, () => Task.FromResult((object)defaultHandler.Handle(request)));
 
-            return result;
+            return (TResponse) pipeline.Result;
         }
 
         public void Send(IRequest request)
         {
             var handler = GetHandler(request);
 
-            handler.Handle(request);
+            var pipeline = CreatePipeline(request, () =>
+            {
+                handler.Handle(request);
+                return Task.FromResult((object) null);
+            });
+
+            pipeline.Wait();
         }
 
-        public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
+        public async Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request);
+            RequestHandlerDelegate invokeHandler = async () => await defaultHandler.Handle(request);
 
-            return result;
+            var pipeline = CreatePipeline(request, invokeHandler);
+
+            var result = await pipeline;
+
+            return (TResponse)result;
         }
 
         public Task SendAsync(IAsyncRequest request)
         {
             var handler = GetHandler(request);
 
-            return handler.Handle(request);
+            RequestHandlerDelegate invokeHandler = async () =>
+            {
+                await handler.Handle(request);
+                return Unit.Value;
+            };
+
+            var pipeline = CreatePipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
-        public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
+        public async Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request, cancellationToken);
+            RequestHandlerDelegate invokeHandler = async () => await defaultHandler.Handle(request, cancellationToken);
 
-            return result;
+            var pipeline = CreatePipeline(request, invokeHandler);
+
+            var result = await pipeline;
+
+            return (TResponse)result;
         }
 
         public Task SendAsync(ICancellableAsyncRequest request, CancellationToken cancellationToken)
         {
             var handler = GetHandler(request);
 
-            return handler.Handle(request, cancellationToken);
+            RequestHandlerDelegate invokeHandler = async () =>
+            {
+                await handler.Handle(request, cancellationToken);
+                return Unit.Value;
+            };
+
+            var pipeline = CreatePipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
         public void Publish(INotification notification)
@@ -225,6 +255,18 @@ namespace MediatR
                 .Cast<TWrapper>()
                 .ToList();
         }
+
+        private Task<object> CreatePipeline(object request, RequestHandlerDelegate invokeHandler)
+        {
+            var behaviors = _multiInstanceFactory(typeof(IPipelineBehavior))
+                .Cast<IPipelineBehavior>()
+                .Reverse();
+
+            var aggregate = behaviors.Aggregate(invokeHandler, (next, pipeline) => () => pipeline.Handle(request, next));
+
+            return aggregate();
+        }
+
 
         private IEnumerable<object> GetNotificationHandlers(object notification, Type handlerType)
         {
