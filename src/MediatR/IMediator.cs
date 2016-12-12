@@ -19,7 +19,6 @@ namespace MediatR
         /// <summary>
         /// Send a request to a single handler without expecting a response
         /// </summary>
-        /// <typeparam name="TResponse">Response type</typeparam>
         /// <param name="request">Request object</param>
         void Send(IRequest request);
 
@@ -34,7 +33,6 @@ namespace MediatR
         /// <summary>
         /// Asynchronously send a request to a single handler without expecting a response
         /// </summary>
-        /// <typeparam name="TResponse">Response type</typeparam>
         /// <param name="request">Request object</param>
         /// <returns>A task that represents the send operation.</returns>
         Task SendAsync(IAsyncRequest request);
