@@ -9,7 +9,6 @@
 
     public class PipelineTests
     {
-
         public class Ping : IAsyncRequest<Pong>
         {
             public string Message { get; set; }
@@ -35,7 +34,7 @@
             }
         }
 
-        public class OuterBehavior : IPipelineBehavior
+        public class OuterBehavior : IPipelineBehavior<Ping, Pong>
         {
             private readonly Logger _output;
 
@@ -44,7 +43,7 @@
                 _output = output;
             }
 
-            public async Task<object> Handle(object request, RequestHandlerDelegate next)
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Outer before");
                 var response = await next();
@@ -54,7 +53,7 @@
             }
         }
 
-        public class InnerBehavior : IPipelineBehavior
+        public class InnerBehavior : IPipelineBehavior<Ping, Pong>
         {
             private readonly Logger _output;
 
@@ -63,11 +62,49 @@
                 _output = output;
             }
 
-            public async Task<object> Handle(object request, RequestHandlerDelegate next)
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Inner before");
                 var response = await next();
                 _output.Messages.Add("Inner after");
+
+                return response;
+            }
+        }
+
+        public class GenericBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        {
+            private readonly Logger _output;
+
+            public GenericBehavior(Logger output)
+            {
+                _output = output;
+            }
+
+            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            {
+                _output.Messages.Add("Generic before");
+                var response = await next();
+                _output.Messages.Add("Generic after");
+
+                return response;
+            }
+        }
+
+        public class GenericObjectBehavior : IPipelineBehavior<object, object>
+        {
+            private readonly Logger _output;
+
+            public GenericObjectBehavior(Logger output)
+            {
+                _output = output;
+            }
+
+            public async Task<object> Handle(object request, RequestHandlerDelegate<object> next)
+            {
+                _output.Messages.Add("Generic object before");
+                var response = await next();
+                _output.Messages.Add("Generic object after");
 
                 return response;
             }
@@ -87,13 +124,13 @@
                 cfg.Scan(scanner =>
                 {
                     scanner.AssemblyContainingType(typeof(AsyncPublishTests));
-                    scanner.IncludeNamespaceContainingType<AsyncSendTests.Ping>();
+                    scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
                 });
                 cfg.For<Logger>().Singleton().Use(output);
-                cfg.For<IPipelineBehavior>().Add<OuterBehavior>();
-                cfg.For<IPipelineBehavior>().Add<InnerBehavior>();
+                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
+                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
@@ -115,5 +152,50 @@
             });
         }
 
+        [Fact]
+        public async Task Should_wrap_generics_with_behavior()
+        {
+            var output = new Logger();
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
+                });
+                cfg.For<Logger>().Singleton().Use(output);
+                cfg.For<IPipelineBehavior<object, object>>().Add<GenericObjectBehavior>();
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericBehavior<,>));
+                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
+                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+            Console.WriteLine(container.WhatDoIHave());
+
+            container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
+
+            Console.WriteLine(container.WhatDoIHave());
+
+            var mediator = container.GetInstance<IMediator>();
+
+            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
+
+            response.Message.ShouldBe("Ping Pong");
+
+            output.Messages.ShouldBe(new[]
+            {
+                "Generic before",
+                "Outer before",
+                "Inner before",
+                "Handler",
+                "Inner after",
+                "Outer after",
+                "Generic after"
+            });
+        }
     }
 }
