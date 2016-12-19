@@ -10,7 +10,7 @@ namespace MediatR.Examples.LightInject
         {
             var mediator = BuildMediator();
             
-            Runner.Run(mediator, Console.Out);
+            Runner.Run(mediator, Console.Out).Wait();
 
             Console.ReadKey();
         }

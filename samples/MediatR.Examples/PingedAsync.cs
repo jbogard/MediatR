@@ -1,6 +1,6 @@
 ﻿namespace MediatR.Examples
 {
-    public class PingedAsync : IAsyncNotification
+    public class PingedAsync : INotification
     {
          
     }

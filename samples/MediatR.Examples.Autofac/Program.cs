@@ -10,11 +10,11 @@ namespace MediatR.Examples.Autofac
 
     internal static class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out);
+            Runner.Run(mediator, Console.Out).Wait();
 
             Console.ReadKey();
         }

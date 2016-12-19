@@ -5,26 +5,24 @@
 
     public static class Runner
     {
-        public static void Run(IMediator mediator, TextWriter writer)
+        public static async Task Run(IMediator mediator, TextWriter writer)
         {
-            writer.WriteLine("Sample mediator implementation using send, publish and post-request handlers in sync and async version.");
-            writer.WriteLine("---------------");
-            
-            writer.WriteLine("Sending Ping...");
-            var pong = mediator.Send(new Ping { Message = "Ping" });
-            writer.WriteLine("Received: " + pong.Message);
+            await writer.WriteLineAsync("Sample mediator implementation using send, publish and post-request handlers in sync and async version.");
+            await writer.WriteLineAsync("---------------");
 
-            writer.WriteLine("Sending Ping async...");
-            var response = mediator.SendAsync(new PingAsync { Message = "Ping" });
-            Task.WaitAll(response);
-            writer.WriteLine("Received async: " + response.Result.Message);
+            await writer.WriteLineAsync("Sending Ping...");
+            var pong = await mediator.SendAsync(new Ping { Message = "Ping" });
+            await writer.WriteLineAsync("Received: " + pong.Message);
 
-            writer.WriteLine("Publishing Pinged...");
-            mediator.Publish(new Pinged());
+            await writer.WriteLineAsync("Sending Ping async...");
+            var response = await mediator.SendAsync(new PingAsync { Message = "Ping" });
+            await writer.WriteLineAsync("Received async: " + response.Message);
 
-            writer.WriteLine("Publishing Pinged async...");
-            var publishResponse = mediator.PublishAsync(new PingedAsync());
-            Task.WaitAll(publishResponse);
+            await writer.WriteLineAsync("Publishing Pinged...");
+            await mediator.PublishAsync(new Pinged());
+
+            await writer.WriteLineAsync("Publishing Pinged async...");
+            await mediator.PublishAsync(new PingedAsync());
         }
     }
 }

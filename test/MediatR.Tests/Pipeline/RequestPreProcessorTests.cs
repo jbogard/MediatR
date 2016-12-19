@@ -8,7 +8,7 @@
 
     public class RequestPreProcessorTests
     {
-        public class Ping : IAsyncRequest<Pong>
+        public class Ping : IRequest<Pong>
         {
             public string Message { get; set; }
         }

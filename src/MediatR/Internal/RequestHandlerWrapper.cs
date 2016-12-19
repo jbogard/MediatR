@@ -10,34 +10,34 @@ namespace MediatR.Internal
         public abstract void Handle(IRequest message);
     }
 
-    internal class RequestHandlerWrapperImpl<TCommand> : RequestHandlerWrapper
-        where TCommand : IRequest
+    internal class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
+        where TRequest : IRequest
     {
-        private readonly IRequestHandler<TCommand> _inner;
+        private readonly IRequestHandler<TRequest> _inner;
 
-        public RequestHandlerWrapperImpl(IRequestHandler<TCommand> inner)
+        public RequestHandlerWrapperImpl(IRequestHandler<TRequest> inner)
         {
             _inner = inner;
         }
 
         public override void Handle(IRequest message)
         {
-            _inner.Handle((TCommand)message);
+            _inner.Handle((TRequest)message);
         }
     }
-    internal class RequestHandlerWrapperImpl<TCommand, TResult> : RequestHandlerWrapper<TResult>
-        where TCommand : IRequest<TResult>
+    internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
+        where TRequest : IRequest<TResponse>
     {
-        private readonly IRequestHandler<TCommand, TResult> _inner;
+        private readonly IRequestHandler<TRequest, TResponse> _inner;
 
-        public RequestHandlerWrapperImpl(IRequestHandler<TCommand, TResult> inner)
+        public RequestHandlerWrapperImpl(IRequestHandler<TRequest, TResponse> inner)
         {
             _inner = inner;
         }
 
-        public override TResult Handle(IRequest<TResult> message)
+        public override TResponse Handle(IRequest<TResponse> message)
         {
-            return _inner.Handle((TCommand)message);
+            return _inner.Handle((TRequest)message);
         }
     }
 }

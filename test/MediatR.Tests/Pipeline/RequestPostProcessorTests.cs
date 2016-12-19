@@ -8,7 +8,7 @@
 
     public class RequestPostProcessorTests
     {
-        public class Ping : IAsyncRequest<Pong>
+        public class Ping : IRequest<Pong>
         {
             public string Message { get; set; }
         }
