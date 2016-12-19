@@ -7,7 +7,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TNotification">The type of notification being handled</typeparam>
     public interface IAsyncNotificationHandler<in TNotification>
-        where TNotification : IAsyncNotification
+        where TNotification : INotification
     {
         /// <summary>
         /// Handles an asynchronous notification

@@ -12,9 +12,9 @@
             _writer = writer;
         }
 
-        public async Task Handle(PingedAsync notification)
+        public Task Handle(PingedAsync notification)
         {
-            await _writer.WriteLineAsync("Got pinged async.");
+            return _writer.WriteLineAsync("Got pinged async.");
         }
     }
 
@@ -27,9 +27,9 @@
             _writer = writer;
         }
 
-        public async Task Handle(PingedAsync notification)
+        public Task Handle(PingedAsync notification)
         {
-            await _writer.WriteLineAsync("Got pinged also async.");
+            return _writer.WriteLineAsync("Got pinged also async.");
         }
     }
 }

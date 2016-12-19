@@ -9,7 +9,7 @@
 
     public class PipelineTests
     {
-        public class Ping : IAsyncRequest<Pong>
+        public class Ping : IRequest<Pong>
         {
             public string Message { get; set; }
         }
@@ -19,7 +19,7 @@
             public string Message { get; set; }
         }
 
-        public class Zing : IAsyncRequest<Zong>
+        public class Zing : IRequest<Zong>
         {
             public string Message { get; set; }
         }

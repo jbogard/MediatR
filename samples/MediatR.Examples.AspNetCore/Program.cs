@@ -10,7 +10,7 @@ namespace MediatR.Examples.AspNetCore
         public static void Main(string[] args)
         {
             var mediator = BuildMediator();
-            Runner.Run(mediator, Console.Out);
+            Runner.Run(mediator, Console.Out).Wait();
             Console.ReadKey();
         }
 

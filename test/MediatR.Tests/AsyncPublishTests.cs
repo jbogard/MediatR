@@ -11,7 +11,7 @@
 
     public class AsyncPublishTests
     {
-        public class Ping : IAsyncNotification
+        public class Ping : INotification
         {
             public string Message { get; set; }
         }

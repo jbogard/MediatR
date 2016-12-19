@@ -5,11 +5,11 @@ namespace MediatR.Internal
 {
     internal abstract class CancellableAsyncNotificationHandlerWrapper
     {
-        public abstract Task Handle(ICancellableAsyncNotification message, CancellationToken cancellationToken);
+        public abstract Task Handle(INotification message, CancellationToken cancellationToken);
     }
 
     internal class CancellableAsyncNotificationHandlerWrapper<TNotification> : CancellableAsyncNotificationHandlerWrapper
-        where TNotification : ICancellableAsyncNotification
+        where TNotification : INotification
     {
         private readonly ICancellableAsyncNotificationHandler<TNotification> _inner;
 
@@ -18,7 +18,7 @@ namespace MediatR.Internal
             _inner = inner;
         }
 
-        public override Task Handle(ICancellableAsyncNotification message, CancellationToken cancellationToken)
+        public override Task Handle(INotification message, CancellationToken cancellationToken)
         {
             return _inner.Handle((TNotification)message, cancellationToken);
         }

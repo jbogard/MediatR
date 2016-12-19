@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -46,7 +47,7 @@
         }
 
         [Fact]
-        public void Should_resolve_main_handler()
+        public async Task Should_resolve_main_handler()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -68,7 +69,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            mediator.Publish(new Ping { Message = "Ping" });
+            await mediator.PublishAsync(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");

@@ -5,43 +5,43 @@ namespace MediatR.Internal
 {
     internal abstract class CancellableAsyncRequestHandlerWrapper
     {
-        public abstract Task Handle(ICancellableAsyncRequest message, CancellationToken cancellationToken);
+        public abstract Task Handle(IRequest message, CancellationToken cancellationToken);
     }
 
     internal abstract class CancellableAsyncRequestHandlerWrapper<TResult>
     {
-        public abstract Task<TResult> Handle(ICancellableAsyncRequest<TResult> message, CancellationToken cancellationToken);
+        public abstract Task<TResult> Handle(IRequest<TResult> message, CancellationToken cancellationToken);
     }
 
-    internal class CancellableAsyncRequestHandlerWrapperImpl<TCommand> : CancellableAsyncRequestHandlerWrapper
-        where TCommand : ICancellableAsyncRequest
+    internal class CancellableAsyncRequestHandlerWrapperImpl<TRequest> : CancellableAsyncRequestHandlerWrapper
+        where TRequest : IRequest
     {
-        private readonly ICancellableAsyncRequestHandler<TCommand> _inner;
+        private readonly ICancellableAsyncRequestHandler<TRequest> _inner;
 
-        public CancellableAsyncRequestHandlerWrapperImpl(ICancellableAsyncRequestHandler<TCommand> inner)
+        public CancellableAsyncRequestHandlerWrapperImpl(ICancellableAsyncRequestHandler<TRequest> inner)
         {
             _inner = inner;
         }
 
-        public override Task Handle(ICancellableAsyncRequest message, CancellationToken cancellationToken)
+        public override Task Handle(IRequest message, CancellationToken cancellationToken)
         {
-            return _inner.Handle((TCommand)message, cancellationToken);
+            return _inner.Handle((TRequest)message, cancellationToken);
         }
     }
 
-    internal class CancellableAsyncRequestHandlerWrapperImpl<TCommand, TResult> : CancellableAsyncRequestHandlerWrapper<TResult>
-        where TCommand : ICancellableAsyncRequest<TResult>
+    internal class CancellableAsyncRequestHandlerWrapperImpl<TRequest, TResponse> : CancellableAsyncRequestHandlerWrapper<TResponse>
+        where TRequest : IRequest<TResponse>
     {
-        private readonly ICancellableAsyncRequestHandler<TCommand, TResult> _inner;
+        private readonly ICancellableAsyncRequestHandler<TRequest, TResponse> _inner;
 
-        public CancellableAsyncRequestHandlerWrapperImpl(ICancellableAsyncRequestHandler<TCommand, TResult> inner)
+        public CancellableAsyncRequestHandlerWrapperImpl(ICancellableAsyncRequestHandler<TRequest, TResponse> inner)
         {
             _inner = inner;
         }
 
-        public override Task<TResult> Handle(ICancellableAsyncRequest<TResult> message, CancellationToken cancellationToken)
+        public override Task<TResponse> Handle(IRequest<TResponse> message, CancellationToken cancellationToken)
         {
-            return _inner.Handle((TCommand)message, cancellationToken);
+            return _inner.Handle((TRequest)message, cancellationToken);
         }
     }
 }

@@ -11,7 +11,7 @@
 
     public class AsyncSendVoidInterfaceTests
     {
-        public class Ping : IAsyncRequest
+        public class Ping : IRequest
         {
             public string Message { get; set; }
         }

@@ -8,7 +8,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TNotification">The type of notification being handled</typeparam>
     public interface ICancellableAsyncNotificationHandler<in TNotification>
-        where TNotification : ICancellableAsyncNotification
+        where TNotification : INotification
     {
         /// <summary>
         /// Handles a cancellable, asynchronous notification

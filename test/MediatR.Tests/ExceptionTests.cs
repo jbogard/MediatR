@@ -10,13 +10,33 @@
     {
         private readonly IMediator _mediator;
 
-        public class Ping : IRequest<Pong> { }
-        public class Pong {}
-        public class VoidPing : IRequest { }
-        public class Pinged : INotification { }
-        public class AsyncPing : IAsyncRequest<Pong> { }
-        public class AsyncVoidPing : IAsyncRequest { }
-        public class AsyncPinged : IAsyncNotification { }
+        public class Ping : IRequest<Pong>
+        {
+        }
+
+        public class Pong
+        {
+        }
+
+        public class VoidPing : IRequest
+        {
+        }
+
+        public class Pinged : INotification
+        {
+        }
+
+        public class AsyncPing : IRequest<Pong>
+        {
+        }
+
+        public class AsyncVoidPing : IRequest
+        {
+        }
+
+        public class AsyncPinged : INotification
+        {
+        }
 
         public ExceptionTests()
         {
@@ -30,21 +50,30 @@
         }
 
         [Fact]
-        public void Should_throw_for_send()
+        public async Task Should_throw_for_send()
         {
-            Should.Throw<InvalidOperationException>(() => _mediator.Send(new Ping()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new Ping()));
         }
 
         [Fact]
-        public void Should_throw_for_void_send()
+        public async Task Should_throw_for_void_send()
         {
-            Should.Throw<InvalidOperationException>(() => _mediator.Send(new VoidPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new VoidPing()));
         }
 
         [Fact]
-        public void Should_not_throw_for_publish()
+        public async Task Should_not_throw_for_publish()
         {
-            Should.NotThrow(() => _mediator.Publish(new Pinged()));
+            Exception ex = null;
+            try
+            {
+                await _mediator.PublishAsync(new Pinged());
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+            ex.ShouldBeNull();
         }
 
         [Fact]
@@ -60,9 +89,18 @@
         }
 
         [Fact]
-        public void Should_not_throw_for_async_publish()
+        public async Task Should_not_throw_for_async_publish()
         {
-            Should.NotThrow(async () => await _mediator.PublishAsync(new AsyncPinged()));
+            Exception ex = null;
+            try
+            {
+                await _mediator.PublishAsync(new AsyncPinged());
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+            ex.ShouldBeNull();
         }
     }
 }
