@@ -6,6 +6,7 @@ namespace MediatR
     using System.Collections.Generic;
     using System.Collections.Concurrent;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace MediatR
 
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>> _genericHandlerCache;
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>> _wrapperHandlerCache;
+        private static readonly MethodInfo CreatePipelineMethod = typeof(Mediator).GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(CreatePipeline));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -37,48 +39,76 @@ namespace MediatR
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request);
+            var pipeline = GetPipeline(request, () => Task.FromResult(defaultHandler.Handle(request)));
 
-            return result;
+            return pipeline.Result;
         }
 
         public void Send(IRequest request)
         {
             var handler = GetHandler(request);
 
-            handler.Handle(request);
+            RequestHandlerDelegate<Unit> invokeHandler = () =>
+            {
+                handler.Handle(request);
+                return Task.FromResult(Unit.Value);
+            };
+
+            var pipeline = GetPipeline(request, invokeHandler);
+
+            pipeline.Wait();
         }
 
         public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request);
+            RequestHandlerDelegate<TResponse> invokeHandler = () => defaultHandler.Handle(request);
 
-            return result;
+            var pipeline = GetPipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
         public Task SendAsync(IAsyncRequest request)
         {
             var handler = GetHandler(request);
 
-            return handler.Handle(request);
+            RequestHandlerDelegate<Unit> invokeHandler = async () =>
+            {
+                await handler.Handle(request);
+                return Unit.Value;
+            };
+
+            var pipeline = GetPipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
         public Task<TResponse> SendAsync<TResponse>(ICancellableAsyncRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var defaultHandler = GetHandler(request);
 
-            var result = defaultHandler.Handle(request, cancellationToken);
+            RequestHandlerDelegate<TResponse> invokeHandler = () => defaultHandler.Handle(request, cancellationToken);
 
-            return result;
+            var pipeline = GetPipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
         public Task SendAsync(ICancellableAsyncRequest request, CancellationToken cancellationToken)
         {
             var handler = GetHandler(request);
 
-            return handler.Handle(request, cancellationToken);
+            RequestHandlerDelegate<Unit> invokeHandler = async () =>
+            {
+                await handler.Handle(request, cancellationToken);
+                return Unit.Value;
+            };
+
+            var pipeline = GetPipeline(request, invokeHandler);
+
+            return pipeline;
         }
 
         public void Publish(INotification notification)
@@ -225,6 +255,25 @@ namespace MediatR
                 .Cast<TWrapper>()
                 .ToList();
         }
+
+        private Task<TResponse> GetPipeline<TResponse>(object request, RequestHandlerDelegate<TResponse> invokeHandler)
+        {
+            var requestType = request.GetType();
+            var method = CreatePipelineMethod.MakeGenericMethod(requestType, typeof(TResponse));
+            return (Task<TResponse>) method.Invoke(this, new[] { request, invokeHandler});
+        }
+
+        private Task<TResponse> CreatePipeline<TRequest, TResponse>(TRequest request, RequestHandlerDelegate<TResponse> invokeHandler)
+        {
+            var behaviors = _multiInstanceFactory(typeof(IPipelineBehavior<TRequest, TResponse>))
+                .Cast<IPipelineBehavior<TRequest, TResponse>>()
+                .Reverse();
+
+            var aggregate = behaviors.Aggregate(invokeHandler, (next, pipeline) => () => pipeline.Handle(request, next));
+
+            return aggregate();
+        }
+
 
         private IEnumerable<object> GetNotificationHandlers(object notification, Type handlerType)
         {

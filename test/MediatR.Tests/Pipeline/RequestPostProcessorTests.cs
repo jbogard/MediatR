@@ -1,15 +1,13 @@
-﻿namespace MediatR.Tests
+﻿namespace MediatR.Tests.Pipeline
 {
-    using System;
     using System.Threading.Tasks;
+    using MediatR.Pipeline;
     using Shouldly;
     using StructureMap;
-    using StructureMap.Graph;
     using Xunit;
 
-    public class AsyncSendTests
+    public class RequestPostProcessorTests
     {
-
         public class Ping : IAsyncRequest<Pong>
         {
             public string Message { get; set; }
@@ -28,8 +26,18 @@
             }
         }
 
+        public class PingPongPostProcessor : IRequestPostProcessor<Ping, Pong>
+        {
+            public Task Process(Ping request, Pong response)
+            {
+                response.Message = response.Message + " " + request.Message;
+
+                return Task.FromResult(0);
+            }
+        }
+
         [Fact]
-        public async Task Should_resolve_main_handler()
+        public async Task Should_run_postprocessors()
         {
             var container = new Container(cfg =>
             {
@@ -38,8 +46,10 @@
                     scanner.AssemblyContainingType(typeof(AsyncPublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof (IAsyncRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof(IRequestPostProcessor<,>));
                 });
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
@@ -49,7 +59,8 @@
 
             var response = await mediator.SendAsync(new Ping { Message = "Ping" });
 
-            response.Message.ShouldBe("Ping Pong");
+            response.Message.ShouldBe("Ping Pong Ping");
         }
+
     }
 }
