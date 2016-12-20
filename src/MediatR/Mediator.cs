@@ -57,30 +57,30 @@ namespace MediatR
         {
             var requestType = request.GetType();
 
-            var handler = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
+            var handlerFactory = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
                 _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory(requestType, GetHandler));
 
-            if (handler == null)
+            if (handlerFactory == null)
             {
                 throw BuildException(request);
             }
 
-            return handler(request, cancellationToken, _singleInstanceFactory);
+            return handlerFactory(request, cancellationToken, _singleInstanceFactory);
         }
 
         private RequestHandlerDelegate<TResponse> GetHandler<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var requestType = request.GetType();
 
-            var handler = (Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>)
+            var handlerFactory = (Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>)
                 _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory<TResponse>(requestType, GetHandler));
 
-            if (handler == null)
+            if (handlerFactory == null)
             {
                 throw BuildException(request);
             }
 
-            return handler(request, cancellationToken, _singleInstanceFactory);
+            return handlerFactory(request, cancellationToken, _singleInstanceFactory);
         }
 
         private object GetHandler(Type requestType)
