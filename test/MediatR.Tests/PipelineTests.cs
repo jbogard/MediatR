@@ -220,11 +220,8 @@
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
-            Console.WriteLine(container.WhatDoIHave());
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
-
-            Console.WriteLine(container.WhatDoIHave());
 
             var mediator = container.GetInstance<IMediator>();
 
@@ -265,11 +262,8 @@
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
-            Console.WriteLine(container.WhatDoIHave());
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
-
-            Console.WriteLine(container.WhatDoIHave());
 
             var mediator = container.GetInstance<IMediator>();
 
@@ -291,8 +285,6 @@
             output.Messages.Clear();
 
             var zingResponse = await mediator.SendAsync(new Zing { Message = "Zing" });
-
-            Console.WriteLine(container.WhatDoIHave());
 
             zingResponse.Message.ShouldBe("Zing Zong");
 
