@@ -1,6 +1,7 @@
 ﻿namespace MediatR
 {
     using System;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Represents a void type, since <see cref="System.Void"/> is not a valid return type in C#.
@@ -11,6 +12,11 @@
         /// Default and only value of the <see cref="Unit"/> type.
         /// </summary>
         public static readonly Unit Value = new Unit();
+
+        /// <summary>
+        /// Task from a <see cref="Unit"/> type.
+        /// </summary>
+        public static readonly Task<Unit> Task = System.Threading.Tasks.Task.FromResult(Value);
 
         /// <summary>
         /// Compares the current object with another object of the same type.

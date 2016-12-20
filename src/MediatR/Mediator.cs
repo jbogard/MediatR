@@ -135,7 +135,11 @@ namespace MediatR
         public Task PublishAsync(INotification notification, CancellationToken cancellationToken = default(CancellationToken))
         {
             var notificationHandlers = GetNotificationHandlers(notification)
-                .Select(handler => Task.Run(() => handler.Handle(notification), cancellationToken));
+                .Select(handler =>
+                {
+                    handler.Handle(notification);
+                    return Unit.Task;
+                });
             var asyncNotificationHandlers = GetAsyncNotificationHandlers(notification)
                 .Select(handler => handler.Handle(notification));
             var cancellableAsyncNotificationHandlers = GetCancellableAsyncNotificationHandlers(notification)
