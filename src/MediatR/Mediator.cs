@@ -1,12 +1,9 @@
-﻿using MediatR.Internal;
-
-namespace MediatR
+﻿namespace MediatR
 {
+    using Internal;
     using System;
-    using System.Collections.Generic;
     using System.Collections.Concurrent;
     using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -17,11 +14,8 @@ namespace MediatR
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
         private readonly MultiInstanceFactory _multiInstanceFactory;
-
-        private static readonly MethodInfo CreatePipelineMethod =
-            typeof(Mediator).GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(CreatePipeline));
-
         private static readonly ConcurrentDictionary<Type, Delegate> _requestHandlerFactories = new ConcurrentDictionary<Type, Delegate>();
+        private static readonly ConcurrentDictionary<Type, object> _pipelineWrappers = new ConcurrentDictionary<Type, object>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -34,8 +28,7 @@ namespace MediatR
             _multiInstanceFactory = multiInstanceFactory;
         }
 
-        public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var handler = GetHandler(request, cancellationToken);
 
@@ -53,34 +46,60 @@ namespace MediatR
             return pipeline;
         }
 
+        public Task PublishAsync<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
+            where TNotification : INotification
+        {
+            var notificationType = typeof(TNotification);
+            var notificationHandlers = _multiInstanceFactory(typeof(INotificationHandler<>).MakeGenericType(notificationType))
+                .Cast<INotificationHandler<TNotification>>()
+                .Select(handler =>
+                {
+                    handler.Handle(notification);
+                    return Unit.Task;
+                });
+            var asyncNotificationHandlers = _multiInstanceFactory(typeof(IAsyncNotificationHandler<>).MakeGenericType(notificationType))
+                .Cast<IAsyncNotificationHandler<TNotification>>()
+                .Select(handler => handler.Handle(notification));
+            var cancellableAsyncNotificationHandlers = _multiInstanceFactory(typeof(ICancellableAsyncNotificationHandler<>).MakeGenericType(notificationType))
+                .Cast<ICancellableAsyncNotificationHandler<TNotification>>()
+                .Select(handler => handler.Handle(notification, cancellationToken));
+
+            var allHandlers = notificationHandlers
+                .Concat(asyncNotificationHandlers)
+                .Concat(cancellableAsyncNotificationHandlers);
+
+            return Task.WhenAll(allHandlers);
+        }
+
+
         private RequestHandlerDelegate<Unit> GetHandler(IRequest request, CancellationToken cancellationToken)
         {
             var requestType = request.GetType();
 
-            var handler = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
+            var handlerFactory = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
                 _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory(requestType, GetHandler));
 
-            if (handler == null)
+            if (handlerFactory == null)
             {
                 throw BuildException(request);
             }
 
-            return handler(request, cancellationToken, _singleInstanceFactory);
+            return handlerFactory(request, cancellationToken, _singleInstanceFactory);
         }
 
         private RequestHandlerDelegate<TResponse> GetHandler<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var requestType = request.GetType();
 
-            var handler = (Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>)
+            var handlerFactory = (Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>)
                 _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory<TResponse>(requestType, GetHandler));
 
-            if (handler == null)
+            if (handlerFactory == null)
             {
                 throw BuildException(request);
             }
 
-            return handler(request, cancellationToken, _singleInstanceFactory);
+            return handlerFactory(request, cancellationToken, _singleInstanceFactory);
         }
 
         private object GetHandler(Type requestType)
@@ -95,17 +114,18 @@ namespace MediatR
             }
         }
 
-        private static Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>> GetHandlerFactory(Type requestType, SingleInstanceFactory factory)
+        private static Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>
+            GetHandlerFactory(Type requestType, SingleInstanceFactory factory)
         {
             var handlerType = typeof(IRequestHandler<>).MakeGenericType(requestType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                var wrapper = (RequestHandlerWrapper)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (RequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    wrapper.Handle(request);
+                    wrapper.Handle(request, handler);
                     return Task.FromResult(Unit.Value);
                 };
             }
@@ -113,11 +133,11 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-                return (request, token, fac) => async () => 
+                var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
+                return (request, token, fac) => async () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    await wrapper.Handle(request);
+                    await wrapper.Handle(request, handler);
                     return Unit.Value;
                 };
             }
@@ -125,125 +145,67 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => async () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    await wrapper.Handle(request, token);
+                    await wrapper.Handle(request, token, handler);
                     return Unit.Value;
                 };
             }
             return null;
         }
-        private static Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>> GetHandlerFactory<TResponse>(Type requestType, SingleInstanceFactory factory)
+        private static Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>
+            GetHandlerFactory<TResponse>(Type requestType, SingleInstanceFactory factory)
         {
             var responseType = typeof(TResponse);
             var handlerType = typeof(IRequestHandler<,>).MakeGenericType(requestType, responseType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (RequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (RequestHandlerWrapper<TResponse>) Activator.CreateInstance(wrapperType, handler);
-                    return Task.FromResult(wrapper.Handle(request));
+                    return Task.FromResult(wrapper.Handle(request, handler));
                 };
             }
             handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(requestType, responseType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (AsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (AsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType, handler);
-                    return () => wrapper.Handle(request);
+                    return () => wrapper.Handle(request, handler);
                 };
             }
             handlerType = typeof(ICancellableAsyncRequestHandler<,>).MakeGenericType(requestType, responseType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (CancellableAsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (CancellableAsyncRequestHandlerWrapper<TResponse>) Activator.CreateInstance(wrapperType, handler);
-                    return () => wrapper.Handle(request, token);
+                    return () => wrapper.Handle(request, token, handler);
                 };
             }
             return null;
         }
 
-        public Task PublishAsync(INotification notification, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var notificationHandlers = GetNotificationHandlers(notification)
-                .Select(handler =>
-                {
-                    handler.Handle(notification);
-                    return Unit.Task;
-                });
-            var asyncNotificationHandlers = GetAsyncNotificationHandlers(notification)
-                .Select(handler => handler.Handle(notification));
-            var cancellableAsyncNotificationHandlers = GetCancellableAsyncNotificationHandlers(notification)
-                .Select(handler => handler.Handle(notification, cancellationToken));
-
-            var allHandlers = notificationHandlers
-                .Concat(asyncNotificationHandlers)
-                .Concat(cancellableAsyncNotificationHandlers);
-
-            return Task.WhenAll(allHandlers);
-        }
-
-        private IEnumerable<NotificationHandlerWrapper> GetNotificationHandlers(INotification notification)
-        {
-            return GetNotificationHandlers<NotificationHandlerWrapper>(notification,
-                typeof(INotificationHandler<>),
-                typeof(NotificationHandlerWrapper<>));
-        }
-
-        private IEnumerable<AsyncNotificationHandlerWrapper> GetAsyncNotificationHandlers(INotification notification)
-        {
-            return GetNotificationHandlers<AsyncNotificationHandlerWrapper>(notification,
-                typeof(IAsyncNotificationHandler<>),
-                typeof(AsyncNotificationHandlerWrapper<>));
-        }
-
-        private IEnumerable<CancellableAsyncNotificationHandlerWrapper> GetCancellableAsyncNotificationHandlers(INotification notification)
-        {
-            return GetNotificationHandlers<CancellableAsyncNotificationHandlerWrapper>(notification,
-                typeof(ICancellableAsyncNotificationHandler<>),
-                typeof(CancellableAsyncNotificationHandlerWrapper<>));
-        }
-
-        private IEnumerable<TWrapper> GetNotificationHandlers<TWrapper>(object notification, Type handlerType, Type wrapperType)
-        {
-            var notificationType = notification.GetType();
-
-            var genericHandlerType = handlerType.MakeGenericType(notificationType);
-            var genericWrapperType = wrapperType.MakeGenericType(notificationType);
-
-            return _multiInstanceFactory(genericHandlerType)
-                .Select(handler => Activator.CreateInstance(genericWrapperType, handler))
-                .Cast<TWrapper>()
-                .ToList();
-        }
-
         private Task<TResponse> GetPipeline<TResponse>(object request, RequestHandlerDelegate<TResponse> invokeHandler)
         {
             var requestType = request.GetType();
-            var method = CreatePipelineMethod.MakeGenericMethod(requestType, typeof(TResponse));
-            return (Task<TResponse>)method.Invoke(this, new[] { request, invokeHandler });
-        }
 
-        private Task<TResponse> CreatePipeline<TRequest, TResponse>(TRequest request, RequestHandlerDelegate<TResponse> invokeHandler)
-        {
-            var behaviors = _multiInstanceFactory(typeof(IPipelineBehavior<TRequest, TResponse>))
-                .Cast<IPipelineBehavior<TRequest, TResponse>>()
-                .Reverse();
+            var wrapper = (PipelineBehaviorWrapper<TResponse>) _pipelineWrappers.GetOrAdd(requestType, t =>
+            {
+                var wrapperType = typeof(PipelineBehaviorWrapper<,>).MakeGenericType(requestType, typeof(TResponse));
+                return Activator.CreateInstance(wrapperType);
+            });
 
-            var aggregate = behaviors.Aggregate(invokeHandler, (next, pipeline) => () => pipeline.Handle(request, next));
-
-            return aggregate();
+            return wrapper.CreatePipeline(request, invokeHandler, _multiInstanceFactory);
         }
 
         private static InvalidOperationException BuildException(object message)

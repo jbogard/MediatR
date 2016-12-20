@@ -4,43 +4,29 @@ namespace MediatR.Internal
 {
     internal abstract class AsyncRequestHandlerWrapper
     {
-        public abstract Task Handle(IRequest message);
+        public abstract Task Handle(IRequest message, object handler);
     }
 
     internal abstract class AsyncRequestHandlerWrapper<TResult>
     {
-        public abstract Task<TResult> Handle(IRequest<TResult> message);
+        public abstract Task<TResult> Handle(IRequest<TResult> message, object handler);
     }
 
-    internal class AsyncRequestHandlerWrapperImpl<TCommand> : AsyncRequestHandlerWrapper
-        where TCommand : IRequest
+    internal class AsyncRequestHandlerWrapperImpl<TRequest> : AsyncRequestHandlerWrapper
+        where TRequest : IRequest
     {
-        private readonly IAsyncRequestHandler<TCommand> _inner;
-
-        public AsyncRequestHandlerWrapperImpl(IAsyncRequestHandler<TCommand> inner)
+        public override Task Handle(IRequest message, object handler)
         {
-            _inner = inner;
-        }
-
-        public override Task Handle(IRequest message)
-        {
-            return _inner.Handle((TCommand)message);
+            return ((IAsyncRequestHandler<TRequest>)handler).Handle((TRequest)message);
         }
     }
 
     internal class AsyncRequestHandlerWrapperImpl<TCommand, TResult> : AsyncRequestHandlerWrapper<TResult>
         where TCommand : IRequest<TResult>
     {
-        private readonly IAsyncRequestHandler<TCommand, TResult> _inner;
-
-        public AsyncRequestHandlerWrapperImpl(IAsyncRequestHandler<TCommand, TResult> inner)
+        public override Task<TResult> Handle(IRequest<TResult> message, object handler)
         {
-            _inner = inner;
-        }
-
-        public override Task<TResult> Handle(IRequest<TResult> message)
-        {
-            return _inner.Handle((TCommand)message);
+            return ((IAsyncRequestHandler<TCommand, TResult>)handler).Handle((TCommand)message);
         }
     }
 }
