@@ -43,7 +43,7 @@
             var requestType = request.GetType();
 
             var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandler) Activator.CreateInstance(typeof(RequestHandler<>).MakeGenericType(requestType)));
+                t => (RequestHandler) Activator.CreateInstance(typeof(RequestHandlerImpl<>).MakeGenericType(requestType)));
 
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
@@ -160,7 +160,7 @@
                 SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
         }
 
-        private class RequestHandler<TRequest> : RequestHandler
+        private class RequestHandlerImpl<TRequest> : RequestHandler
             where TRequest : IRequest
         {
             private Func<TRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>> _handlerFactory;
