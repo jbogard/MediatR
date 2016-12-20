@@ -14,6 +14,7 @@
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
         private readonly MultiInstanceFactory _multiInstanceFactory;
+        private static readonly ConcurrentDictionary<Type, RequestHandler> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandler>();
         private static readonly ConcurrentDictionary<Type, Delegate> _requestHandlerFactories = new ConcurrentDictionary<Type, Delegate>();
         private static readonly ConcurrentDictionary<Type, object> _pipelineWrappers = new ConcurrentDictionary<Type, object>();
 
@@ -39,11 +40,12 @@
 
         public Task SendAsync(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var handler = GetHandler(request, cancellationToken);
+            var requestType = request.GetType();
 
-            var pipeline = GetPipeline(request, handler);
+            var handler = _voidRequestHandlers.GetOrAdd(requestType,
+                t => (RequestHandler) Activator.CreateInstance(typeof(RequestHandler<>).MakeGenericType(requestType)));
 
-            return pipeline;
+            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
 
         public Task PublishAsync<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
@@ -72,21 +74,6 @@
         }
 
 
-        private RequestHandlerDelegate<Unit> GetHandler(IRequest request, CancellationToken cancellationToken)
-        {
-            var requestType = request.GetType();
-
-            var handlerFactory = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
-                _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory(requestType, GetHandler));
-
-            if (handlerFactory == null)
-            {
-                throw BuildException(request);
-            }
-
-            return handlerFactory(request, cancellationToken, _singleInstanceFactory);
-        }
-
         private RequestHandlerDelegate<TResponse> GetHandler<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
         {
             var requestType = request.GetType();
@@ -114,47 +101,6 @@
             }
         }
 
-        private static Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>
-            GetHandlerFactory(Type requestType, SingleInstanceFactory factory)
-        {
-            var handlerType = typeof(IRequestHandler<>).MakeGenericType(requestType);
-            if (factory(handlerType) != null)
-            {
-                var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-                var wrapper = (RequestHandlerWrapper)Activator.CreateInstance(wrapperType);
-                return (request, token, fac) => () =>
-                {
-                    var handler = fac(handlerType);
-                    wrapper.Handle(request, handler);
-                    return Task.FromResult(Unit.Value);
-                };
-            }
-            handlerType = typeof(IAsyncRequestHandler<>).MakeGenericType(requestType);
-            if (factory(handlerType) != null)
-            {
-                var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-                var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
-                return (request, token, fac) => async () =>
-                {
-                    var handler = fac(handlerType);
-                    await wrapper.Handle(request, handler);
-                    return Unit.Value;
-                };
-            }
-            handlerType = typeof(ICancellableAsyncRequestHandler<>).MakeGenericType(requestType);
-            if (factory(handlerType) != null)
-            {
-                var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-                var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
-                return (request, token, fac) => async () =>
-                {
-                    var handler = fac(handlerType);
-                    await wrapper.Handle(request, token, handler);
-                    return Unit.Value;
-                };
-            }
-            return null;
-        }
         private static Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>
             GetHandlerFactory<TResponse>(Type requestType, SingleInstanceFactory factory)
         {
@@ -206,6 +152,104 @@
             });
 
             return wrapper.CreatePipeline(request, invokeHandler, _multiInstanceFactory);
+        }
+
+        private abstract class RequestHandler
+        {
+            public abstract Task Handle(object request, CancellationToken cancellationToken,
+                SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
+        }
+
+        private class RequestHandler<TRequest> : RequestHandler
+            where TRequest : IRequest
+        {
+            private Func<TRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>> _handlerFactory;
+            private object _syncLock = new object();
+
+            public override Task Handle(object request, CancellationToken cancellationToken, 
+                SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory)
+            {
+                var handler = GetHandler((TRequest) request, cancellationToken, singleFactory);
+
+                var pipeline = GetPipeline((TRequest) request, handler, multiFactory);
+
+                return pipeline;
+            }
+
+            private RequestHandlerDelegate<Unit> GetHandler(TRequest request, CancellationToken cancellationToken, SingleInstanceFactory singleInstanceFactory)
+            {
+                var initialized = false;
+
+                LazyInitializer.EnsureInitialized(ref _handlerFactory, ref initialized, ref _syncLock,
+                    () => GetHandlerFactory(t => GetHandler(t, singleInstanceFactory)));
+
+                if (!initialized || _handlerFactory == null)
+                {
+                    throw BuildException(request);
+                }
+
+                return _handlerFactory(request, cancellationToken, singleInstanceFactory);
+            }
+
+            private static Func<TRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>> 
+                GetHandlerFactory(SingleInstanceFactory factory)
+            {
+                var handlerType = typeof(IRequestHandler<TRequest>);
+                if (factory(handlerType) != null)
+                {
+                    return (request, token, fac) => () =>
+                    {
+                        var handler = (IRequestHandler<TRequest>)fac(handlerType);
+                        handler.Handle(request);
+                        return Task.FromResult(Unit.Value);
+                    };
+                }
+                handlerType = typeof(IAsyncRequestHandler<TRequest>);
+                if (factory(handlerType) != null)
+                {
+                    return (request, token, fac) => async () =>
+                    {
+                        var handler = (IAsyncRequestHandler<TRequest>)fac(handlerType);
+                        await handler.Handle(request);
+                        return Unit.Value;
+                    };
+                }
+                handlerType = typeof(ICancellableAsyncRequestHandler<TRequest>);
+                if (factory(handlerType) != null)
+                {
+                    return (request, token, fac) => async () =>
+                    {
+                        var handler = (ICancellableAsyncRequestHandler<TRequest>)fac(handlerType);
+                        await handler.Handle(request, token);
+                        return Unit.Value;
+                    };
+                }
+                return null;
+            }
+
+            private object GetHandler(Type requestType, SingleInstanceFactory singleInstanceFactory)
+            {
+                try
+                {
+                    return singleInstanceFactory(requestType);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+
+            private Task<Unit> GetPipeline(TRequest request, RequestHandlerDelegate<Unit> invokeHandler, MultiInstanceFactory factory)
+            {
+                var behaviors = factory(typeof(IPipelineBehavior<TRequest, Unit>))
+                    .Cast<IPipelineBehavior<TRequest, Unit>>()
+                    .Reverse();
+
+                var aggregate = behaviors.Aggregate(invokeHandler, (next, pipeline) => () => pipeline.Handle(request, next));
+
+                return aggregate();
+            }
+
         }
 
         private static InvalidOperationException BuildException(object message)
