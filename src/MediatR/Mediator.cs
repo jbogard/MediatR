@@ -101,11 +101,11 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                var wrapper = (RequestHandlerWrapper) Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (RequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    wrapper.Handle(request);
+                    wrapper.Handle(request, handler);
                     return Task.FromResult(Unit.Value);
                 };
             }
@@ -113,11 +113,11 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => async () => 
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    await wrapper.Handle(request);
+                    await wrapper.Handle(request, handler);
                     return Unit.Value;
                 };
             }
@@ -125,11 +125,11 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => async () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
-                    await wrapper.Handle(request, token);
+                    await wrapper.Handle(request, token, handler);
                     return Unit.Value;
                 };
             }
@@ -142,33 +142,33 @@ namespace MediatR
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (RequestHandlerWrapper<TResponse>) Activator.CreateInstance(wrapperType);
                 return (request, token, fac) => () =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (RequestHandlerWrapper<TResponse>) Activator.CreateInstance(wrapperType, handler);
-                    return Task.FromResult(wrapper.Handle(request));
+                    return Task.FromResult(wrapper.Handle(request, handler));
                 };
             }
             handlerType = typeof(IAsyncRequestHandler<,>).MakeGenericType(requestType, responseType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (AsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (AsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType, handler);
-                    return () => wrapper.Handle(request);
+                    return () => wrapper.Handle(request, handler);
                 };
             }
             handlerType = typeof(ICancellableAsyncRequestHandler<,>).MakeGenericType(requestType, responseType);
             if (factory(handlerType) != null)
             {
                 var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
+                var wrapper = (CancellableAsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(wrapperType);
                 return (request, token, fac) =>
                 {
                     var handler = fac(handlerType);
-                    var wrapper = (CancellableAsyncRequestHandlerWrapper<TResponse>) Activator.CreateInstance(wrapperType, handler);
-                    return () => wrapper.Handle(request, token);
+                    return () => wrapper.Handle(request, token, handler);
                 };
             }
             return null;
