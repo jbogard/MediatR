@@ -56,45 +56,16 @@ namespace MediatR
         private RequestHandlerDelegate<Unit> GetHandler(IRequest request, CancellationToken cancellationToken)
         {
             var requestType = request.GetType();
-            var handler = GetHandler(typeof(IRequestHandler<>).MakeGenericType(requestType));
-            if (handler != null)
+
+            var handler = (Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>)
+                _requestHandlerFactories.GetOrAdd(requestType, GetHandlerFactory(requestType, GetHandler));
+
+            if (handler == null)
             {
-                var wrapper =
-                    (RequestHandlerWrapper)
-                    Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType), handler);
-                return () =>
-                {
-                    wrapper.Handle(request);
-                    return Task.FromResult(Unit.Value);
-                };
+                throw BuildException(request);
             }
-            handler = GetHandler(typeof(IAsyncRequestHandler<>).MakeGenericType(requestType));
-            if (handler != null)
-            {
-                var wrapper =
-                    (AsyncRequestHandlerWrapper)
-                    Activator.CreateInstance(typeof(AsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType),
-                        handler);
-                return async () =>
-                {
-                    await wrapper.Handle(request);
-                    return Unit.Value;
-                };
-            }
-            handler = GetHandler(typeof(ICancellableAsyncRequestHandler<>).MakeGenericType(requestType));
-            if (handler != null)
-            {
-                var wrapper =
-                    (CancellableAsyncRequestHandlerWrapper)
-                    Activator.CreateInstance(
-                        typeof(CancellableAsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType), handler);
-                return async () =>
-                {
-                    await wrapper.Handle(request, cancellationToken);
-                    return Unit.Value;
-                };
-            }
-            throw BuildException(request);
+
+            return handler(request, cancellationToken, _singleInstanceFactory);
         }
 
         private RequestHandlerDelegate<TResponse> GetHandler<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
@@ -124,6 +95,46 @@ namespace MediatR
             }
         }
 
+        private static Func<IRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>> GetHandlerFactory(Type requestType, SingleInstanceFactory factory)
+        {
+            var handlerType = typeof(IRequestHandler<>).MakeGenericType(requestType);
+            if (factory(handlerType) != null)
+            {
+                var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                return (request, token, fac) => () =>
+                {
+                    var handler = fac(handlerType);
+                    var wrapper = (RequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
+                    wrapper.Handle(request);
+                    return Task.FromResult(Unit.Value);
+                };
+            }
+            handlerType = typeof(IAsyncRequestHandler<>).MakeGenericType(requestType);
+            if (factory(handlerType) != null)
+            {
+                var wrapperType = typeof(AsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                return (request, token, fac) => async () => 
+                {
+                    var handler = fac(handlerType);
+                    var wrapper = (AsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
+                    await wrapper.Handle(request);
+                    return Unit.Value;
+                };
+            }
+            handlerType = typeof(ICancellableAsyncRequestHandler<>).MakeGenericType(requestType);
+            if (factory(handlerType) != null)
+            {
+                var wrapperType = typeof(CancellableAsyncRequestHandlerWrapperImpl<>).MakeGenericType(requestType);
+                return (request, token, fac) => async () =>
+                {
+                    var handler = fac(handlerType);
+                    var wrapper = (CancellableAsyncRequestHandlerWrapper)Activator.CreateInstance(wrapperType, handler);
+                    await wrapper.Handle(request, token);
+                    return Unit.Value;
+                };
+            }
+            return null;
+        }
         private static Func<IRequest<TResponse>, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>> GetHandlerFactory<TResponse>(Type requestType, SingleInstanceFactory factory)
         {
             var responseType = typeof(TResponse);
