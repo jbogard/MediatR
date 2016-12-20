@@ -9,7 +9,7 @@
 
     public class PipelineTests
     {
-        public class Ping : IAsyncRequest<Pong>
+        public class Ping : IRequest<Pong>
         {
             public string Message { get; set; }
         }
@@ -19,7 +19,7 @@
             public string Message { get; set; }
         }
 
-        public class Zing : IAsyncRequest<Zong>
+        public class Zing : IRequest<Zong>
         {
             public string Message { get; set; }
         }
@@ -220,11 +220,8 @@
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
-            Console.WriteLine(container.WhatDoIHave());
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
-
-            Console.WriteLine(container.WhatDoIHave());
 
             var mediator = container.GetInstance<IMediator>();
 
@@ -265,11 +262,8 @@
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
-            Console.WriteLine(container.WhatDoIHave());
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
-
-            Console.WriteLine(container.WhatDoIHave());
 
             var mediator = container.GetInstance<IMediator>();
 
@@ -291,8 +285,6 @@
             output.Messages.Clear();
 
             var zingResponse = await mediator.SendAsync(new Zing { Message = "Zing" });
-
-            Console.WriteLine(container.WhatDoIHave());
 
             zingResponse.Message.ShouldBe("Zing Zong");
 

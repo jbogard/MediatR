@@ -2,6 +2,7 @@ namespace MediatR.Tests
 {
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -30,7 +31,7 @@ namespace MediatR.Tests
         }
 
         [Fact]
-        public void Should_resolve_main_void_handler()
+        public async Task Should_resolve_main_void_handler()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -52,7 +53,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            mediator.Send(new Ping { Message = "Ping" });
+            await mediator.SendAsync(new Ping { Message = "Ping" });
 
             builder.ToString().ShouldBe("Ping Pong");
         }

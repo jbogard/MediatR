@@ -9,7 +9,7 @@ namespace MediatR
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     /// <typeparam name="TResponse">The type of response from the handler</typeparam>
     public interface ICancellableAsyncRequestHandler<in TRequest, TResponse>
-        where TRequest : ICancellableAsyncRequest<TResponse>
+        where TRequest : IRequest<TResponse>
     {
         /// <summary>
         /// Handles a cancellable, asynchronous request
@@ -24,7 +24,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     public interface ICancellableAsyncRequestHandler<in TRequest>
-        where TRequest : ICancellableAsyncRequest
+        where TRequest : IRequest
     {
         /// <summary>
         /// Handles a cancellable, asynchronous request

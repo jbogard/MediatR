@@ -1,5 +1,6 @@
 ﻿namespace MediatR.Tests
 {
+    using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
     using StructureMap.Graph;
@@ -26,7 +27,7 @@
         }
 
         [Fact]
-        public void Should_resolve_main_handler()
+        public async Task Should_resolve_main_handler()
         {
             var container = new Container(cfg =>
             {
@@ -44,7 +45,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
 
             response.Message.ShouldBe("Ping Pong");
         }
