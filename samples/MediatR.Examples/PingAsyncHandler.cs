@@ -6,7 +6,7 @@
     {
         public Task<Pong> Handle(PingAsync message)
         {
-            return Task.Factory.StartNew(() => new Pong { Message = message.Message + " Pong" });
+            return Task.FromResult(new Pong { Message = message.Message + " Pong" });
         }
     }
 }
