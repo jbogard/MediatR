@@ -69,7 +69,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            await mediator.PublishAsync(new Ping { Message = "Ping" });
+            await mediator.Publish(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");

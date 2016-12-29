@@ -52,13 +52,13 @@
         [Fact]
         public async Task Should_throw_for_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new Ping()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
         }
 
         [Fact]
         public async Task Should_throw_for_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new VoidPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
         }
 
         [Fact]
@@ -67,7 +67,7 @@
             Exception ex = null;
             try
             {
-                await _mediator.PublishAsync(new Pinged());
+                await _mediator.Publish(new Pinged());
             }
             catch (Exception e)
             {
@@ -79,13 +79,13 @@
         [Fact]
         public async Task Should_throw_for_async_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new AsyncPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
         }
 
         [Fact]
         public async Task Should_throw_for_async_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new AsyncVoidPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
         }
 
         [Fact]
@@ -94,7 +94,7 @@
             Exception ex = null;
             try
             {
-                await _mediator.PublishAsync(new AsyncPinged());
+                await _mediator.Publish(new AsyncPinged());
             }
             catch (Exception e)
             {

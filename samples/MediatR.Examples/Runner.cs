@@ -11,18 +11,18 @@
             await writer.WriteLineAsync("---------------");
 
             await writer.WriteLineAsync("Sending Ping...");
-            var pong = await mediator.SendAsync(new Ping { Message = "Ping" });
+            var pong = await mediator.Send(new Ping { Message = "Ping" });
             await writer.WriteLineAsync("Received: " + pong.Message);
 
             await writer.WriteLineAsync("Sending Ping async...");
-            var response = await mediator.SendAsync(new PingAsync { Message = "Ping" });
+            var response = await mediator.Send(new PingAsync { Message = "Ping" });
             await writer.WriteLineAsync("Received async: " + response.Message);
 
             await writer.WriteLineAsync("Publishing Pinged...");
-            await mediator.PublishAsync(new Pinged());
+            await mediator.Publish(new Pinged());
 
             await writer.WriteLineAsync("Publishing Pinged async...");
-            await mediator.PublishAsync(new PingedAsync());
+            await mediator.Publish(new PingedAsync());
         }
     }
 }

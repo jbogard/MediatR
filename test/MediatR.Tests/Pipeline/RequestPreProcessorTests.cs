@@ -57,7 +57,7 @@
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping { Message = "Ping" });
 
             response.Message.ShouldBe("Ping Ping Pong");
         }

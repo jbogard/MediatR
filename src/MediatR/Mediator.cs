@@ -28,7 +28,7 @@
             _multiInstanceFactory = multiInstanceFactory;
         }
 
-        public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var requestType = request.GetType();
 
@@ -38,7 +38,7 @@
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
 
-        public Task SendAsync(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
         {
             var requestType = request.GetType();
 
@@ -48,7 +48,7 @@
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
 
-        public Task PublishAsync<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
             where TNotification : INotification
         {
             var notificationType = typeof(TNotification);
