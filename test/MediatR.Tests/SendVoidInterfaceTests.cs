@@ -53,7 +53,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            await mediator.SendAsync(new Ping { Message = "Ping" });
+            await mediator.Send(new Ping { Message = "Ping" });
 
             builder.ToString().ShouldBe("Ping Pong");
         }
