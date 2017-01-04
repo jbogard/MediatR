@@ -156,6 +156,25 @@
             }
         }
 
+        public class ConcreteBehavior : IPipelineBehavior<Ping, Pong>
+        {
+            private readonly Logger _output;
+
+            public ConcreteBehavior(Logger output)
+            {
+                _output = output;
+            }
+
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            {
+                _output.Messages.Add("Concrete before");
+                var response = await next();
+                _output.Messages.Add("Concrete after");
+
+                return response;
+            }
+        }
+
         public class Logger
         {
             public IList<string> Messages { get; } = new List<string>();
@@ -278,6 +297,65 @@
                 "Constrained before",
                 "Handler",
                 "Constrained after",
+                "Inner generic after",
+                "Outer generic after",
+            });
+
+            output.Messages.Clear();
+
+            var zingResponse = await mediator.Send(new Zing { Message = "Zing" });
+
+            zingResponse.Message.ShouldBe("Zing Zong");
+
+            output.Messages.ShouldBe(new[]
+            {
+                "Outer generic before",
+                "Inner generic before",
+                "Handler",
+                "Inner generic after",
+                "Outer generic after",
+            });
+        }
+
+        [Fact(Skip = "StructureMap does not mix concrete and open generics. Use constraints instead.")]
+        public async Task Should_handle_concrete_and_open_generics()
+        {
+            var output = new Logger();
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
+                });
+                cfg.For<Logger>().Singleton().Use(output);
+
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
+                cfg.For(typeof(IPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
+
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
+
+            var mediator = container.GetInstance<IMediator>();
+
+            var response = await mediator.Send(new Ping { Message = "Ping" });
+
+            response.Message.ShouldBe("Ping Pong");
+
+            output.Messages.ShouldBe(new[]
+            {
+                "Outer generic before",
+                "Inner generic before",
+                "Concrete before",
+                "Handler",
+                "Concrete after",
                 "Inner generic after",
                 "Outer generic after",
             });
