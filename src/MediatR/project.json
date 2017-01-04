@@ -1,5 +1,5 @@
 ﻿{
-  "version": "3.0.0-alpha-*",
+  "version": "3.0.0",
   "authors": [ "Jimmy Bogard" ],
   "copyright": "Copyright Jimmy Bogard",
   "description": "Simple, unambitious mediator implementation in .NET",
