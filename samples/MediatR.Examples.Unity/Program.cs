@@ -23,7 +23,7 @@
             container.RegisterType(typeof(INotificationHandler<>), typeof(GenericHandler), GetName(typeof(GenericHandler)));
             container.RegisterType(typeof(IAsyncNotificationHandler<>), typeof(GenericAsyncHandler), GetName(typeof(GenericAsyncHandler)));
             container.RegisterInstance(Console.Out);
-            container.RegisterInstance<SingleInstanceFactory>(t => container.Resolve(t));
+            container.RegisterInstance<SingleInstanceFactory>(t => container.IsRegistered(t) ? container.Resolve(t) : null);
             container.RegisterInstance<MultiInstanceFactory>(t => container.ResolveAll(t));
 
             var mediator = container.Resolve<IMediator>();
@@ -43,7 +43,7 @@
 
         static string GetName(Type type)
         {
-            return IsNotificationHandler(type) ? string.Format("HandlerFor" + type.Name) : string.Empty;
+            return "HandlerFor" + type.Name;
         }
     }
 }
