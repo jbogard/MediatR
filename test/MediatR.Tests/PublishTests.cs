@@ -51,7 +51,7 @@
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
-            
+
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
@@ -72,6 +72,37 @@
             await mediator.Publish(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+            result.ShouldContain("Ping Pong");
+            result.ShouldContain("Ping Pung");
+        }
+
+        [Fact]
+        public async Task Should_resolve_concrete_type()
+        {
+            var builder = new StringBuilder();
+            var writer = new StringWriter(builder);
+
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(INotificationHandler<>));
+                });
+                cfg.For<TextWriter>().Use(writer);
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            INotification ping = new Ping { Message = "Ping" };
+            await mediator.Publish(ping);
+
+            var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");
             result.ShouldContain("Ping Pung");
         }
