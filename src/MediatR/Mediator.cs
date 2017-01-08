@@ -4,7 +4,6 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -17,6 +16,7 @@
         private readonly MultiInstanceFactory _multiInstanceFactory;
         private static readonly ConcurrentDictionary<Type, RequestHandler> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandler>();
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandler>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -52,26 +52,11 @@
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
             where TNotification : INotification
         {
-            var notificationType = typeof(TNotification);
-            var notificationHandlers = _multiInstanceFactory(typeof(INotificationHandler<>).MakeGenericType(notificationType))
-                .Cast<INotificationHandler<TNotification>>()
-                .Select(handler =>
-                {
-                    handler.Handle(notification);
-                    return Unit.Task;
-                });
-            var asyncNotificationHandlers = _multiInstanceFactory(typeof(IAsyncNotificationHandler<>).MakeGenericType(notificationType))
-                .Cast<IAsyncNotificationHandler<TNotification>>()
-                .Select(handler => handler.Handle(notification));
-            var cancellableAsyncNotificationHandlers = _multiInstanceFactory(typeof(ICancellableAsyncNotificationHandler<>).MakeGenericType(notificationType))
-                .Cast<ICancellableAsyncNotificationHandler<TNotification>>()
-                .Select(handler => handler.Handle(notification, cancellationToken));
+            var notificationType = notification.GetType();
+            var handler = _notificationHandlers.GetOrAdd(notificationType,
+                t => (NotificationHandler)Activator.CreateInstance(typeof(NotificationHandlerImpl<>).MakeGenericType(notificationType)));
 
-            var allHandlers = notificationHandlers
-                .Concat(asyncNotificationHandlers)
-                .Concat(cancellableAsyncNotificationHandlers);
-
-            return PublishCore(allHandlers);
+            return handler.Handle(notification, cancellationToken, _multiInstanceFactory, PublishCore);
         }
 
         /// <summary>
