@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace MediatR.Internal
 {
     using System;
@@ -7,26 +9,43 @@ namespace MediatR.Internal
 
     internal abstract class RequestHandlerBase
     {
-        protected static object GetHandler(Type requestType, SingleInstanceFactory singleInstanceFactory)
+        protected static object GetHandler(Type requestType, SingleInstanceFactory singleInstanceFactory, ref Collection<Exception> resolveExceptions)
         {
             try
             {
                 return singleInstanceFactory(requestType);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                resolveExceptions?.Add(e);
                 return null;
             }
         }
 
-        protected static THandler GetHandler<THandler>(SingleInstanceFactory factory)
+        protected static THandler GetHandler<THandler>(SingleInstanceFactory factory, ref Collection<Exception> resolveExceptions)
         {
-            return (THandler) GetHandler(typeof(THandler), factory);
+            return (THandler) GetHandler(typeof(THandler), factory, ref resolveExceptions);
         }
 
-        protected static InvalidOperationException BuildException(object message)
+        protected static THandler GetHandler<THandler>(SingleInstanceFactory factory)
         {
-            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.");
+            Collection<Exception> swallowedExceptions = null;
+            return (THandler)GetHandler(typeof(THandler), factory, ref swallowedExceptions);
+        }
+
+        protected static InvalidOperationException BuildException(object message, Collection<Exception> resolveExceptions)
+        {
+            Exception innerException = null;
+            if (resolveExceptions.Count == 1)
+            {
+                innerException = resolveExceptions.First();
+            }
+            else if (resolveExceptions.Count > 1)
+            {
+                innerException = new AggregateException("Errors were encountered while resolving handlers", resolveExceptions);
+            }
+
+            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", innerException);
         }
     }
 
@@ -62,21 +81,22 @@ namespace MediatR.Internal
         {
             var initialized = false;
 
+            var resolveExceptions = new Collection<Exception>();
             LazyInitializer.EnsureInitialized(ref _handlerFactory, ref initialized, ref _syncLock,
-                () => GetHandlerFactory(factory));
+                () => GetHandlerFactory(factory, ref resolveExceptions));
 
             if (!initialized || _handlerFactory == null)
             {
-                throw BuildException(request);
+                throw BuildException(request, resolveExceptions);
             }
 
             return _handlerFactory(request, cancellationToken, factory);
         }
 
         private static Func<TRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<TResponse>>
-            GetHandlerFactory(SingleInstanceFactory factory)
+            GetHandlerFactory(SingleInstanceFactory factory, ref Collection<Exception> resolveExceptions)
         {
-            if (GetHandler<IRequestHandler<TRequest, TResponse>>(factory) != null)
+            if (GetHandler<IRequestHandler<TRequest, TResponse>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) => () =>
                 {
@@ -84,7 +104,8 @@ namespace MediatR.Internal
                     return Task.FromResult(handler.Handle(request));
                 };
             }
-            if (GetHandler<IAsyncRequestHandler<TRequest, TResponse>>(factory) != null)
+
+            if (GetHandler<IAsyncRequestHandler<TRequest, TResponse>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) =>
                 {
@@ -92,7 +113,8 @@ namespace MediatR.Internal
                     return () => handler.Handle(request);
                 };
             }
-            if (GetHandler<ICancellableAsyncRequestHandler<TRequest, TResponse>>(factory) != null)
+
+            if (GetHandler<ICancellableAsyncRequestHandler<TRequest, TResponse>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) =>
                 {
@@ -100,6 +122,7 @@ namespace MediatR.Internal
                     return () => handler.Handle(request, token);
                 };
             }
+
             return null;
         }
 
@@ -135,21 +158,22 @@ namespace MediatR.Internal
         {
             var initialized = false;
 
+            var resolveExceptions = new Collection<Exception>();
             LazyInitializer.EnsureInitialized(ref _handlerFactory, ref initialized, ref _syncLock,
-                () => GetHandlerFactory(singleInstanceFactory));
+                () => GetHandlerFactory(singleInstanceFactory, ref resolveExceptions));
 
             if (!initialized || _handlerFactory == null)
             {
-                throw BuildException(request);
+                throw BuildException(request, resolveExceptions);
             }
 
             return _handlerFactory(request, cancellationToken, singleInstanceFactory);
         }
 
         private static Func<TRequest, CancellationToken, SingleInstanceFactory, RequestHandlerDelegate<Unit>>
-            GetHandlerFactory(SingleInstanceFactory factory)
+            GetHandlerFactory(SingleInstanceFactory factory, ref Collection<Exception> resolveExceptions)
         {
-            if (GetHandler<IRequestHandler<TRequest>>(factory) != null)
+            if (GetHandler<IRequestHandler<TRequest>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) => () =>
                 {
@@ -158,7 +182,7 @@ namespace MediatR.Internal
                     return Task.FromResult(Unit.Value);
                 };
             }
-            if (GetHandler<IAsyncRequestHandler<TRequest>>(factory) != null)
+            if (GetHandler<IAsyncRequestHandler<TRequest>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) => async () =>
                 {
@@ -167,7 +191,7 @@ namespace MediatR.Internal
                     return Unit.Value;
                 };
             }
-            if (GetHandler<ICancellableAsyncRequestHandler<TRequest>>(factory) != null)
+            if (GetHandler<ICancellableAsyncRequestHandler<TRequest>>(factory, ref resolveExceptions) != null)
             {
                 return (request, token, fac) => async () =>
                 {
