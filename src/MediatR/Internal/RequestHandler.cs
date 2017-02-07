@@ -63,7 +63,7 @@ namespace MediatR.Internal
             var initialized = false;
 
             LazyInitializer.EnsureInitialized(ref _handlerFactory, ref initialized, ref _syncLock,
-                () => GetHandlerFactory(t => GetHandler(t, factory)));
+                () => GetHandlerFactory(factory));
 
             if (!initialized || _handlerFactory == null)
             {
@@ -136,7 +136,7 @@ namespace MediatR.Internal
             var initialized = false;
 
             LazyInitializer.EnsureInitialized(ref _handlerFactory, ref initialized, ref _syncLock,
-                () => GetHandlerFactory(t => GetHandler(t, singleInstanceFactory)));
+                () => GetHandlerFactory(singleInstanceFactory));
 
             if (!initialized || _handlerFactory == null)
             {
