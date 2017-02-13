@@ -187,7 +187,7 @@ namespace MediatR.Internal
                 return (request, token, fac) => async () =>
                 {
                     var handler = GetHandler<IAsyncRequestHandler<TRequest>>(fac);
-                    await handler.Handle(request);
+                    await handler.Handle(request).ConfigureAwait(false);
                     return Unit.Value;
                 };
             }
@@ -196,7 +196,7 @@ namespace MediatR.Internal
                 return (request, token, fac) => async () =>
                 {
                     var handler = GetHandler<ICancellableAsyncRequestHandler<TRequest>>(fac);
-                    await handler.Handle(request, token);
+                    await handler.Handle(request, token).ConfigureAwait(false);
                     return Unit.Value;
                 };
             }
