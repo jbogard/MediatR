@@ -20,9 +20,9 @@
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
         {
-            await Task.WhenAll(_preProcessors.Select(p => p.Process(request)));
+            await Task.WhenAll(_preProcessors.Select(p => p.Process(request))).ConfigureAwait(false);
 
-            return await next();
+            return await next().ConfigureAwait(false);
         }
     }
 }
