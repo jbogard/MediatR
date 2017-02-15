@@ -1,4 +1,4 @@
-﻿namespace MediatR.Pipeline
+namespace MediatR.Pipeline
 {
     using System.Collections.Generic;
     using System.Linq;
