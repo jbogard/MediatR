@@ -49,5 +49,34 @@
 
             response.Message.ShouldBe("Ping Pong");
         }
+
+        [Fact]
+        public async Task Should_cache_handler_factory()
+        {
+            var count = 0;
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                });
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>("", ctx => t => {
+                    count++;
+                    return ctx.GetInstance(t);
+                });
+                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            await mediator.Send(new Ping { Message = "Ping" }); // First time - call twice
+            await mediator.Send(new Ping { Message = "Ping" }); // Second time - call only once
+
+            count.ShouldBe(3);
+        }
     }
 }
