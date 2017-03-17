@@ -1,4 +1,6 @@
-﻿namespace MediatR.Examples.SimpleInjector
+﻿using MediatR.Pipeline;
+
+namespace MediatR.Examples.SimpleInjector
 {
     using System;
     using System.Collections.Generic;
@@ -28,8 +30,18 @@
             container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
             container.RegisterCollection(typeof(IAsyncNotificationHandler<>), assemblies);
             container.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>), assemblies);
-            container.RegisterCollection(typeof(IPipelineBehavior<,>), assemblies);
             container.RegisterSingleton(Console.Out);
+
+            //Pipeline
+            container.RegisterCollection(typeof(IPipelineBehavior<,>), new []
+            {
+                typeof(RequestPreProcessorBehavior<,>),
+                typeof(RequestPostProcessorBehavior<,>),
+                typeof(GenericPipelineBehavior<,>)
+            });
+            container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>)});
+            container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>) });
+
             container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
             container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
 
