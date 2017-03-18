@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using DryIoc;
+using MediatR.Pipeline;
 
 namespace MediatR.Examples.DryIoc
 {
@@ -22,6 +23,8 @@ namespace MediatR.Examples.DryIoc
             container.RegisterDelegate<SingleInstanceFactory>(r => serviceType => r.Resolve(serviceType));
             container.RegisterDelegate<MultiInstanceFactory>(r => serviceType => r.ResolveMany(serviceType));
             container.RegisterInstance(Console.Out);
+
+            //Pipeline works out of the box here
 
             container.RegisterMany(new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() }, type => type.GetTypeInfo().IsInterface); 
 

@@ -1,4 +1,6 @@
-﻿namespace MediatR.Examples.StructureMap
+﻿using MediatR.Pipeline;
+
+namespace MediatR.Examples.StructureMap
 {
     using System;
     using System.IO;
@@ -31,6 +33,14 @@
                     scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncNotificationHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(ICancellableAsyncNotificationHandler<>));
                 });
+
+                //Pipeline
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericPipelineBehavior<,>));
+                cfg.For(typeof(IRequestPreProcessor<>)).Add(typeof(GenericRequestPreProcessor<>));
+                cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(GenericRequestPostProcessor<,>));
+
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<TextWriter>().Use(Console.Out);
