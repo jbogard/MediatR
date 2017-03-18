@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Scrutor;
 
@@ -22,6 +23,13 @@ namespace MediatR.Examples.AspNetCore
             services.AddScoped<MultiInstanceFactory>(p => t => p.GetRequiredServices(t));
 
             services.AddSingleton(Console.Out);
+
+            //Pipeline
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>));
+            services.AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
+            services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>));
 
             // Use Scrutor to scan and register all
             // classes as their implemented interfaces.
