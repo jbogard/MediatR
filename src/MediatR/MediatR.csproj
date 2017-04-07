@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Simple, unambitious mediator implementation in .NET</Description>
+    <Copyright>Copyright Jimmy Bogard</Copyright>
+    <VersionPrefix>3.0.1</VersionPrefix>
+    <Authors>Jimmy Bogard</Authors>
+    <TargetFrameworks>net45;netstandard1.1</TargetFrameworks>
+    <AssemblyName>MediatR</AssemblyName>
+    <PackageId>MediatR</PackageId>
+    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/jbogard/MediatR/master/assets/logo/gradient_128x128.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/jbogard/MediatR</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/jbogard/MediatR/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>git://github.com/jbogard/mediatr</RepositoryUrl>
+    <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.0</NetStandardImplicitPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>
