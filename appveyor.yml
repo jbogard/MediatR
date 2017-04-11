@@ -1,9 +1,10 @@
-version: '{build}'
+﻿version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
   - master
+image: Visual Studio 2017
 nuget:
   disable_publish_on_pr: true
 build_script:
