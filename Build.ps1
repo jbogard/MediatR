@@ -22,7 +22,7 @@ function Exec
     }
 }
 
-if(Test-Path .\artifacts) { Remove-Item .\src\MediatR\artifacts -Force -Recurse }
+if(Test-Path .\src\MediatR\artifacts) { Remove-Item .\src\MediatR\artifacts -Force -Recurse }
 
 exec { & dotnet restore }
 
