@@ -1,9 +1,6 @@
 ﻿version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
-branches:
-  only:
-  - master
 image: Visual Studio 2017
 nuget:
   disable_publish_on_pr: true
@@ -11,7 +8,7 @@ build_script:
 - ps: .\Build.ps1
 test: off
 artifacts:
-- path: .\artifacts\**\*.nupkg
+- path: .\src\MediatR\artifacts\**\*.nupkg
   name: NuGet
 deploy:
 - provider: NuGet
@@ -26,5 +23,4 @@ deploy:
   api_key:
     secure: t3blEIQiDIYjjWhOSTTtrcAnzJkmSi+0zYPxC1v4RDzm6oI/gIpD6ZtrOGsYu2jE
   on:
-    branch: master
     appveyor_repo_tag: true
