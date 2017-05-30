@@ -49,6 +49,16 @@
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
 
+        public Task<TResponse[]> SendAll<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var requestType = request.GetType();
+
+            var handler = (MultiRequestHandler<TResponse>)_requestHandlers.GetOrAdd(requestType,
+                t => Activator.CreateInstance(typeof(MultiRequestHandlerImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+
+            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory, PublishCore);
+        }
+
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
             where TNotification : INotification
         {
@@ -65,6 +75,16 @@
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>
         protected virtual Task PublishCore(IEnumerable<Task> allHandlers)
+        {
+            return Task.WhenAll(allHandlers);
+        }
+
+        /// <summary>
+        /// Override in a derived class to control how the tasks are awaited. By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task{TResponse}})" />
+        /// </summary>
+        /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
+        /// <returns>A task representing invoking all handlers with the result from each</returns>
+        protected virtual Task<TResponse[]> PublishCore<TResponse>(IEnumerable<Task<TResponse>> allHandlers)
         {
             return Task.WhenAll(allHandlers);
         }
