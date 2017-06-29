@@ -14,9 +14,7 @@ namespace MediatR.Examples.SimpleInjector
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "SimpleInjector").Wait();
         }
 
         private static IMediator BuildMediator()

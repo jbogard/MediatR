@@ -11,9 +11,7 @@ namespace MediatR.Examples.LightInject
         {
             var mediator = BuildMediator();
             
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "LightInject").Wait();
         }
 
         private static IMediator BuildMediator()

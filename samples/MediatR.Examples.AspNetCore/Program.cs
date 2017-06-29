@@ -11,8 +11,7 @@ namespace MediatR.Examples.AspNetCore
         public static void Main(string[] args)
         {
             var mediator = BuildMediator();
-            Runner.Run(mediator, Console.Out).Wait();
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "ASP.NET Core DI").Wait();
         }
 
         private static IMediator BuildMediator()

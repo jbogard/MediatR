@@ -17,9 +17,7 @@ namespace MediatR.Examples.Autofac
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "Autofac").Wait();
         }
 
         private static IMediator BuildMediator()

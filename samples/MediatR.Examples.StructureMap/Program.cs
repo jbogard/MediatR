@@ -12,9 +12,7 @@ namespace MediatR.Examples.StructureMap
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "StructureMap").Wait();
         }
 
         private static IMediator BuildMediator()

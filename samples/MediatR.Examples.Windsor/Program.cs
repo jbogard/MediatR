@@ -15,9 +15,7 @@ namespace MediatR.Examples.Windsor
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "Castle.Windsor").Wait();
         }
 
         private static IMediator BuildMediator()

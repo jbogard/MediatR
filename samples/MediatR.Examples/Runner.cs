@@ -5,10 +5,11 @@
 
     public static class Runner
     {
-        public static async Task Run(IMediator mediator, TextWriter writer)
+        public static async Task Run(IMediator mediator, TextWriter writer, string projectName)
         {
-            await writer.WriteLineAsync("Sample mediator implementation using send, publish and post-request handlers in sync and async version.");
-            await writer.WriteLineAsync("---------------");
+            await writer.WriteLineAsync("===============");
+            await writer.WriteLineAsync(projectName);
+            await writer.WriteLineAsync("===============");
 
             await writer.WriteLineAsync("Sending Ping...");
             var pong = await mediator.Send(new Ping { Message = "Ping" });

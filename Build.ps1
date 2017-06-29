@@ -40,6 +40,15 @@ exec { & dotnet xunit -configuration Release }
 
 Pop-Location
 
-exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o .\artifacts --include-symbols --no-build --version-suffix=$suffix }
+$samples = Get-ChildItem .\samples\MediatR.Examples.*
 
+foreach ($sample in $samples) {
+    Push-Location -Path $sample
+
+    exec { & dotnet run -configuration Release --no-build }
+
+    Pop-Location
+}
+
+exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o .\artifacts --include-symbols --no-build --version-suffix=$suffix }
 

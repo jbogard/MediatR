@@ -11,9 +11,7 @@ namespace MediatR.Examples.DryIoc
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "DryIoc").Wait();
         }
 
         private static IMediator BuildMediator()

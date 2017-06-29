@@ -14,9 +14,7 @@ namespace MediatR.Examples.Ninject
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out).Wait();
-
-            Console.ReadKey();
+            Runner.Run(mediator, Console.Out, "Ninject").Wait();
         }
 
         private static IMediator BuildMediator()
