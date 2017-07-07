@@ -1,15 +1,12 @@
-﻿using System.Linq;
-using System.Reflection;
-using Autofac.Core;
-using MediatR.Pipeline;
-
-namespace MediatR.Examples.Autofac
+﻿namespace MediatR.Examples.Autofac
 {
+    using global::Autofac;
+    using MediatR.Pipeline;
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using global::Autofac;
-    using global::Autofac.Features.Variance;
+    using System.Linq;
+    using System.Reflection;
 
     internal static class Program
     {
@@ -23,31 +20,34 @@ namespace MediatR.Examples.Autofac
         private static IMediator BuildMediator()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterSource(new ContravariantRegistrationSource());
-            builder.RegisterAssemblyTypes(typeof (IMediator).GetTypeInfo().Assembly).AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(typeof(IMediator).GetTypeInfo().Assembly).AsImplementedInterfaces();
 
-            builder.RegisterAssemblyTypes(typeof (Ping).GetTypeInfo().Assembly).Where(t => 
-                    t.GetInterfaces().Any(i => i.IsClosedTypeOf(typeof(IRequestHandler<,>))
-                                            || i.IsClosedTypeOf(typeof(IAsyncRequestHandler <,>))
-                                            || i.IsClosedTypeOf(typeof(ICancellableAsyncRequestHandler<,>))
-                                            || i.IsClosedTypeOf(typeof(INotificationHandler<>))
-                                            || i.IsClosedTypeOf(typeof(IAsyncNotificationHandler<>))
-                                            || i.IsClosedTypeOf(typeof(ICancellableAsyncNotificationHandler<>))
-                                         )
-                )
-                .AsImplementedInterfaces();
+            var mediatrOpenTypes = new[]
+            {
+                typeof(IRequestHandler<,>),
+                typeof(IAsyncRequestHandler<,>),
+                typeof(ICancellableAsyncRequestHandler<,>),
+                typeof(INotificationHandler<>),
+                typeof(IAsyncNotificationHandler<>),
+                typeof(ICancellableAsyncNotificationHandler<>)
+            };
+
+            foreach (var mediatrOpenType in mediatrOpenTypes)
+            {
+                builder
+                    .RegisterAssemblyTypes(typeof(Ping).GetTypeInfo().Assembly)
+                    .AsClosedTypesOf(mediatrOpenType)
+                    .AsImplementedInterfaces();
+            }
+
             builder.RegisterInstance(Console.Out).As<TextWriter>();
 
-            //Pipeline
-            //TODO: doesn't work, too many implementations of the pipelinebehaviors:
-            // - GenericPipelineBehavior<Ping, Pong>
-            // - GenericPipelineBehavior<IRequest<Pong>, Pong>
-            // - GenericPipelineBehavior<Object, Pong>
-            //builder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
-            //builder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
-            //builder.RegisterGeneric(typeof(GenericPipelineBehavior<,>)).As(typeof(IPipelineBehavior<,>));
-            //builder.RegisterGeneric(typeof(GenericRequestPreProcessor<>)).As(typeof(IRequestPreProcessor<>));
-            //builder.RegisterGeneric(typeof(GenericRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
+            // It appears Autofac returns the last registered types first
+            builder.RegisterGeneric(typeof(GenericPipelineBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+            builder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+            builder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+            builder.RegisterGeneric(typeof(GenericRequestPreProcessor<>)).As(typeof(IRequestPreProcessor<>));
+            builder.RegisterGeneric(typeof(GenericRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
 
             builder.Register<SingleInstanceFactory>(ctx =>
             {
@@ -58,13 +58,25 @@ namespace MediatR.Examples.Autofac
                     return c.TryResolve(t, out o) ? o : null;
                 };
             });
+
             builder.Register<MultiInstanceFactory>(ctx =>
             {
                 var c = ctx.Resolve<IComponentContext>();
-                return t => (IEnumerable<object>) c.Resolve(typeof (IEnumerable<>).MakeGenericType(t));
+                return t => (IEnumerable<object>)c.Resolve(typeof(IEnumerable<>).MakeGenericType(t));
             });
-            
-            var mediator = builder.Build().Resolve<IMediator>();
+
+            var container = builder.Build();
+
+            // The below returns:
+            //  - RequestPreProcessorBehavior
+            //  - RequestPostProcessorBehavior
+            //  - GenericPipelineBehavior
+
+            //var behaviors = container
+            //    .Resolve<IEnumerable<IPipelineBehavior<Ping, Pong>>>()
+            //    .ToList();
+
+            var mediator = container.Resolve<IMediator>();
 
             return mediator;
         }
