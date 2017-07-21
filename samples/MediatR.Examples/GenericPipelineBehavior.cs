@@ -12,10 +12,10 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
         {
             _writer.WriteLine("-- Handling Request");
-            var response = next();
+            var response = await next();
             _writer.WriteLine("-- Finished Request");
             return response;
         }
