@@ -18,5 +18,9 @@ Examples in the [wiki](https://github.com/jbogard/MediatR/wiki).
 You should install [MediatR with NuGet](https://www.nuget.org/packages/MediatR):
 
     Install-Package MediatR
+    
+Or via the .NET Core command line interface:
 
-This command from Package Manager Console will download and install MediatR and all required dependencies.
+    dotnet add package MediatR
+
+Either commands, from Package Manager Console or .NET Core CLI, will download and install MediatR and all required dependencies.
