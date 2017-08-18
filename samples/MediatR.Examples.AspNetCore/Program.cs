@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Scrutor;
@@ -8,10 +9,10 @@ namespace MediatR.Examples.AspNetCore
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static Task Main(string[] args)
         {
             var mediator = BuildMediator();
-            Runner.Run(mediator, Console.Out, "ASP.NET Core DI").Wait();
+            return Runner.Run(mediator, Console.Out, "ASP.NET Core DI");
         }
 
         private static IMediator BuildMediator()
