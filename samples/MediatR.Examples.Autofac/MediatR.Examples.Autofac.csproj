@@ -5,6 +5,7 @@
     <AssemblyName>MediatR.Examples.Autofac</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.Autofac</PackageId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

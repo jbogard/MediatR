@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using LightInject;
 using MediatR.Pipeline;
 
@@ -7,11 +8,11 @@ namespace MediatR.Examples.LightInject
 {
     class Program
     {
-        static void Main(string[] args)
+        static Task Main(string[] args)
         {
             var mediator = BuildMediator();
             
-            Runner.Run(mediator, Console.Out, "LightInject").Wait();
+            return Runner.Run(mediator, Console.Out, "LightInject");
         }
 
         private static IMediator BuildMediator()

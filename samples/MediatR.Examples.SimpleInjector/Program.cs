@@ -1,4 +1,5 @@
-﻿using MediatR.Pipeline;
+using System.Threading.Tasks;
+using MediatR.Pipeline;
 
 namespace MediatR.Examples.SimpleInjector
 {
@@ -10,11 +11,11 @@ namespace MediatR.Examples.SimpleInjector
 
     internal class Program
     {
-        private static void Main(string[] args)
+        private static Task Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "SimpleInjector").Wait();
+            return Runner.Run(mediator, Console.Out, "SimpleInjector");
         }
 
         private static IMediator BuildMediator()

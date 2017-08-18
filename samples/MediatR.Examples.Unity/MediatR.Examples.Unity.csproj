@@ -5,6 +5,7 @@
     <AssemblyName>MediatR.Examples.Unity</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.Unity</PackageId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

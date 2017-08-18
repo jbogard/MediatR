@@ -1,4 +1,5 @@
-﻿using MediatR.Pipeline;
+using System.Threading.Tasks;
+using MediatR.Pipeline;
 
 namespace MediatR.Examples.StructureMap
 {
@@ -8,11 +9,11 @@ namespace MediatR.Examples.StructureMap
 
     class Program
     {
-        static void Main(string[] args)
+        static Task Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "StructureMap").Wait();
+            return Runner.Run(mediator, Console.Out, "StructureMap");
         }
 
         private static IMediator BuildMediator()

@@ -1,4 +1,4 @@
-﻿namespace MediatR.Examples.Autofac
+namespace MediatR.Examples.Autofac
 {
     using global::Autofac;
     using MediatR.Pipeline;
@@ -7,14 +7,15 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     internal static class Program
     {
-        public static void Main(string[] args)
+        public static Task Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "Autofac").Wait();
+            return Runner.Run(mediator, Console.Out, "Autofac");
         }
 
         private static IMediator BuildMediator()

@@ -5,6 +5,7 @@
     <AssemblyName>MediatR.Examples.SimpleInjector</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.SimpleInjector</PackageId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

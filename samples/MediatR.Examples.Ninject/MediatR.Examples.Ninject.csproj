@@ -5,6 +5,7 @@
     <AssemblyName>MediatR.Examples.Ninject</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.Ninject</PackageId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

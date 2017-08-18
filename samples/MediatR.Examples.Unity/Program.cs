@@ -1,17 +1,18 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Practices.Unity;
 
 namespace MediatR.Examples.Unity
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static Task Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "Unity").Wait();
+            return Runner.Run(mediator, Console.Out, "Unity");
         }
 
         private static IMediator BuildMediator()

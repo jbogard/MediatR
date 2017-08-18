@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using DryIoc;
 using MediatR.Pipeline;
 
@@ -7,11 +8,11 @@ namespace MediatR.Examples.DryIoc
 {
     class Program
     {
-        static void Main()
+        static Task Main()
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "DryIoc").Wait();
+            return Runner.Run(mediator, Console.Out, "DryIoc");
         }
 
         private static IMediator BuildMediator()

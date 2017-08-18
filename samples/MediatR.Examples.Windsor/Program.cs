@@ -1,4 +1,5 @@
-﻿using Castle.MicroKernel.Resolvers.SpecializedResolvers;
+using System.Threading.Tasks;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using MediatR.Pipeline;
 
 namespace MediatR.Examples.Windsor
@@ -11,11 +12,11 @@ namespace MediatR.Examples.Windsor
 
     internal class Program
     {
-        private static void Main(string[] args)
+        private static Task Main(string[] args)
         {
             var mediator = BuildMediator();
 
-            Runner.Run(mediator, Console.Out, "Castle.Windsor").Wait();
+            return Runner.Run(mediator, Console.Out, "Castle.Windsor");
         }
 
         private static IMediator BuildMediator()
