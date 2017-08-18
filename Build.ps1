@@ -45,7 +45,7 @@ $samples = Get-ChildItem .\samples\MediatR.Examples.*
 foreach ($sample in $samples) {
     Push-Location -Path $sample
 
-    exec { & dotnet run -configuration Release --no-build }
+    exec { & dotnet run -c Release --no-build }
 
     Pop-Location
 }

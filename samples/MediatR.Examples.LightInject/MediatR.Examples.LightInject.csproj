@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>MediatR.Examples.LightInject</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.LightInject</PackageId>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="4.0.10" />
+    <PackageReference Include="LightInject" Version="5.0.3" />
   </ItemGroup>
 
 </Project>

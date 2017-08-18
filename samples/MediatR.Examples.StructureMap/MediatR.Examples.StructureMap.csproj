@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>MediatR.Examples.StructureMap</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.StructureMap</PackageId>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="structuremap" Version="4.4.0" />
+    <PackageReference Include="structuremap" Version="4.5.2" />
   </ItemGroup>
 
 </Project>

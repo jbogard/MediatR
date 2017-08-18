@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>MediatR.Examples.Autofac</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.Autofac</PackageId>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.0.0-rc3-286" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
   </ItemGroup>
 
 </Project>
