@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using StructureMap.Pipeline;
 
 namespace MediatR.Examples.StructureMap
 {
@@ -23,8 +24,6 @@ namespace MediatR.Examples.StructureMap
                 cfg.Scan(scanner =>
                 {
                     scanner.AssemblyContainingType<Ping>();
-                    scanner.AssemblyContainingType<IMediator>();
-                    scanner.WithDefaultConventions();
                     scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncRequestHandler<,>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(ICancellableAsyncRequestHandler<,>));
@@ -39,6 +38,9 @@ namespace MediatR.Examples.StructureMap
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericPipelineBehavior<,>));
                 cfg.For(typeof(IRequestPreProcessor<>)).Add(typeof(GenericRequestPreProcessor<>));
                 cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(GenericRequestPostProcessor<,>));
+
+                // This is the default but let's be explicit. At most we should be container scoped.
+                cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
 
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
