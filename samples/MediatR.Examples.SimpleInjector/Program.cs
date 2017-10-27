@@ -28,9 +28,11 @@ namespace MediatR.Examples.SimpleInjector
 			container.Register(typeof(IRequestHandler<>), assemblies);
             container.Register(typeof(IAsyncRequestHandler<>), assemblies);
             container.Register(typeof(ICancellableAsyncRequestHandler<>), assemblies);
+            container.Register(typeof(IContextualAsyncRequestHandler<>), assemblies);
             container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
             container.RegisterCollection(typeof(IAsyncNotificationHandler<>), assemblies);
             container.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>), assemblies);
+            container.RegisterCollection(typeof(IContextualAsyncNotificationHandler<>), assemblies);
             container.RegisterSingleton(Console.Out);
 
             //Pipeline
