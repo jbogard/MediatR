@@ -1,4 +1,4 @@
-﻿namespace MediatR.Tests
+namespace MediatR.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -68,7 +68,7 @@
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, IMediatorContext context)
             {
                 _output.Messages.Add("Outer before");
                 var response = await next();
@@ -87,7 +87,7 @@
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, IMediatorContext context)
             {
                 _output.Messages.Add("Inner before");
                 var response = await next();
@@ -106,7 +106,7 @@
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context)
             {
                 _output.Messages.Add("Inner generic before");
                 var response = await next();
@@ -125,7 +125,7 @@
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context)
             {
                 _output.Messages.Add("Outer generic before");
                 var response = await next();
@@ -146,7 +146,7 @@
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context)
             {
                 _output.Messages.Add("Constrained before");
                 var response = await next();
@@ -165,7 +165,7 @@
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, IMediatorContext context)
             {
                 _output.Messages.Add("Concrete before");
                 var response = await next();

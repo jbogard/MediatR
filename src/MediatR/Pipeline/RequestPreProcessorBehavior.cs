@@ -1,4 +1,4 @@
-﻿namespace MediatR.Pipeline
+namespace MediatR.Pipeline
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -18,9 +18,9 @@
             _preProcessors = preProcessors;
         }
 
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context)
         {
-            await Task.WhenAll(_preProcessors.Select(p => p.Process(request))).ConfigureAwait(false);
+            await Task.WhenAll(_preProcessors.Select(p => p.Process(request,context))).ConfigureAwait(false);
 
             return await next().ConfigureAwait(false);
         }

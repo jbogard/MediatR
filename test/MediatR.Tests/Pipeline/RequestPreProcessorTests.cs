@@ -1,4 +1,4 @@
-﻿namespace MediatR.Tests.Pipeline
+namespace MediatR.Tests.Pipeline
 {
     using System.Threading.Tasks;
     using MediatR.Pipeline;
@@ -28,7 +28,7 @@
 
         public class PingPreProcessor : IRequestPreProcessor<Ping>
         {
-            public Task Process(Ping request)
+            public Task Process(Ping request, IMediatorContext context)
             {
                 request.Message = request.Message + " Ping";
 

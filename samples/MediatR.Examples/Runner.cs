@@ -1,4 +1,8 @@
-﻿namespace MediatR.Examples
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+
+namespace MediatR.Examples
 {
     using System.IO;
     using System.Threading.Tasks;
@@ -23,7 +27,14 @@
             await mediator.Publish(new Pinged());
 
             await writer.WriteLineAsync("Publishing Pinged async...");
-            await mediator.Publish(new PingedAsync());
+            var context = new DefaultMediatorContext()
+                                         {
+                                             Items = new Dictionary<object, object>()
+                                                     {
+                                                         {"created-at",DateTime.UtcNow}
+                                                     }
+                                         };
+            await mediator.Publish(new PingedAsync(), context: context);
         }
     }
 }

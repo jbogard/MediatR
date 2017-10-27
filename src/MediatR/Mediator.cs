@@ -29,37 +29,41 @@ namespace MediatR
             _multiInstanceFactory = multiInstanceFactory;
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken),IMediatorContext context=null)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
+
+            context = SetDefaultContext(cancellationToken, context);
 
             var requestType = request.GetType();
 
             var handler = (RequestHandler<TResponse>)_requestHandlers.GetOrAdd(requestType,
                 t => Activator.CreateInstance(typeof(RequestHandlerImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
+            return handler.Handle(request, cancellationToken,context, _singleInstanceFactory, _multiInstanceFactory);
         }
 
-        public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken), IMediatorContext context = null)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
+            context = SetDefaultContext(cancellationToken, context);
+
             var requestType = request.GetType();
 
             var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandler) Activator.CreateInstance(typeof(RequestHandlerImpl<>).MakeGenericType(requestType)));
+                t => (RequestHandler)Activator.CreateInstance(typeof(RequestHandlerImpl<>).MakeGenericType(requestType)));
 
-            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
+            return handler.Handle(request, cancellationToken,context, _singleInstanceFactory, _multiInstanceFactory);
         }
 
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken), IMediatorContext context = null)
             where TNotification : INotification
         {
             if (notification == null)
@@ -67,11 +71,23 @@ namespace MediatR
                 throw new ArgumentNullException(nameof(notification));
             }
 
+            context = SetDefaultContext(cancellationToken, context);
+
             var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
                 t => (NotificationHandler)Activator.CreateInstance(typeof(NotificationHandlerImpl<>).MakeGenericType(notificationType)));
 
-            return handler.Handle(notification, cancellationToken, _multiInstanceFactory, PublishCore);
+            return handler.Handle(notification, cancellationToken, context, _multiInstanceFactory, PublishCore);
+        }
+
+        private static IMediatorContext SetDefaultContext(CancellationToken cancellationToken, IMediatorContext context)
+        {
+            context = context ?? new DefaultMediatorContext();
+            if (context.CancellationToken == default(CancellationToken))
+            {
+                context.CancellationToken = cancellationToken;
+            }
+            return context;
         }
 
         /// <summary>
