@@ -8,43 +8,40 @@ namespace MediatR.Internal
 
     internal abstract class NotificationHandler
     {
-        public abstract Task Handle(INotification notification, CancellationToken cancellationToken, IMediatorContext context, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<Task>, Task> publish);
+        public abstract Task Handle(INotification notification, CancellationToken cancellationToken, IMediatorContext context, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<RequestHandlerDelegate<Unit>>, Task> publish);
     }
 
     internal class NotificationHandlerImpl<TNotification> : NotificationHandler
         where TNotification : INotification
     {
-        public override Task Handle(INotification notification, CancellationToken cancellationToken, IMediatorContext context, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<Task>, Task> publish)
+        public override Task Handle(INotification notification, CancellationToken cancellationToken, IMediatorContext context, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<RequestHandlerDelegate<Unit>>, Task> publish)
         {
             var handlers = GetHandlers((TNotification)notification, cancellationToken, context, multiInstanceFactory);
             var pipeline = GetPipeline((TNotification)notification, context, handlers, multiInstanceFactory, publish);
 
             return pipeline;
-            //return publish(handlers);
         }
 
-        private static async Task<Unit> GetPipeline(TNotification request, IMediatorContext context, IEnumerable<RequestHandlerDelegate<Unit>> handlers, MultiInstanceFactory factory, Func<IEnumerable<Task>, Task> publish)
+        private static async Task GetPipeline(TNotification request, IMediatorContext context, IEnumerable<RequestHandlerDelegate<Unit>> handlers, MultiInstanceFactory factory, Func<IEnumerable<RequestHandlerDelegate<Unit>>, Task> publish)
         {
             var behaviors = factory(typeof(IPipelineBehavior<TNotification, Unit>))
                 .Cast<IPipelineBehavior<TNotification, Unit>>()
                 .Reverse()
                 .ToArray();
 
-            var tasks = new List<Task<Unit>>();
+            var tasks = new List<RequestHandlerDelegate<Unit>>();
             foreach (var handle in handlers)
             {
-                RequestHandlerDelegate<Unit> x = async () =>
+                RequestHandlerDelegate<Unit> handleCoreDelegate = async () =>
                 {
                     await handle();
                     return Unit.Value;
                 };
-                var aggregate = behaviors.Aggregate(x, (next, pipeline) => () => pipeline.Handle(request, next, context));
-                tasks.Add(aggregate());
+                var aggregate = behaviors.Aggregate(handleCoreDelegate, (next, pipeline) => () => pipeline.Handle(request, next, context));
+                tasks.Add(aggregate);
             }
 
-            await Task.WhenAll(tasks);
-
-            return Unit.Value;
+            await publish(tasks);
         }
 
         private static IEnumerable<THandler> GetHandlers<THandler>(MultiInstanceFactory factory)
@@ -102,9 +99,5 @@ namespace MediatR.Internal
             return allHandlers;
         }
 
-        private Task<Unit> RequestHandlerDelegate()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace MediatR
 {
     using Internal;
@@ -29,7 +31,7 @@ namespace MediatR
             _multiInstanceFactory = multiInstanceFactory;
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken),IMediatorContext context=null)
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken), IMediatorContext context = null)
         {
             if (request == null)
             {
@@ -43,7 +45,7 @@ namespace MediatR
             var handler = (RequestHandler<TResponse>)_requestHandlers.GetOrAdd(requestType,
                 t => Activator.CreateInstance(typeof(RequestHandlerImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return handler.Handle(request, cancellationToken,context, _singleInstanceFactory, _multiInstanceFactory);
+            return handler.Handle(request, cancellationToken, context, _singleInstanceFactory, _multiInstanceFactory);
         }
 
         public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken), IMediatorContext context = null)
@@ -60,7 +62,7 @@ namespace MediatR
             var handler = _voidRequestHandlers.GetOrAdd(requestType,
                 t => (RequestHandler)Activator.CreateInstance(typeof(RequestHandlerImpl<>).MakeGenericType(requestType)));
 
-            return handler.Handle(request, cancellationToken,context, _singleInstanceFactory, _multiInstanceFactory);
+            return handler.Handle(request, cancellationToken, context, _singleInstanceFactory, _multiInstanceFactory);
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken), IMediatorContext context = null)
@@ -95,9 +97,9 @@ namespace MediatR
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual Task PublishCore(IEnumerable<Task> allHandlers)
+        protected virtual Task PublishCore(IEnumerable<RequestHandlerDelegate<Unit>> allHandlers)
         {
-            return Task.WhenAll(allHandlers);
+            return Task.WhenAll(allHandlers.Select(d => d()));
         }
     }
 }

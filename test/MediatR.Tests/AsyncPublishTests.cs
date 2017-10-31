@@ -1,4 +1,4 @@
-﻿namespace MediatR.Tests
+namespace MediatR.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -84,11 +84,11 @@
             {
             }
 
-            protected override async Task PublishCore(IEnumerable<Task> allHandlers)
+            protected override async Task PublishCore(IEnumerable<RequestHandlerDelegate<Unit>> allHandlers)
             {
                 foreach (var handler in allHandlers)
                 {
-                    await handler;
+                    await handler();
                 }
             }
         }
