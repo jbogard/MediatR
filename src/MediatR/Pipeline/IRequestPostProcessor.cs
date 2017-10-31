@@ -1,4 +1,4 @@
-﻿namespace MediatR.Pipeline
+namespace MediatR.Pipeline
 {
     using System.Threading.Tasks;
 
@@ -14,7 +14,8 @@
         /// </summary>
         /// <param name="request">Request instance</param>
         /// <param name="response">Response instance</param>
+        /// <param name="context">The context</param>
         /// <returns>An awaitable task</returns>
-        Task Process(TRequest request, TResponse response);
+        Task Process(TRequest request, TResponse response,IMediatorContext context);
     }
 }

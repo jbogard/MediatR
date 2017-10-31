@@ -18,13 +18,14 @@ namespace MediatR.Pipeline
             _postProcessors = postProcessors;
         }
 
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context)
         {
             var response = await next().ConfigureAwait(false);
 
-            await Task.WhenAll(_postProcessors.Select(p => p.Process(request, response))).ConfigureAwait(false);
+            await Task.WhenAll(_postProcessors.Select(p => p.Process(request, response,context))).ConfigureAwait(false);
 
             return response;
         }
+        
     }
 }

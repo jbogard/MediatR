@@ -1,4 +1,4 @@
-﻿namespace MediatR
+namespace MediatR
 {
     using System.Threading.Tasks;
 
@@ -22,7 +22,21 @@
         /// </summary>
         /// <param name="request">Incoming request</param>
         /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
+        /// <param name="context">The context</param>
         /// <returns>Awaitable task returning the <typeparamref name="TResponse"/></returns>
-        Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next);
+        Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, IMediatorContext context = null);
+    }
+
+
+    public interface INotificationPipelineBehaviour<in TRequest>
+    {
+        /// <summary>
+        /// Pipeline handler. Perform any additional behavior and await the <paramref name="next"/> delegate as necessary
+        /// </summary>
+        /// <param name="request">Incoming request</param>
+        /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
+        /// <param name="context">The context</param>
+        /// <returns>Awaitable task returning the <typeparamref name="TResponse"/></returns>
+        Task Handle(TRequest request, RequestHandlerDelegate<Unit> next, IMediatorContext context = null);
     }
 }

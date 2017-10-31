@@ -13,7 +13,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Process(TRequest request, TResponse response)
+        public Task Process(TRequest request, TResponse response,IMediatorContext context)
         {
             _writer.WriteLine("- All Done");
             return Task.FromResult(0);
