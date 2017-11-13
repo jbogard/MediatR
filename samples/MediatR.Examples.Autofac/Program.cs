@@ -26,6 +26,7 @@ namespace MediatR.Examples.Autofac
             var mediatrOpenTypes = new[]
             {
                 typeof(IRequestHandler<,>),
+                typeof(IRequestHandler<>),
                 typeof(IAsyncRequestHandler<,>),
                 typeof(ICancellableAsyncRequestHandler<,>),
                 typeof(INotificationHandler<>),
