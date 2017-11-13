@@ -25,7 +25,7 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Publishing Pinged async...");
             await mediator.Publish(new PingedAsync());
 
-            await writer.WriteLineAsync("Published Jing");
+            await writer.WriteLineAsync("Sending Jing...");
             await mediator.Send(new Jing { Message = "Jing" });
         }
     }
