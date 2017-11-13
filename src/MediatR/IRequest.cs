@@ -1,13 +1,13 @@
-﻿namespace MediatR
+namespace MediatR
 {
     /// <summary>
-    /// Marker interface to represent a request with a void response
+    /// Marker interface to represent a request
     /// </summary>
-    public interface IRequest : IRequest<Unit> { }
+    public interface IRequest { }
 
     /// <summary>
     /// Marker interface to represent a request with a response
     /// </summary>
     /// <typeparam name="TResponse">Response type</typeparam>
-    public interface IRequest<out TResponse> { }
+    public interface IRequest<out TResponse> : IRequest { }
 }
