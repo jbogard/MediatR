@@ -10,18 +10,20 @@ namespace MediatR.Tests
 
     public class GenericTypeConstraintsTests
     {
-        public interface IGenericTypeRequestHandlerTestClass<TRequest> where TRequest : IRequest
+        public interface IGenericTypeRequestHandlerTestClass<TRequest> where TRequest : IBaseRequest
         {
             Type[] Handle(TRequest request);
         }
 
         public abstract class GenericTypeRequestHandlerTestClass<TRequest> : IGenericTypeRequestHandlerTestClass<TRequest>
-            where TRequest : IRequest
+            where TRequest : IBaseRequest
         {
-            public bool IsIRequest { get; private set; }
+            public bool IsIRequest { get; }
 
 
-            public bool IsIRequestT { get; private set; }
+            public bool IsIRequestT { get; }
+
+            public bool IsIBaseRequest { get; }
 
             public GenericTypeRequestHandlerTestClass()
             {
@@ -29,6 +31,8 @@ namespace MediatR.Tests
                 IsIRequestT = typeof(TRequest).GetInterfaces()
                                                    .Any(x => x.IsGenericType &&
                                                              x.GetGenericTypeDefinition() == typeof(IRequest<>));
+
+                IsIBaseRequest = typeof(IBaseRequest).IsAssignableFrom(typeof(TRequest));
             }
 
             public Type[] Handle(TRequest request)
@@ -113,13 +117,16 @@ namespace MediatR.Tests
             // Create new instance of type constrained class
             var genericTypeConstraintsVoidReturn = new  GenericTypeConstraintJing();
 
-            // Assert it is of type IRequest but not IRequest<T>
+            // Assert it is of type IRequest and IRequest<T>
             Assert.True(genericTypeConstraintsVoidReturn.IsIRequest);
-            Assert.False(genericTypeConstraintsVoidReturn.IsIRequestT);
+            Assert.True(genericTypeConstraintsVoidReturn.IsIRequestT);
+            Assert.True(genericTypeConstraintsVoidReturn.IsIBaseRequest);
 
             // Verify it is of IRequest
             genericTypeConstraintsVoidReturn.Handle(jing)
-                .Select(x => x.ShouldBeOfType<IRequest>());
+                .Select(x => x.ShouldBeOfType<IRequest>())
+                .Select(x => x.ShouldBeOfType<IRequest<Unit>>())
+                .Select(x => x.ShouldBeOfType<IBaseRequest>());
         }
 
         [Fact]
@@ -135,14 +142,16 @@ namespace MediatR.Tests
             // Create new instance of type constrained class
             var genericTypeConstraintsResponseReturn = new GenericTypeConstraintPing();
 
-            // Assert it is of type IRequest and IRequest<T>
-            Assert.True(genericTypeConstraintsResponseReturn.IsIRequest);
+            // Assert it is of type IRequest<T> but not IRequest
+            Assert.False(genericTypeConstraintsResponseReturn.IsIRequest);
             Assert.True(genericTypeConstraintsResponseReturn.IsIRequestT);
+            Assert.True(genericTypeConstraintsResponseReturn.IsIBaseRequest);
 
             // Verify it is of IRequest<Pong>
             genericTypeConstraintsResponseReturn.Handle(ping)
                 .Select(x => x.ShouldBeOfType<IRequest<Pong>>())
-                .Select(x => x.ShouldBeOfType<IRequest>());
+                .Select(x => x.ShouldBeOfType<IRequest>())
+                .Select(x => x.ShouldBeOfType<IBaseRequest>());
         }
     }
 }

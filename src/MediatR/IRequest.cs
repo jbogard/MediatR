@@ -3,11 +3,16 @@ namespace MediatR
     /// <summary>
     /// Marker interface to represent a request
     /// </summary>
-    public interface IRequest { }
+    public interface IRequest : IRequest<Unit> { }
 
     /// <summary>
     /// Marker interface to represent a request with a response
     /// </summary>
     /// <typeparam name="TResponse">Response type</typeparam>
-    public interface IRequest<out TResponse> : IRequest { }
+    public interface IRequest<out TResponse> : IBaseRequest { }
+
+    /// <summary>
+    /// Allows for generic type constraints of objects implementing IRequest or IRequest<TResponse>
+    /// </summary>
+    public interface IBaseRequest { }
 }
