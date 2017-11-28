@@ -122,11 +122,14 @@ namespace MediatR.Tests
             Assert.True(genericTypeConstraintsVoidReturn.IsIRequestT);
             Assert.True(genericTypeConstraintsVoidReturn.IsIBaseRequest);
 
-            // Verify it is of IRequest
-            genericTypeConstraintsVoidReturn.Handle(jing)
-                .Select(x => x.ShouldBeOfType<IRequest>())
-                .Select(x => x.ShouldBeOfType<IRequest<Unit>>())
-                .Select(x => x.ShouldBeOfType<IBaseRequest>());
+            // Verify it is of IRequest and IBaseRequest and IRequest<Unit>
+            var results = genericTypeConstraintsVoidReturn.Handle(jing);
+
+            Assert.Equal(3, results.Length);
+
+            results.ShouldContain(typeof(IRequest<Unit>));
+            results.ShouldContain(typeof(IBaseRequest));
+            results.ShouldContain(typeof(IRequest));
         }
 
         [Fact]
@@ -147,11 +150,14 @@ namespace MediatR.Tests
             Assert.True(genericTypeConstraintsResponseReturn.IsIRequestT);
             Assert.True(genericTypeConstraintsResponseReturn.IsIBaseRequest);
 
-            // Verify it is of IRequest<Pong>
-            genericTypeConstraintsResponseReturn.Handle(ping)
-                .Select(x => x.ShouldBeOfType<IRequest<Pong>>())
-                .Select(x => x.ShouldBeOfType<IRequest>())
-                .Select(x => x.ShouldBeOfType<IBaseRequest>());
+            // Verify it is of IRequest<Pong> and IBaseRequest, but not IRequest
+            var results = genericTypeConstraintsResponseReturn.Handle(ping);
+
+            Assert.Equal(2, results.Length);
+
+            results.ShouldContain(typeof(IRequest<Pong>));
+            results.ShouldContain(typeof(IBaseRequest));
+            results.ShouldNotContain(typeof(IRequest));
         }
     }
 }
