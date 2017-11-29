@@ -15,15 +15,8 @@ namespace MediatR.Examples
             var pong = await mediator.Send(new Ping { Message = "Ping" });
             await writer.WriteLineAsync("Received: " + pong.Message);
 
-            await writer.WriteLineAsync("Sending Ping async...");
-            var response = await mediator.Send(new PingAsync { Message = "Ping" });
-            await writer.WriteLineAsync("Received async: " + response.Message);
-
             await writer.WriteLineAsync("Publishing Pinged...");
             await mediator.Publish(new Pinged());
-
-            await writer.WriteLineAsync("Publishing Pinged async...");
-            await mediator.Publish(new PingedAsync());
 
             await writer.WriteLineAsync("Sending Jing...");
             await mediator.Send(new Jing { Message = "Jing" });

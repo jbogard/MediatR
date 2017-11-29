@@ -27,11 +27,7 @@ namespace MediatR.Examples.Autofac
             {
                 typeof(IRequestHandler<,>),
                 typeof(IRequestHandler<>),
-                typeof(IAsyncRequestHandler<,>),
-                typeof(ICancellableAsyncRequestHandler<,>),
                 typeof(INotificationHandler<>),
-                typeof(IAsyncNotificationHandler<>),
-                typeof(ICancellableAsyncNotificationHandler<>)
             };
 
             foreach (var mediatrOpenType in mediatrOpenTypes)

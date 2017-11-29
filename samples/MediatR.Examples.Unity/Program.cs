@@ -41,10 +41,7 @@ namespace MediatR.Examples.Unity
         {
             return container.RegisterTypesImplementingType(assembly, typeof(IRequestHandler<>))
                             .RegisterTypesImplementingType(assembly, typeof(IRequestHandler<,>))
-                            .RegisterTypesImplementingType(assembly, typeof(IAsyncRequestHandler<>))
-                            .RegisterTypesImplementingType(assembly, typeof(IAsyncRequestHandler<,>))
-                            .RegisterTypesImplementingType(assembly, typeof(INotificationHandler<>))
-                            .RegisterTypesImplementingType(assembly, typeof(IAsyncNotificationHandler<>));
+                            .RegisterTypesImplementingType(assembly, typeof(INotificationHandler<>));
         }
 
         /// <summary>

@@ -24,13 +24,8 @@ namespace MediatR.Examples.SimpleInjector
             var assemblies = GetAssemblies().ToArray();
             container.RegisterSingleton<IMediator, Mediator>();
             container.Register(typeof(IRequestHandler<,>), assemblies);
-            container.Register(typeof(IAsyncRequestHandler<,>), assemblies);
 			container.Register(typeof(IRequestHandler<>), assemblies);
-            container.Register(typeof(IAsyncRequestHandler<>), assemblies);
-            container.Register(typeof(ICancellableAsyncRequestHandler<>), assemblies);
             container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
-            container.RegisterCollection(typeof(IAsyncNotificationHandler<>), assemblies);
-            container.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>), assemblies);
             container.RegisterSingleton(Console.Out);
 
             //Pipeline
