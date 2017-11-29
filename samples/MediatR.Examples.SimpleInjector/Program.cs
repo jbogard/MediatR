@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 
@@ -13,12 +14,13 @@ namespace MediatR.Examples.SimpleInjector
     {
         private static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, Console.Out, "SimpleInjector");
+            return Runner.Run(mediator, writer, "SimpleInjector");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
@@ -26,7 +28,7 @@ namespace MediatR.Examples.SimpleInjector
             container.Register(typeof(IRequestHandler<,>), assemblies);
 			container.Register(typeof(IRequestHandler<>), assemblies);
             container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
-            container.RegisterSingleton(Console.Out);
+            container.RegisterSingleton<TextWriter>(writer);
 
             //Pipeline
             container.RegisterCollection(typeof(IPipelineBehavior<,>), new []

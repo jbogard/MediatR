@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
-using Scrutor;
 
 namespace MediatR.Examples.AspNetCore
 {
@@ -11,18 +11,19 @@ namespace MediatR.Examples.AspNetCore
     {
         public static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
-            return Runner.Run(mediator, Console.Out, "ASP.NET Core DI");
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
+            return Runner.Run(mediator, writer, "ASP.NET Core DI");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var services = new ServiceCollection();
 
             services.AddScoped<SingleInstanceFactory>(p => p.GetRequiredService);
             services.AddScoped<MultiInstanceFactory>(p => p.GetRequiredServices);
 
-            services.AddSingleton(Console.Out);
+            services.AddSingleton<TextWriter>(writer);
 
             //Pipeline
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));

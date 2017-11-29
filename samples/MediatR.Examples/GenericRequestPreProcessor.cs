@@ -16,8 +16,7 @@ namespace MediatR.Examples
 
         public Task Process(TRequest request, CancellationToken cancellationToken)
         {
-            _writer.WriteLine("- Starting Up");
-            return Task.FromResult(0);
+            return _writer.WriteLineAsync("- Starting Up");
         }
     }
 }

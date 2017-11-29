@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -12,16 +13,17 @@ namespace MediatR.Examples.Unity
     {
         private static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, Console.Out, "Unity");
+            return Runner.Run(mediator, writer, "Unity");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var container = new UnityContainer();
 
-            container.RegisterInstance(Console.Out)
+            container.RegisterInstance<TextWriter>(writer)
                      .RegisterMediator(new HierarchicalLifetimeManager())
                      .RegisterMediatorHandlers(Assembly.GetAssembly(typeof(Ping)));
 

@@ -15,9 +15,9 @@ namespace MediatR.Examples
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            _writer.WriteLine("-- Handling Request");
+            await _writer.WriteLineAsync("-- Handling Request");
             var response = await next();
-            _writer.WriteLine("-- Finished Request");
+            await  _writer.WriteLineAsync("-- Finished Request");
             return response;
         }
     }
