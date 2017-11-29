@@ -22,7 +22,7 @@ namespace MediatR.Tests
 
         public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping message, CancellationToken token)
+            public Task<Pong> Handle(Ping message, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new Pong { Message = message.Message + " Pong" });
             }

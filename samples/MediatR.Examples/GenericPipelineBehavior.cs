@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Examples
@@ -12,7 +13,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             _writer.WriteLine("-- Handling Request");
             var response = await next();
