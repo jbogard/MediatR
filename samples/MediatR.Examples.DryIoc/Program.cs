@@ -21,7 +21,7 @@ namespace MediatR.Examples.DryIoc
 
             container.RegisterDelegate<SingleInstanceFactory>(r => r.Resolve);
             container.RegisterDelegate<MultiInstanceFactory>(r => serviceType => r.ResolveMany(serviceType));
-            container.RegisterInstance(Console.Out);
+            container.UseInstance(Console.Out);
 
             //Pipeline works out of the box here
 

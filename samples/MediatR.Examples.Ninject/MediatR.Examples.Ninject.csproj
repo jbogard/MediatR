@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ninject.extensions.conventions" Version="3.2.0" />
+    <PackageReference Include="ninject.extensions.conventions" Version="3.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

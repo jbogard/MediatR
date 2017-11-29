@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Scrutor" Version="2.0.0" />
+    <PackageReference Include="Scrutor" Version="2.1.2" />
   </ItemGroup>
 
 </Project>
