@@ -27,7 +27,9 @@ namespace MediatR.Examples.StructureMap
                     scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncRequestHandler<,>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncRequestHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(ICancellableAsyncRequestHandler<,>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(ICancellableAsyncRequestHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(IAsyncNotificationHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(ICancellableAsyncNotificationHandler<>));
