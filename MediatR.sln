@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6267E2ED-942C-497D-BFC9-B3CE0AFC276F}"
 EndProject
@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Unity", "samples\MediatR.Examples.Unity\MediatR.Examples.Unity.csproj", "{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A}"
@@ -110,5 +111,8 @@ Global
 		{24A1217D-8438-45DA-A802-0A3A7A3DDFD1} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{4A255E84-AAC5-4ED9-ABAC-822804DBA4F1} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D58286E3-878B-4ACB-8E76-F61E708D4339}
 	EndGlobalSection
 EndGlobal

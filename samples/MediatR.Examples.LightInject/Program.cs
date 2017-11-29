@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using LightInject;
@@ -12,17 +13,18 @@ namespace MediatR.Examples.LightInject
     {
         static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
-            
-            return Runner.Run(mediator, Console.Out, "LightInject");
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
+
+            return Runner.Run(mediator, writer, "LightInject");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var serviceContainer = new ServiceContainer();
             serviceContainer.Register<IMediator, Mediator>();
             serviceContainer.RegisterAssembly(typeof(IMediator).GetTypeInfo().Assembly, (serviceType, implementingType) => !serviceType.GetTypeInfo().IsClass);
-            serviceContainer.RegisterInstance(Console.Out);
+            serviceContainer.RegisterInstance<TextWriter>(writer);
 
             serviceContainer.RegisterAssembly(typeof(Ping).GetTypeInfo().Assembly, (serviceType, implementingType) =>
                 serviceType.IsConstructedGenericType &&

@@ -14,7 +14,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Handle(Pinged notification, CancellationToken token)
+        public Task Handle(Pinged notification, CancellationToken cancellationToken)
         {
             return _writer.WriteLineAsync("Got pinged async.");
         }
@@ -29,7 +29,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Handle(Pinged notification, CancellationToken token)
+        public Task Handle(Pinged notification, CancellationToken cancellationToken)
         {
             return _writer.WriteLineAsync("Got pinged also async.");
         }

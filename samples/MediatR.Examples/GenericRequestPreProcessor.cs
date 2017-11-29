@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 
@@ -13,10 +14,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Process(TRequest request)
+        public Task Process(TRequest request, CancellationToken cancellationToken)
         {
-            _writer.WriteLine("- Starting Up");
-            return Task.FromResult(0);
+            return _writer.WriteLineAsync("- Starting Up");
         }
     }
 }

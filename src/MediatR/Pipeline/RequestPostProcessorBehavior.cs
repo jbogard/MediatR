@@ -2,6 +2,7 @@ namespace MediatR.Pipeline
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -18,7 +19,7 @@ namespace MediatR.Pipeline
             _postProcessors = postProcessors;
         }
 
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var response = await next().ConfigureAwait(false);
 

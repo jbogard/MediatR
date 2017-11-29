@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
 namespace MediatR.Internal
 {
     using System;
@@ -55,7 +52,7 @@ namespace MediatR.Internal
             return multiFactory(typeof(IPipelineBehavior<TRequest, TResponse>))
                 .Cast<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, next))();
+                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
         }
     }
 
@@ -74,7 +71,7 @@ namespace MediatR.Internal
             return multiFactory(typeof(IPipelineBehavior<TRequest, Unit>))
                 .Cast<IPipelineBehavior<TRequest, Unit>>()
                 .Reverse()
-                .Aggregate((RequestHandlerDelegate<Unit>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, next))();
+                .Aggregate((RequestHandlerDelegate<Unit>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
         }
     }
 }

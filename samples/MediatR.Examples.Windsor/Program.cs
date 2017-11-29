@@ -14,12 +14,13 @@ namespace MediatR.Examples.Windsor
     {
         private static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, Console.Out, "Castle.Windsor");
+            return Runner.Run(mediator, writer, "Castle.Windsor");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var container = new WindsorContainer();
             container.Kernel.Resolver.AddSubResolver(new CollectionResolver(container.Kernel));
@@ -30,7 +31,7 @@ namespace MediatR.Examples.Windsor
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());
 
             container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
-            container.Register(Component.For<TextWriter>().Instance(Console.Out));
+            container.Register(Component.For<TextWriter>().Instance(writer));
             container.Register(Component.For<SingleInstanceFactory>().UsingFactoryMethod<SingleInstanceFactory>(k => k.Resolve));
             container.Register(Component.For<MultiInstanceFactory>().UsingFactoryMethod<MultiInstanceFactory>(k => t => (IEnumerable<object>)k.ResolveAll(t)));
 

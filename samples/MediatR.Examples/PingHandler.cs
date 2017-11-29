@@ -14,7 +14,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public async Task<Pong> Handle(Ping message, CancellationToken token)
+        public async Task<Pong> Handle(Ping message, CancellationToken cancellationToken)
         {
             await _writer.WriteLineAsync($"--- Handled Ping: {message.Message}");
             return new Pong { Message = message.Message + " Pong" };

@@ -39,7 +39,7 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
-            public Task<Pong> Handle(Ping message, CancellationToken token)
+            public Task<Pong> Handle(Ping message, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
                 return Task.FromResult(new Pong { Message = message.Message + " Pong" });
@@ -54,7 +54,7 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
-            public Task<Zong> Handle(Zing message, CancellationToken token)
+            public Task<Zong> Handle(Zing message, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
                 return Task.FromResult(new Zong { Message = message.Message + " Zong" });
@@ -70,7 +70,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Outer before");
                 var response = await next();
@@ -89,7 +89,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Inner before");
                 var response = await next();
@@ -108,7 +108,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Inner generic before");
                 var response = await next();
@@ -127,7 +127,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Outer generic before");
                 var response = await next();
@@ -148,7 +148,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Constrained before");
                 var response = await next();
@@ -167,7 +167,7 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Concrete before");
                 var response = await next();

@@ -12,12 +12,13 @@ namespace MediatR.Examples.StructureMap
     {
         static Task Main(string[] args)
         {
-            var mediator = BuildMediator();
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, Console.Out, "StructureMap");
+            return Runner.Run(mediator, writer, "StructureMap");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var container = new Container(cfg =>
             {
@@ -41,7 +42,7 @@ namespace MediatR.Examples.StructureMap
 
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => ctx.GetInstance);
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => ctx.GetAllInstances);
-                cfg.For<TextWriter>().Use(Console.Out);
+                cfg.For<TextWriter>().Use(writer);
             });
 
 

@@ -13,7 +13,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Handle(Jing message, CancellationToken token)
+        public Task Handle(Jing message, CancellationToken cancellationToken)
         {
             return _writer.WriteLineAsync($"--- Handled Jing: {message.Message}, no Jong");
         }

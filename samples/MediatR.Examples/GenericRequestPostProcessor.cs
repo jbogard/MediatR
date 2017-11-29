@@ -15,8 +15,7 @@ namespace MediatR.Examples
 
         public Task Process(TRequest request, TResponse response)
         {
-            _writer.WriteLine("- All Done");
-            return Task.FromResult(0);
+            return _writer.WriteLineAsync("- All Done");
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using DryIoc;
@@ -10,18 +11,19 @@ namespace MediatR.Examples.DryIoc
     {
         static Task Main()
         {
-            var mediator = BuildMediator();
+            var writer = new WrappingWriter(Console.Out);
+            var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, Console.Out, "DryIoc");
+            return Runner.Run(mediator, writer, "DryIoc");
         }
 
-        private static IMediator BuildMediator()
+        private static IMediator BuildMediator(WrappingWriter writer)
         {
             var container = new Container();
 
             container.RegisterDelegate<SingleInstanceFactory>(r => r.Resolve);
             container.RegisterDelegate<MultiInstanceFactory>(r => serviceType => r.ResolveMany(serviceType));
-            container.UseInstance(Console.Out);
+            container.UseInstance<TextWriter>(writer);
 
             //Pipeline works out of the box here
 
