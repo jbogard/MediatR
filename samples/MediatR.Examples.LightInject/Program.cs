@@ -27,6 +27,7 @@ namespace MediatR.Examples.LightInject
                 return serviceType.IsConstructedGenericType &&
                         (
                             serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
+                            serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<>) ||
                             serviceType.GetGenericTypeDefinition() == typeof(IAsyncRequestHandler<,>) ||
                             serviceType.GetGenericTypeDefinition() == typeof(ICancellableAsyncRequestHandler<,>) ||
                             serviceType.GetGenericTypeDefinition() == typeof(INotificationHandler<>) ||

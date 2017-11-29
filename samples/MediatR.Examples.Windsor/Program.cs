@@ -26,6 +26,7 @@ namespace MediatR.Examples.Windsor
             container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces());
+            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IAsyncRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(ICancellableAsyncRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());

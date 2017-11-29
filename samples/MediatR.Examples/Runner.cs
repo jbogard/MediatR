@@ -1,4 +1,4 @@
-﻿namespace MediatR.Examples
+namespace MediatR.Examples
 {
     using System.IO;
     using System.Threading.Tasks;
@@ -24,6 +24,9 @@
 
             await writer.WriteLineAsync("Publishing Pinged async...");
             await mediator.Publish(new PingedAsync());
+
+            await writer.WriteLineAsync("Sending Jing...");
+            await mediator.Send(new Jing { Message = "Jing" });
         }
     }
 }
