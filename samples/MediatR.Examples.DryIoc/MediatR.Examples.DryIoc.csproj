@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc" Version="2.11.6" />
+    <PackageReference Include="DryIoc" Version="3.0.0-preview-02" />
   </ItemGroup>
 
 </Project>

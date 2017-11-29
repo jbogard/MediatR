@@ -1,7 +1,10 @@
-﻿using System.IO;
+using System.IO;
+using System.Threading;
 
 namespace MediatR.Examples
 {
+    using System.Threading.Tasks;
+
     public class PingHandler : IRequestHandler<Ping, Pong>
     {
         private readonly TextWriter _writer;
@@ -11,10 +14,10 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Pong Handle(Ping message)
+        public async Task<Pong> Handle(Ping message, CancellationToken token)
         {
-            _writer.WriteLine($"--- Handled Ping: {message.Message}");
-            return new Pong {Message = message.Message + " Pong"};
+            await _writer.WriteLineAsync($"--- Handled Ping: {message.Message}");
+            return new Pong { Message = message.Message + " Pong" };
         }
     }
 }

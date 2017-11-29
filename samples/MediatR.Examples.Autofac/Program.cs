@@ -27,11 +27,7 @@ namespace MediatR.Examples.Autofac
             {
                 typeof(IRequestHandler<,>),
                 typeof(IRequestHandler<>),
-                typeof(IAsyncRequestHandler<,>),
-                typeof(ICancellableAsyncRequestHandler<,>),
                 typeof(INotificationHandler<>),
-                typeof(IAsyncNotificationHandler<>),
-                typeof(ICancellableAsyncNotificationHandler<>)
             };
 
             foreach (var mediatrOpenType in mediatrOpenTypes)
@@ -45,20 +41,16 @@ namespace MediatR.Examples.Autofac
             builder.RegisterInstance(Console.Out).As<TextWriter>();
 
             // It appears Autofac returns the last registered types first
-            builder.RegisterGeneric(typeof(GenericPipelineBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(GenericRequestPreProcessor<>)).As(typeof(IRequestPreProcessor<>));
             builder.RegisterGeneric(typeof(GenericRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
+            builder.RegisterGeneric(typeof(GenericPipelineBehavior<,>)).As(typeof(IPipelineBehavior<,>));
 
             builder.Register<SingleInstanceFactory>(ctx =>
             {
                 var c = ctx.Resolve<IComponentContext>();
-                return t =>
-                {
-                    object o;
-                    return c.TryResolve(t, out o) ? o : null;
-                };
+                return t => c.Resolve(t);
             });
 
             builder.Register<MultiInstanceFactory>(ctx =>

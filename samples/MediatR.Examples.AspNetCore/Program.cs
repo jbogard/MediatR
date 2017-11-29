@@ -19,8 +19,8 @@ namespace MediatR.Examples.AspNetCore
         {
             var services = new ServiceCollection();
 
-            services.AddScoped<SingleInstanceFactory>(p => t => p.GetRequiredService(t));
-            services.AddScoped<MultiInstanceFactory>(p => t => p.GetRequiredServices(t));
+            services.AddScoped<SingleInstanceFactory>(p => p.GetRequiredService);
+            services.AddScoped<MultiInstanceFactory>(p => p.GetRequiredServices);
 
             services.AddSingleton(Console.Out);
 

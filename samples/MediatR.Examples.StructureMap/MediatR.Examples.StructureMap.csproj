@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="structuremap" Version="4.5.2" />
+    <PackageReference Include="structuremap" Version="4.5.3" />
   </ItemGroup>
 
 </Project>

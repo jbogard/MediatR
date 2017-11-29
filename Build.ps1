@@ -1,4 +1,4 @@
-﻿# Taken from psake https://github.com/psake/psake
+# Taken from psake https://github.com/psake/psake
 
 <#
 .SYNOPSIS
@@ -36,7 +36,7 @@ exec { & dotnet build MediatR.sln -c Release --version-suffix=$buildSuffix -v q 
 
 Push-Location -Path .\test\MediatR.Tests
 
-exec { & dotnet xunit -configuration Release }
+exec { & dotnet xunit -configuration Release --fx-version 2.0.0 }
 
 Pop-Location
 

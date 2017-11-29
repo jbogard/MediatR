@@ -1,5 +1,8 @@
+using System.Threading;
+
 namespace MediatR.Tests
 {
+    using System;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -24,9 +27,9 @@ namespace MediatR.Tests
                 _writer = writer;
             }
 
-            public void Handle(Ping message)
+            public Task Handle(Ping message, CancellationToken token)
             {
-                _writer.Write(message.Message + " Pong");
+                return _writer.WriteAsync(message.Message + " Pong");
             }
         }
 
@@ -40,16 +43,17 @@ namespace MediatR.Tests
             {
                 cfg.Scan(scanner =>
                 {
-                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (IRequestHandler<>));
                 });
-                cfg.For<TextWriter>().Use(writer);
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<TextWriter>().Use(writer);
                 cfg.For<IMediator>().Use<Mediator>();
             });
+
 
             var mediator = container.GetInstance<IMediator>();
 

@@ -1,6 +1,9 @@
-﻿namespace MediatR.Tests
+using System.Threading;
+
+namespace MediatR.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -25,9 +28,9 @@
                 _writer = writer;
             }
 
-            public void Handle(Ping message)
+            public Task Handle(Ping message, CancellationToken token)
             {
-                _writer.WriteLine(message.Message + " Pong");
+                return _writer.WriteLineAsync(message.Message + " Pong");
             }
         }
 
@@ -40,9 +43,9 @@
                 _writer = writer;
             }
 
-            public void Handle(Ping message)
+            public Task Handle(Ping message, CancellationToken token)
             {
-                _writer.WriteLine(message.Message + " Pung");
+                return _writer.WriteLineAsync(message.Message + " Pung");
             }
         }
 
@@ -51,20 +54,20 @@
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
-
+            
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
                 {
-                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<IMediator>().Use<Mediator>();
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
-                cfg.For<IMediator>().Use<Mediator>();
             });
 
             var mediator = container.GetInstance<IMediator>();
@@ -76,8 +79,24 @@
             result.ShouldContain("Ping Pung");
         }
 
+        public class SequentialMediator : Mediator
+        {
+            public SequentialMediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory) 
+                : base(singleInstanceFactory, multiInstanceFactory)
+            {
+            }
+
+            protected override async Task PublishCore(IEnumerable<Task> allHandlers)
+            {
+                foreach (var handler in allHandlers)
+                {
+                    await handler;
+                }
+            }
+        }
+
         [Fact]
-        public async Task Should_resolve_concrete_type()
+        public async Task Should_override_with_sequential_firing()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
@@ -86,21 +105,20 @@
             {
                 cfg.Scan(scanner =>
                 {
-                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<IMediator>().Use<SequentialMediator>();
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
-                cfg.For<IMediator>().Use<Mediator>();
             });
 
             var mediator = container.GetInstance<IMediator>();
 
-            INotification ping = new Ping { Message = "Ping" };
-            await mediator.Publish(ping);
+            await mediator.Publish(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");

@@ -1,4 +1,6 @@
-﻿namespace MediatR.Tests.Pipeline
+using System.Threading;
+
+namespace MediatR.Tests.Pipeline
 {
     using System.Threading.Tasks;
     using MediatR.Pipeline;
@@ -18,9 +20,9 @@
             public string Message { get; set; }
         }
 
-        public class PingHandler : IAsyncRequestHandler<Ping, Pong>
+        public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping message)
+            public Task<Pong> Handle(Ping message, CancellationToken token)
             {
                 return Task.FromResult(new Pong { Message = message.Message + " Pong" });
             }
@@ -43,10 +45,10 @@
             {
                 cfg.Scan(scanner =>
                 {
-                    scanner.AssemblyContainingType(typeof(AsyncPublishTests));
+                    scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IAsyncRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                     scanner.AddAllTypesOf(typeof(IRequestPreProcessor<>));
                 });
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));

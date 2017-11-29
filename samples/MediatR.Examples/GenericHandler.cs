@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace MediatR.Examples
 {
     using System.IO;
@@ -11,9 +14,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public void Handle(INotification notification)
+        public Task Handle(INotification notification, CancellationToken token)
         {
-            _writer.WriteLine("Got notified.");
+            return _writer.WriteLineAsync("Got notified.");
         }
     }
 }

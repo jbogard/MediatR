@@ -27,15 +27,11 @@ namespace MediatR.Examples.Windsor
 
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<>)).WithServiceAllInterfaces());
-            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IAsyncRequestHandler<,>)).WithServiceAllInterfaces());
-            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(ICancellableAsyncRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());
-            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IAsyncNotificationHandler<>)).WithServiceAllInterfaces());
-            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(ICancellableAsyncNotificationHandler<>)).WithServiceAllInterfaces());
 
             container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Component.For<TextWriter>().Instance(Console.Out));
-            container.Register(Component.For<SingleInstanceFactory>().UsingFactoryMethod<SingleInstanceFactory>(k => t => k.Resolve(t)));
+            container.Register(Component.For<SingleInstanceFactory>().UsingFactoryMethod<SingleInstanceFactory>(k => k.Resolve));
             container.Register(Component.For<MultiInstanceFactory>().UsingFactoryMethod<MultiInstanceFactory>(k => t => (IEnumerable<object>)k.ResolveAll(t)));
 
             //Pipeline

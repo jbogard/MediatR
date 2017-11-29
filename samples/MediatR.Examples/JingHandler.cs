@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Examples
@@ -16,9 +13,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public void Handle(Jing message)
+        public Task Handle(Jing message, CancellationToken token)
         {
-            _writer.WriteLine($"--- Handled Jing: {message.Message}, no Jong");
+            return _writer.WriteLineAsync($"--- Handled Jing: {message.Message}, no Jong");
         }
     }
 }
