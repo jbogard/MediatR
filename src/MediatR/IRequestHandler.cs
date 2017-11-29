@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace MediatR
 {
     /// <summary>
@@ -5,15 +8,16 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     /// <typeparam name="TResponse">The type of response from the handler</typeparam>
-    public interface IRequestHandler<in TRequest, out TResponse>
+    public interface IRequestHandler<in TRequest, TResponse>
         where TRequest : IRequest<TResponse>
     {
         /// <summary>
         /// Handles a request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Response from the request</returns>
-        TResponse Handle(TRequest message);
+        Task<TResponse> Handle(TRequest message, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -27,6 +31,7 @@ namespace MediatR
         /// Handles a request
         /// </summary>
         /// <param name="message">The request message</param>
-        void Handle(TRequest message);
+        /// <param name="cancellationToken">Cancellation token</param>
+        Task Handle(TRequest message, CancellationToken cancellationToken);
     }
 }

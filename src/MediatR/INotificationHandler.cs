@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace MediatR
 {
     /// <summary>
@@ -11,6 +14,7 @@ namespace MediatR
         /// Handles a notification
         /// </summary>
         /// <param name="notification">The notification message</param>
-        void Handle(TNotification notification);
+        /// <param name="cancellationToken">Cancellation token</param>
+        Task Handle(TNotification notification, CancellationToken cancellationToken);
     }
 }

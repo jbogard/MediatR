@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace MediatR.Tests
 {
     using System;
@@ -58,9 +60,10 @@ namespace MediatR.Tests
 
         public class JingHandler : IRequestHandler<Jing>
         {
-            public void Handle(Jing message)
+            public Task Handle(Jing message, CancellationToken token)
             {
                 // empty handle
+                return Task.CompletedTask;
             }
         }
 
@@ -76,9 +79,9 @@ namespace MediatR.Tests
 
         public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Pong Handle(Ping message)
+            public Task<Pong> Handle(Ping message, CancellationToken token)
             {
-                return new Pong { Message = message.Message + " Pong" };
+                return Task.FromResult(new Pong { Message = message.Message + " Pong" });
             }
         }
 
