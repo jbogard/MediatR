@@ -16,7 +16,7 @@ namespace MediatR
         private readonly MultiInstanceFactory _multiInstanceFactory;
         private static readonly ConcurrentDictionary<Type, RequestHandlerWrapper> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandlerWrapper>();
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
-        private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandler>();
+        private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -69,7 +69,7 @@ namespace MediatR
 
             var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandler)Activator.CreateInstance(typeof(NotificationHandlerImpl<>).MakeGenericType(notificationType)));
+                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
 
             return handler.Handle(notification, cancellationToken, _multiInstanceFactory, PublishCore);
         }

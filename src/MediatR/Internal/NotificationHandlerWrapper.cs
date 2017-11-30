@@ -6,12 +6,12 @@ namespace MediatR.Internal
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal abstract class NotificationHandler
+    internal abstract class NotificationHandlerWrapper
     {
         public abstract Task Handle(INotification notification, CancellationToken cancellationToken, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<Task>, Task> publish);
     }
 
-    internal class NotificationHandlerImpl<TNotification> : NotificationHandler
+    internal class NotificationHandlerWrapperImpl<TNotification> : NotificationHandlerWrapper
         where TNotification : INotification
     {
         public override Task Handle(INotification notification, CancellationToken cancellationToken, MultiInstanceFactory multiInstanceFactory, Func<IEnumerable<Task>, Task> publish)
