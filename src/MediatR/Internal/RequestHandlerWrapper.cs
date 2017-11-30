@@ -29,19 +29,19 @@ namespace MediatR.Internal
         }
     }
 
-    internal abstract class RequestHandler : RequestHandlerBase
+    internal abstract class RequestHandlerWrapper : RequestHandlerBase
     {
         public abstract Task Handle(IRequest request, CancellationToken cancellationToken,
             SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
     }
 
-    internal abstract class RequestHandler<TResponse> : RequestHandlerBase
+    internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
     }
 
-    internal class RequestHandlerImpl<TRequest, TResponse> : RequestHandler<TResponse>
+    internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
@@ -56,7 +56,7 @@ namespace MediatR.Internal
         }
     }
 
-    internal class RequestHandlerImpl<TRequest> : RequestHandler
+    internal class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
         where TRequest : IRequest
     {
         public override Task Handle(IRequest request, CancellationToken cancellationToken,

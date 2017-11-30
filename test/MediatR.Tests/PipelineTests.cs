@@ -39,10 +39,10 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
-            public Task<Pong> Handle(Ping message, CancellationToken cancellationToken)
+            public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
-                return Task.FromResult(new Pong { Message = message.Message + " Pong" });
+                return Task.FromResult(new Pong { Message = request.Message + " Pong" });
             }
         }
 
@@ -54,10 +54,10 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
-            public Task<Zong> Handle(Zing message, CancellationToken cancellationToken)
+            public Task<Zong> Handle(Zing request, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
-                return Task.FromResult(new Zong { Message = message.Message + " Zong" });
+                return Task.FromResult(new Zong { Message = request.Message + " Zong" });
             }
         }
 

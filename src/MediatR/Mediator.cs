@@ -14,7 +14,7 @@ namespace MediatR
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
         private readonly MultiInstanceFactory _multiInstanceFactory;
-        private static readonly ConcurrentDictionary<Type, RequestHandler> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandler>();
+        private static readonly ConcurrentDictionary<Type, RequestHandlerWrapper> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandlerWrapper>();
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
         private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandler>();
 
@@ -38,8 +38,8 @@ namespace MediatR
 
             var requestType = request.GetType();
 
-            var handler = (RequestHandler<TResponse>)_requestHandlers.GetOrAdd(requestType,
-                t => Activator.CreateInstance(typeof(RequestHandlerImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+            var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
+                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
@@ -54,7 +54,7 @@ namespace MediatR
             var requestType = request.GetType();
 
             var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandler) Activator.CreateInstance(typeof(RequestHandlerImpl<>).MakeGenericType(requestType)));
+                t => (RequestHandlerWrapper) Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
 
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }

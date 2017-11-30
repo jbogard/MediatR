@@ -14,10 +14,82 @@ namespace MediatR
         /// <summary>
         /// Handles a request
         /// </summary>
-        /// <param name="message">The request message</param>
+        /// <param name="request">The request message</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Response from the request</returns>
-        Task<TResponse> Handle(TRequest message, CancellationToken cancellationToken);
+        Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
+    }
+
+    /// <summary>
+    /// Wrapper class for a handler that asynchronously handles a request and returns a response, ignoring the cancellation token
+    /// </summary>
+    /// <typeparam name="TRequest">The type of request being handled</typeparam>
+    /// <typeparam name="TResponse">The type of response from the handler</typeparam>
+    public abstract class AsyncRequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
+    {
+        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
+            => HandleCore(request);
+
+        /// <summary>
+        /// Override in a derived class for the handler logic
+        /// </summary>
+        /// <param name="request">Request</param>
+        /// <returns>Response</returns>
+        protected abstract Task<TResponse> HandleCore(TRequest request);
+    }
+
+    /// <summary>
+    /// Wrapper class for a handler that asynchronously handles a request and does not return a response, ignoring the cancellation token
+    /// </summary>
+    /// <typeparam name="TRequest">The type of request being handled</typeparam>
+    public abstract class AsyncRequestHandler<TRequest> : IRequestHandler<TRequest>
+        where TRequest : IRequest
+    {
+        public Task Handle(TRequest message, CancellationToken cancellationToken)
+            => HandleCore(message);
+
+        /// <summary>
+        /// Override in a derived class for the handler logic
+        /// </summary>
+        /// <param name="request">Request</param>
+        /// <returns>Response</returns>
+        protected abstract Task HandleCore(TRequest request);
+    }
+
+    /// <summary>
+    /// Wrapper class for a handler that synchronously handles a request and returns a response
+    /// </summary>
+    /// <typeparam name="TRequest">The type of request being handled</typeparam>
+    /// <typeparam name="TResponse">The type of response from the handler</typeparam>
+    public abstract class RequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
+    {
+        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
+            => Task.FromResult(HandleCore(request));
+
+        /// <summary>
+        /// Override in a derived class for the handler logic
+        /// </summary>
+        /// <param name="request">Request</param>
+        /// <returns>Response</returns>
+        protected abstract TResponse HandleCore(TRequest request);
+    }
+
+    /// <summary>
+    /// Wrapper class for a handler that synchronously handles a request does not return a response
+    /// </summary>
+    /// <typeparam name="TRequest">The type of request being handled</typeparam>
+    public abstract class RequestHandler<TRequest> : IRequestHandler<TRequest>
+        where TRequest : IRequest
+    {
+        public Task Handle(TRequest message, CancellationToken cancellationToken)
+        {
+            HandleCore(message);
+            return Unit.Task;
+        }
+
+        protected abstract void HandleCore(TRequest message);
     }
 
     /// <summary>
