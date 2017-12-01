@@ -60,7 +60,7 @@ namespace MediatR
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
-            where TNotification : INotification
+            where TNotification : class, INotification
         {
             if (notification == null)
             {

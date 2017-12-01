@@ -8,6 +8,7 @@ namespace MediatR.Internal
     internal abstract class RequestHandlerBase
     {
         protected static THandler GetHandler<THandler>(SingleInstanceFactory factory)
+            where THandler : class
         {
             THandler handler;
 
