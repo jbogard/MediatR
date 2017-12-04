@@ -3,9 +3,9 @@
   <PropertyGroup>
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>4.0.0</VersionPrefix>
+    <VersionPrefix>4.0.1</VersionPrefix>
     <Authors>Jimmy Bogard</Authors>
-    <TargetFrameworks>netstandard1.1</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.1</TargetFrameworks>
     <AssemblyName>MediatR</AssemblyName>
     <PackageId>MediatR</PackageId>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
@@ -15,4 +15,10 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/jbogard/mediatr</RepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
 </Project>
