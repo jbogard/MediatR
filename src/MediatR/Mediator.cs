@@ -44,6 +44,21 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }
 
+        public Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default(CancellationToken)) where TRequest : IRequest<TResponse>
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var requestType = typeof(TRequest);
+
+            var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
+                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+
+            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
+        }
+
         public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (request == null)
@@ -54,7 +69,20 @@ namespace MediatR
             var requestType = request.GetType();
 
             var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandlerWrapper) Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
+                t => (RequestHandlerWrapper)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
+
+            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
+        }
+
+        public Task Send(Type requestType, IRequest request, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var handler = _voidRequestHandlers.GetOrAdd(requestType,
+                t => (RequestHandlerWrapper)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
 
             return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
         }

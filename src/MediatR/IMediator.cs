@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,12 +19,31 @@ namespace MediatR
         Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
+        /// Asynchronously send a request to a single handler
+        /// </summary>
+        /// <typeparam name="TRequest">Request type</typeparam>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
+        Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default(CancellationToken)) where TRequest : IRequest<TResponse>;
+        
+        /// <summary>
         /// Asynchronously send a request to a single handler without expecting a response
         /// </summary>
         /// <param name="request">Request object</param>
         /// <param name="cancellationToken">Optional cancellation token</param>
         /// <returns>A task that represents the send operation.</returns>
         Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Asynchronously send a request to a single handler without expecting a response
+        /// </summary>
+        /// <param name="requestType">Request type</param>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the send operation.</returns>
+        Task Send(Type requestType, IRequest request, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously send a notification to multiple handlers
