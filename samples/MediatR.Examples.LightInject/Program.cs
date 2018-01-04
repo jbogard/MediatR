@@ -41,6 +41,8 @@ namespace MediatR.Examples.LightInject
             serviceContainer.Register(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>));
             serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
             serviceContainer.Register(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>));
+            serviceContainer.Register(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>));
+            serviceContainer.Register(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>));
 
 
             serviceContainer.Register<SingleInstanceFactory>(fac => fac.GetInstance);

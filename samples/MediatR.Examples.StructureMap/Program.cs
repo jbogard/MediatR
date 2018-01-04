@@ -36,6 +36,10 @@ namespace MediatR.Examples.StructureMap
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericPipelineBehavior<,>));
                 cfg.For(typeof(IRequestPreProcessor<>)).Add(typeof(GenericRequestPreProcessor<>));
                 cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(GenericRequestPostProcessor<,>));
+                cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(ConstrainedRequestPostProcessor<,>));
+
+                //Constrained notification handlers
+                cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
 
                 // This is the default but let's be explicit. At most we should be container scoped.
                 cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();

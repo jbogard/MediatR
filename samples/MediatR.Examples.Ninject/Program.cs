@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using Ninject.Syntax;
 
 namespace MediatR.Examples.Ninject
 {
@@ -27,7 +29,7 @@ namespace MediatR.Examples.Ninject
             kernel.Bind<TextWriter>().ToConstant(writer);
 
             kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<,>)).BindAllInterfaces());
-             kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<>)).BindAllInterfaces());
+            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<>)).BindAllInterfaces());
             kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(INotificationHandler<>)).BindAllInterfaces());
 
             //Pipeline
@@ -36,13 +38,36 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(typeof(IPipelineBehavior<,>)).To(typeof(GenericPipelineBehavior<,>));
             kernel.Bind(typeof(IRequestPreProcessor<>)).To(typeof(GenericRequestPreProcessor<>));
             kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(GenericRequestPostProcessor<,>));
+            kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(ConstrainedRequestPostProcessor<,>));
+            kernel.Bind(typeof(INotificationHandler<>)).To(typeof(ConstrainedPingedHandler<>)).WhenNotificationMatchesType<Pinged>();
 
             kernel.Bind<SingleInstanceFactory>().ToMethod(ctx => t => ctx.Kernel.TryGet(t));
-            kernel.Bind<MultiInstanceFactory>().ToMethod(ctx => t => ctx.Kernel.GetAll(t));
+            kernel.Bind<MultiInstanceFactory>().ToMethod(ctx => t =>
+            {
+                try
+                {
+                    return ctx.Kernel.GetAll(t).ToList();
+                }
+                catch (Exception e)
+                {
+                    writer.WriteLine(e.ToString());
+                    return new object[0];
+                }
+            });
 
             var mediator = kernel.Get<IMediator>();
 
             return mediator;
         }
     }
+
+    public static class BindingExtensions
+    {
+        public static IBindingInNamedWithOrOnSyntax<object> WhenNotificationMatchesType<TNotification>(this IBindingWhenSyntax<object> syntax)
+            where TNotification : INotification
+        {
+            return syntax.When(request => typeof(TNotification).IsAssignableFrom(request.Service.GenericTypeArguments.Single()));
+        }
+    }
+
 }

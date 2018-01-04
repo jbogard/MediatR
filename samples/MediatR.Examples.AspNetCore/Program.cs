@@ -32,6 +32,10 @@ namespace MediatR.Examples.AspNetCore
             services.AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
             services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>));
 
+            //This causes a type load exception. https://github.com/jbogard/MediatR.Extensions.Microsoft.DependencyInjection/issues/12
+            //services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>));
+            //services.AddScoped(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>));
+
             // Use Scrutor to scan and register all
             // classes as their implemented interfaces.
             services.Scan(scan => scan

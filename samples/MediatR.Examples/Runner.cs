@@ -22,29 +22,74 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Publishing Pinged...");
             await mediator.Publish(new Pinged());
 
+            await writer.WriteLineAsync("Publishing Ponged...");
+            await mediator.Publish(new Ponged());
+
+            bool failedJing = false;
             await writer.WriteLineAsync("Sending Jing...");
-            await mediator.Send(new Jing { Message = "Jing" });
+            try
+            {
+                await mediator.Send(new Jing { Message = "Jing" });
+            }
+            catch (Exception e)
+            {
+                failedJing = true;
+                await writer.WriteLineAsync(e.ToString());
+            }
 
             await writer.WriteLineAsync("---------------");
             var contents = writer.Contents;
-            await writer.WriteLineAsync($"Request Handler...................{(contents.Contains("--- Handled Ping:") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Void Request Handler..............{(contents.Contains("--- Handled Jing:") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Pipeline Behavior.................{(contents.Contains("-- Handling Request") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Pre-Processor.....................{(contents.Contains("- Starting Up") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Post-Processor....................{(contents.Contains("- All Done") ? "Y" : "N")}");
             var order = new[] {
                 contents.IndexOf("- Starting Up", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("-- Handling Request", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("--- Handled Ping", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("-- Finished Request", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("- All Done", StringComparison.OrdinalIgnoreCase),
-                };
-            var isOrdered = order.SequenceEqual(order.OrderBy(i => i));
-            await writer.WriteLineAsync($"Ordered Behaviors.................{(isOrdered ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Notification Handler..............{(contents.Contains("Got pinged async") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Notification Handlers.............{(contents.Contains("Got pinged async") && contents.Contains("Got pinged also async") ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Covariant Notification Handler....{(contents.Contains("Got notified") ? "Y" : "N")}");
+                contents.IndexOf("- All Done with Ping", StringComparison.OrdinalIgnoreCase),
+            };
+
+            var results = new RunResults
+            {
+                RequestHandlers = contents.Contains("--- Handled Ping:"),
+                VoidRequestsHandlers = contents.Contains("--- Handled Jing:"),
+                PipelineBehaviors = contents.Contains("-- Handling Request"),
+                RequestPreProcessors = contents.Contains("- Starting Up"),
+                RequestPostProcessors = contents.Contains("- All Done"),
+                ConstrainedGenericBehaviors = contents.Contains("- All Done with Ping") && !failedJing,
+                OrderedPipelineBehaviors = order.SequenceEqual(order.OrderBy(i => i)),
+                NotificationHandler = contents.Contains("Got pinged async"),
+                MultipleNotificationHandlers = contents.Contains("Got pinged async") && contents.Contains("Got pinged also async"),
+                ConstrainedGenericNotificationHandler = contents.Contains("Got pinged constrained async"),
+                CovariantNotificationHandler = contents.Contains("Got notified")
+            };
+
+            await writer.WriteLineAsync($"Request Handler...................{(results.RequestHandlers ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Void Request Handler..............{(results.VoidRequestsHandlers ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Pipeline Behavior.................{(results.PipelineBehaviors ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Pre-Processor.....................{(results.RequestPreProcessors ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Post-Processor....................{(results.RequestPostProcessors ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Constrained Post-Processor........{(results.ConstrainedGenericBehaviors ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Ordered Behaviors.................{(results.OrderedPipelineBehaviors ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Notification Handler..............{(results.NotificationHandler ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Notification Handlers.............{(results.MultipleNotificationHandlers ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Constrained Notification Handler..{(results.ConstrainedGenericNotificationHandler ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Covariant Notification Handler....{(results.CovariantNotificationHandler ? "Y" : "N")}");
         }
+    }
+
+    public class RunResults
+    {
+        public bool RequestHandlers { get; set; }
+        public bool VoidRequestsHandlers { get; set; }
+        public bool PipelineBehaviors { get; set; }
+        public bool RequestPreProcessors { get; set; }
+        public bool RequestPostProcessors { get; set; }
+        public bool OrderedPipelineBehaviors { get; set; }
+        public bool ConstrainedGenericBehaviors { get; set; }
+        public bool NotificationHandler { get; set; }
+        public bool MultipleNotificationHandlers { get; set; }
+        public bool CovariantNotificationHandler { get; set; }
+        public bool ConstrainedGenericNotificationHandler { get; set; }
     }
 
     public class WrappingWriter : TextWriter

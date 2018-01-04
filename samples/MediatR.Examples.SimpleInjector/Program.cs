@@ -37,8 +37,8 @@ namespace MediatR.Examples.SimpleInjector
                 typeof(RequestPostProcessorBehavior<,>),
                 typeof(GenericPipelineBehavior<,>)
             });
-            container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>)});
-            container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>) });
+            container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
+            container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
             container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
             container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
