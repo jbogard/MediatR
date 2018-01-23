@@ -62,7 +62,7 @@ namespace MediatR.Tests
 
         public class VoidNullPingHandler : IRequestHandler<VoidNullPing>
         {
-            public Task Handle(VoidNullPing message, CancellationToken cancellationToken)
+            public Task Handle(VoidNullPing request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(0);
             }

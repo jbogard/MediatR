@@ -13,9 +13,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Handle(Jing message, CancellationToken cancellationToken)
+        public Task Handle(Jing request, CancellationToken cancellationToken)
         {
-            return _writer.WriteLineAsync($"--- Handled Jing: {message.Message}, no Jong");
+            return _writer.WriteLineAsync($"--- Handled Jing: {request.Message}, no Jong");
         }
     }
 }
