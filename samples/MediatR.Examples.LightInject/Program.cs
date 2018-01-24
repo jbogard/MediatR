@@ -48,7 +48,7 @@ namespace MediatR.Examples.LightInject
                 }, type => new PerContainerLifetime());
                    
             serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));            
-            serviceContainer.Register(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>));
+            
 
             serviceContainer.Register<SingleInstanceFactory>(fac => fac.GetInstance);
             serviceContainer.Register<MultiInstanceFactory>(fac => fac.GetAllInstances);
