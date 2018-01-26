@@ -13,7 +13,7 @@ namespace MediatR
         /// <summary>
         /// Handles a notification
         /// </summary>
-        /// <param name="notification">The notification message</param>
+        /// <param name="notification">The notification</param>
         /// <param name="cancellationToken">Cancellation token</param>
         Task Handle(TNotification notification, CancellationToken cancellationToken);
     }

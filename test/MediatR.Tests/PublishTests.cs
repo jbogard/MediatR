@@ -28,9 +28,9 @@ namespace MediatR.Tests
                 _writer = writer;
             }
 
-            public Task Handle(Ping message, CancellationToken cancellationToken)
+            public Task Handle(Ping notification, CancellationToken cancellationToken)
             {
-                return _writer.WriteLineAsync(message.Message + " Pong");
+                return _writer.WriteLineAsync(notification.Message + " Pong");
             }
         }
 
@@ -43,9 +43,9 @@ namespace MediatR.Tests
                 _writer = writer;
             }
 
-            public Task Handle(Ping message, CancellationToken cancellationToken)
+            public Task Handle(Ping notification, CancellationToken cancellationToken)
             {
-                return _writer.WriteLineAsync(message.Message + " Pung");
+                return _writer.WriteLineAsync(notification.Message + " Pung");
             }
         }
 

@@ -60,7 +60,7 @@ namespace MediatR.Tests
 
         public class JingHandler : IRequestHandler<Jing>
         {
-            public Task Handle(Jing message, CancellationToken cancellationToken)
+            public Task Handle(Jing request, CancellationToken cancellationToken)
             {
                 // empty handle
                 return Task.CompletedTask;
