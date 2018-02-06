@@ -19,7 +19,7 @@ namespace MediatR
     }
 
     /// <summary>
-    /// Wrapper calss for a synchronous notification handler
+    /// Wrapper class for a synchronous notification handler
     /// </summary>
     /// <typeparam name="TNotification">The notification type</typeparam>
     public abstract class NotificationHandler<TNotification> : INotificationHandler<TNotification>
