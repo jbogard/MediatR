@@ -27,7 +27,15 @@ namespace MediatR.Examples.SimpleInjector
             container.RegisterSingleton<IMediator, Mediator>();
             container.Register(typeof(IRequestHandler<,>), assemblies);
 			container.Register(typeof(IRequestHandler<>), assemblies);
-            container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
+
+            // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
+            var notificationHandlerTypes = container.GetTypesToRegister(typeof(INotificationHandler<>), assemblies, new TypesToRegisterOptions
+            {
+                IncludeGenericTypeDefinitions = true,
+                IncludeComposites = false,
+            });
+            container.RegisterCollection(typeof(INotificationHandler<>), notificationHandlerTypes);
+
             container.RegisterSingleton<TextWriter>(writer);
 
             //Pipeline
