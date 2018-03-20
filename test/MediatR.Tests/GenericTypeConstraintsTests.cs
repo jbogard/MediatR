@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Threading;
 
 namespace MediatR.Tests
@@ -31,7 +32,7 @@ namespace MediatR.Tests
             {
                 IsIRequest = typeof(IRequest).IsAssignableFrom(typeof(TRequest));
                 IsIRequestT = typeof(TRequest).GetInterfaces()
-                                                   .Any(x => x.IsGenericType &&
+                                                   .Any(x => x.GetTypeInfo().IsGenericType &&
                                                              x.GetGenericTypeDefinition() == typeof(IRequest<>));
 
                 IsIBaseRequest = typeof(IBaseRequest).IsAssignableFrom(typeof(TRequest));

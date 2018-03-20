@@ -36,11 +36,11 @@ $versionSuffix = @{ $true = "--version-suffix=$($suffix)"; $false = ""}[$suffix 
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix" 
 
-exec { & dotnet build MediatR.sln -c Release --version-suffix=$buildSuffix -v q /nologo }
+exec { & dotnet build MediatR.sln -c Release --version-suffix=$buildSuffix }
 
 Push-Location -Path .\test\MediatR.Tests
 
-exec { & dotnet xunit -configuration Release --fx-version 2.0.0 }
+exec { & dotnet xunit -configuration Release --no-build }
 
 Pop-Location
 
