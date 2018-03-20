@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
     <AssemblyName>MediatR.Tests</AssemblyName>
     <PackageId>MediatR.Tests</PackageId>
   </PropertyGroup>
@@ -23,5 +23,9 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
+  </PropertyGroup>
 
 </Project>
