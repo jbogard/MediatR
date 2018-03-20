@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "MediatR.Examples.DryIocZero": {
+      "commandName": "Project"
+    }
+  }
+}
