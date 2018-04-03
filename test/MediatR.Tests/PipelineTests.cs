@@ -198,7 +198,7 @@ namespace MediatR.Tests
                 cfg.For<Logger>().Singleton().Use(output);
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
@@ -237,7 +237,7 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
 
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
@@ -279,7 +279,7 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
 
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
@@ -338,7 +338,7 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
 
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });

@@ -49,7 +49,7 @@ namespace MediatR.Examples.Unity
         public static IUnityContainer RegisterMediator(this IUnityContainer container, LifetimeManager lifetimeManager)
         {
             return container.RegisterType<IMediator, Mediator>(lifetimeManager)
-                .RegisterInstance<SingleInstanceFactory>(t => container.IsRegistered(t) ? container.Resolve(t) : null)
+                .RegisterInstance<ServiceFactory>(t => container.IsRegistered(t) ? container.Resolve(t) : null)
                 .RegisterInstance<MultiInstanceFactory>(t =>
                 {
                     var allHandlers = container.ResolveAll(t).ToList();

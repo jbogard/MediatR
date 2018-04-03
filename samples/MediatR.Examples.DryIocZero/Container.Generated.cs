@@ -262,7 +262,7 @@ namespace DryIocZero
         // typeof(MediatR.IMediator)
         internal static object Get1_IMediator(IResolverContext r)
         {
-            return new MediatR.Mediator((MediatR.SingleInstanceFactory)r.Resolve(typeof(MediatR.SingleInstanceFactory), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IMediator), default(System.Type), (object)null, 28, FactoryType.Service, typeof(MediatR.Mediator), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])), (MediatR.MultiInstanceFactory)r.Resolve(typeof(MediatR.MultiInstanceFactory), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IMediator), default(System.Type), (object)null, 28, FactoryType.Service, typeof(MediatR.Mediator), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
+            return new MediatR.Mediator((MediatR.ServiceFactory)r.Resolve(typeof(MediatR.ServiceFactory), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IMediator), default(System.Type), (object)null, 28, FactoryType.Service, typeof(MediatR.Mediator), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])), (MediatR.MultiInstanceFactory)r.Resolve(typeof(MediatR.MultiInstanceFactory), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IMediator), default(System.Type), (object)null, 28, FactoryType.Service, typeof(MediatR.Mediator), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
         }
 
         // typeof(MediatR.INotification)

@@ -44,7 +44,7 @@ namespace MediatR.Examples.StructureMap
                 // This is the default but let's be explicit. At most we should be container scoped.
                 cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
 
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => ctx.GetInstance);
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => ctx.GetAllInstances);
                 cfg.For<TextWriter>().Use(writer);
             });

@@ -44,7 +44,7 @@ namespace MediatR.Examples.Lamar
                 // This is the default but let's be explicit. At most we should be container scoped.
                 cfg.For<IMediator>().Use<Mediator>().Transient();
 
-                cfg.For<SingleInstanceFactory>().Use(ctx => ctx.GetInstance);
+                cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
                 cfg.For<MultiInstanceFactory>().Use(ctx => type => ctx.GetAllInstances(type).Cast<object>());
                 cfg.For<TextWriter>().Use(writer);
             });

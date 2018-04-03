@@ -19,7 +19,7 @@ namespace MediatR.Examples.DryIoc
         {
             var container = new Container();
 
-            container.RegisterDelegate<SingleInstanceFactory>(r => r.Resolve);
+            container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
             container.RegisterDelegate<MultiInstanceFactory>(r => serviceType => r.ResolveMany(serviceType));
             container.UseInstance<TextWriter>(writer);
 

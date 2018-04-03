@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace MediatR.Internal
 {
     using System;
@@ -7,13 +9,13 @@ namespace MediatR.Internal
 
     internal abstract class RequestHandlerBase
     {
-        protected static THandler GetHandler<THandler>(SingleInstanceFactory factory)
+        protected static THandler GetHandler<THandler>(ServiceFactory factory)
         {
             THandler handler;
 
             try
             {
-                handler = (THandler)factory(typeof(THandler));
+                handler = factory.GetInstance<THandler>();
             }
             catch (Exception e)
             {
@@ -32,25 +34,25 @@ namespace MediatR.Internal
     internal abstract class RequestHandlerWrapper : RequestHandlerBase
     {
         public abstract Task Handle(IRequest request, CancellationToken cancellationToken,
-            SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
+            ServiceFactory serviceFactory);
     }
 
     internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
-            SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory);
+            ServiceFactory serviceFactory);
     }
 
     internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
-            SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory)
+            ServiceFactory serviceFactory)
         {
-            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(singleFactory).Handle((TRequest) request, cancellationToken);
+            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
 
-            return multiFactory(typeof(IPipelineBehavior<TRequest, TResponse>))
-                .Cast<IPipelineBehavior<TRequest, TResponse>>()
+            return serviceFactory
+                .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
                 .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
         }
@@ -60,16 +62,16 @@ namespace MediatR.Internal
         where TRequest : IRequest
     {
         public override Task Handle(IRequest request, CancellationToken cancellationToken,
-            SingleInstanceFactory singleFactory, MultiInstanceFactory multiFactory)
+            ServiceFactory serviceFactory)
         {
             async Task<Unit> Handler()
             {
-                await GetHandler<IRequestHandler<TRequest>>(singleFactory).Handle((TRequest) request, cancellationToken).ConfigureAwait(false);
+                await GetHandler<IRequestHandler<TRequest>>(serviceFactory).Handle((TRequest) request, cancellationToken).ConfigureAwait(false);
                 return Unit.Value;
             }
 
-            return multiFactory(typeof(IPipelineBehavior<TRequest, Unit>))
-                .Cast<IPipelineBehavior<TRequest, Unit>>()
+            return serviceFactory
+                .GetInstances<IPipelineBehavior<TRequest, Unit>>()
                 .Reverse()
                 .Aggregate((RequestHandlerDelegate<Unit>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
         }

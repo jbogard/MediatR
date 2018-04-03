@@ -101,7 +101,7 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                     scanner.AddAllTypesOf(typeof(IRequestHandler<>));
                 });
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
