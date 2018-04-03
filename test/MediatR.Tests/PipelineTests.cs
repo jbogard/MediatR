@@ -199,7 +199,6 @@ namespace MediatR.Tests
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 
@@ -238,7 +237,6 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
 
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 
@@ -280,7 +278,6 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
 
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 
@@ -339,7 +336,6 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
 
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 
