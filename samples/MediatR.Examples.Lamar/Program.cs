@@ -3,7 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlueMilk;
+using Lamar;
 using MediatR.Pipeline;
 
 namespace MediatR.Examples.BlueMilk
