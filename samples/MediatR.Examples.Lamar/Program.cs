@@ -3,10 +3,10 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlueMilk;
+using Lamar;
 using MediatR.Pipeline;
 
-namespace MediatR.Examples.BlueMilk
+namespace MediatR.Examples.Lamar
 {
     class Program
     {
@@ -15,7 +15,7 @@ namespace MediatR.Examples.BlueMilk
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, writer, "BlueMilk");
+            return Runner.Run(mediator, writer, "Lamar");
         }
 
         private static IMediator BuildMediator(WrappingWriter writer)
