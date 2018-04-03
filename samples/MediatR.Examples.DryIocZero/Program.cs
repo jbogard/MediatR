@@ -19,7 +19,6 @@ namespace MediatR.Examples.DryIocZero
             var container = new Container();
 
             container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
-            container.RegisterDelegate<MultiInstanceFactory>(r => r.ResolveMany);
             container.UseInstance(writer);
 
             return container.Resolve<IMediator>();

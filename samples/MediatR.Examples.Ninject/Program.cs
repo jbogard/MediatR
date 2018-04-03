@@ -42,18 +42,6 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(typeof(INotificationHandler<>)).To(typeof(ConstrainedPingedHandler<>)).WhenNotificationMatchesType<Pinged>();
 
             kernel.Bind<ServiceFactory>().ToMethod(ctx => t => ctx.Kernel.TryGet(t));
-            kernel.Bind<MultiInstanceFactory>().ToMethod(ctx => t =>
-            {
-                try
-                {
-                    return ctx.Kernel.GetAll(t).ToList();
-                }
-                catch (Exception e)
-                {
-                    writer.WriteLine(e.ToString());
-                    return new object[0];
-                }
-            });
 
             var mediator = kernel.Get<IMediator>();
 

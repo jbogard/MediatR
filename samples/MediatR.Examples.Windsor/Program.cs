@@ -33,7 +33,6 @@ namespace MediatR.Examples.Windsor
             container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Component.For<TextWriter>().Instance(writer));
             container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => k.Resolve));
-            container.Register(Component.For<MultiInstanceFactory>().UsingFactoryMethod<MultiInstanceFactory>(k => t => (IEnumerable<object>)k.ResolveAll(t)));
 
             //Pipeline
             container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));

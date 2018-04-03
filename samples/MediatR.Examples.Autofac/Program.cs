@@ -56,12 +56,6 @@ namespace MediatR.Examples.Autofac
                 return t => c.Resolve(t);
             });
 
-            builder.Register<MultiInstanceFactory>(ctx =>
-            {
-                var c = ctx.Resolve<IComponentContext>();
-                return t => (IEnumerable<object>)c.Resolve(typeof(IEnumerable<>).MakeGenericType(t));
-            });
-
             var container = builder.Build();
 
             // The below returns:

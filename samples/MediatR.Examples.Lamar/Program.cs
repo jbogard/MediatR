@@ -45,7 +45,6 @@ namespace MediatR.Examples.Lamar
                 cfg.For<IMediator>().Use<Mediator>().Transient();
 
                 cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
-                cfg.For<MultiInstanceFactory>().Use(ctx => type => ctx.GetAllInstances(type).Cast<object>());
                 cfg.For<TextWriter>().Use(writer);
             });
 

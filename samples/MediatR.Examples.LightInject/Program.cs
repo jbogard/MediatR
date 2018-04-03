@@ -51,7 +51,6 @@ namespace MediatR.Examples.LightInject
             
 
             serviceContainer.Register<ServiceFactory>(fac => fac.GetInstance);
-            serviceContainer.Register<MultiInstanceFactory>(fac => fac.GetAllInstances);
             return serviceContainer.GetInstance<IMediator>(); 
         }
     }

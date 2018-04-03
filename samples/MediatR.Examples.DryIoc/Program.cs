@@ -20,7 +20,6 @@ namespace MediatR.Examples.DryIoc
             var container = new Container();
 
             container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
-            container.RegisterDelegate<MultiInstanceFactory>(r => serviceType => r.ResolveMany(serviceType));
             container.UseInstance<TextWriter>(writer);
 
             //Pipeline works out of the box here

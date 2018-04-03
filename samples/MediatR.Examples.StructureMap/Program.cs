@@ -45,7 +45,6 @@ namespace MediatR.Examples.StructureMap
                 cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
 
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => ctx.GetAllInstances);
                 cfg.For<TextWriter>().Use(writer);
             });
 
