@@ -1,4 +1,5 @@
 using System.Threading;
+using MediatR.Pipeline;
 
 namespace MediatR.Tests
 {
@@ -72,8 +73,11 @@ namespace MediatR.Tests
         {
             var container = new Container(cfg =>
             {
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For(typeof(RequestProcessor<,>)).Use(typeof(RequestProcessor<,>));
+                cfg.For(typeof(RequestProcessor<>)).Use(typeof(RequestProcessor<>));
+                cfg.For(typeof(NotificationProcessor<>)).Use(typeof(NotificationProcessor<>));
+
+                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => ctx.GetInstance);
                 cfg.For<IMediator>().Use<Mediator>();
             });
             _mediator = container.GetInstance<IMediator>();
@@ -82,13 +86,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new Ping()));
         }
 
         [Fact]
         public async Task Should_throw_for_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new VoidPing()));
         }
 
         [Fact]
@@ -109,13 +113,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_async_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new AsyncPing()));
         }
 
         [Fact]
         public async Task Should_throw_for_async_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new AsyncVoidPing()));
         }
 
         [Fact]
@@ -146,7 +150,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
@@ -169,7 +172,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
@@ -192,7 +194,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();

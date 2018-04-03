@@ -1,18 +1,16 @@
+using System;
+using System.IO;
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
 using System.Threading.Tasks;
-using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using MediatR.Pipeline;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 
 namespace MediatR.Examples.Windsor
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Castle.MicroKernel.Registration;
-    using Castle.Windsor;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -33,7 +31,6 @@ namespace MediatR.Examples.Windsor
             container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Component.For<TextWriter>().Instance(writer));
             container.Register(Component.For<SingleInstanceFactory>().UsingFactoryMethod<SingleInstanceFactory>(k => k.Resolve));
-            container.Register(Component.For<MultiInstanceFactory>().UsingFactoryMethod<MultiInstanceFactory>(k => t => (IEnumerable<object>)k.ResolveAll(t)));
 
             //Pipeline
             container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));
@@ -43,6 +40,10 @@ namespace MediatR.Examples.Windsor
             container.Register(Component.For(typeof(IRequestPostProcessor <,>)).ImplementedBy(typeof(GenericRequestPostProcessor<,>)).NamedAutomatically("PostProcessor"));
             container.Register(Component.For(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>)).NamedAutomatically("ConstrainedRequestPostProcessor"));
             container.Register(Component.For(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>)).NamedAutomatically("ConstrainedPingedHandler"));
+
+            container.Register(Component.For(typeof(RequestProcessor<,>)));
+            container.Register(Component.For(typeof(RequestProcessor<>)));
+            container.Register(Component.For(typeof(NotificationProcessor<>)));
 
             var mediator = container.Resolve<IMediator>();
 

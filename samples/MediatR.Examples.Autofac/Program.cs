@@ -1,17 +1,15 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using MediatR.Pipeline;
+using Autofac;
+
 namespace MediatR.Examples.Autofac
 {
-    using global::Autofac;
-    using MediatR.Pipeline;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading.Tasks;
-
     internal static class Program
     {
-        public static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -50,16 +48,14 @@ namespace MediatR.Examples.Autofac
             builder.RegisterGeneric(typeof(ConstrainedRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
             builder.RegisterGeneric(typeof(ConstrainedPingedHandler<>)).As(typeof(INotificationHandler<>));
 
+            builder.RegisterGeneric(typeof(RequestProcessor<,>)).AsSelf();
+            builder.RegisterGeneric(typeof(RequestProcessor<>)).AsSelf();
+            builder.RegisterGeneric(typeof(NotificationProcessor<>)).AsSelf();
+
             builder.Register<SingleInstanceFactory>(ctx =>
             {
                 var c = ctx.Resolve<IComponentContext>();
                 return t => c.Resolve(t);
-            });
-
-            builder.Register<MultiInstanceFactory>(ctx =>
-            {
-                var c = ctx.Resolve<IComponentContext>();
-                return t => (IEnumerable<object>)c.Resolve(typeof(IEnumerable<>).MakeGenericType(t));
             });
 
             var container = builder.Build();
