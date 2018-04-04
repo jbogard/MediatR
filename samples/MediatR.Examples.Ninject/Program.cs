@@ -1,19 +1,18 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using MediatR.Pipeline;
+using Ninject;
 using Ninject.Syntax;
+using Ninject.Extensions.Conventions;
+using Ninject.Planning.Bindings.Resolvers;
 
 namespace MediatR.Examples.Ninject
 {
-    using System;
-    using System.IO;
-    using global::Ninject;
-    using global::Ninject.Extensions.Conventions;
-    using global::Ninject.Planning.Bindings.Resolvers;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -41,19 +40,11 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(ConstrainedRequestPostProcessor<,>));
             kernel.Bind(typeof(INotificationHandler<>)).To(typeof(ConstrainedPingedHandler<>)).WhenNotificationMatchesType<Pinged>();
 
+            kernel.Bind(typeof(RequestProcessor<,>)).To(typeof(RequestProcessor<,>));
+            kernel.Bind(typeof(RequestProcessor<>)).To(typeof(RequestProcessor<>));
+            kernel.Bind(typeof(NotificationProcessor<>)).To(typeof(NotificationProcessor<>));
+
             kernel.Bind<SingleInstanceFactory>().ToMethod(ctx => t => ctx.Kernel.TryGet(t));
-            kernel.Bind<MultiInstanceFactory>().ToMethod(ctx => t =>
-            {
-                try
-                {
-                    return ctx.Kernel.GetAll(t).ToList();
-                }
-                catch (Exception e)
-                {
-                    writer.WriteLine(e.ToString());
-                    return new object[0];
-                }
-            });
 
             var mediator = kernel.Get<IMediator>();
 

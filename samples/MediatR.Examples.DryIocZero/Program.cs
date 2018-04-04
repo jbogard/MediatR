@@ -6,7 +6,7 @@ namespace MediatR.Examples.DryIocZero
 {
     static class Program
     {
-        public static void Main()
+        static void Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -19,7 +19,6 @@ namespace MediatR.Examples.DryIocZero
             var container = new Container();
 
             container.RegisterDelegate<SingleInstanceFactory>(r => r.Resolve);
-            container.RegisterDelegate<MultiInstanceFactory>(r => r.ResolveMany);
             container.UseInstance(writer);
 
             return container.Resolve<IMediator>();

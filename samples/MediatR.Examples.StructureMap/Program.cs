@@ -1,16 +1,15 @@
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using StructureMap;
 using StructureMap.Pipeline;
 
 namespace MediatR.Examples.StructureMap
 {
-    using System;
-    using System.IO;
-    using global::StructureMap;
-
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -45,7 +44,6 @@ namespace MediatR.Examples.StructureMap
                 cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
 
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => ctx.GetInstance);
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => ctx.GetAllInstances);
                 cfg.For<TextWriter>().Use(writer);
             });
 

@@ -2,7 +2,6 @@ using System.Threading;
 
 namespace MediatR.Tests
 {
-    using System;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
@@ -49,7 +48,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof (IRequestHandler<>));
                 });
                 cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
                 cfg.For<TextWriter>().Use(writer);
                 cfg.For<IMediator>().Use<Mediator>();
             });
