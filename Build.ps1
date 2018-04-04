@@ -49,9 +49,12 @@ $samples = Get-ChildItem .\samples\MediatR.Examples.*
 foreach ($sample in $samples) {
     Push-Location -Path $sample
 
-    exec { & dotnet run -c Release --no-build }
-
-    Pop-Location
+    try {
+        exec { & dotnet run -c Release --no-build }
+    } catch {
+    } finally {
+        Pop-Location
+    }
 }
 
 exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o .\artifacts --include-symbols --no-build $versionSuffix }
