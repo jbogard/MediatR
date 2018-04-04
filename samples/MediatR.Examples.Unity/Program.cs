@@ -18,6 +18,8 @@ namespace MediatR.Examples.Unity
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
 
+            writer.WriteLine("Unity is not a very good container and breaks immediately");
+
             return Runner.Run(mediator, writer, "Unity");
         }
 
@@ -49,13 +51,24 @@ namespace MediatR.Examples.Unity
         public static IUnityContainer RegisterMediator(this IUnityContainer container, LifetimeManager lifetimeManager)
         {
             return container.RegisterType<IMediator, Mediator>(lifetimeManager)
-                .RegisterInstance<ServiceFactory>(t => container.IsRegistered(t) ? container.Resolve(t) : null);
+                .RegisterInstance<ServiceFactory>(type =>
+                {
+                    var enumerableType = type
+                        .GetInterfaces()
+                        .Concat(new[] { type })
+                        .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                    return enumerableType != null
+                        ? container.ResolveAll(enumerableType.GetGenericArguments()[0])
+                        : container.IsRegistered(type)
+                            ? container.Resolve(type)
+                            : null;
+                });
         }
 
         public static IUnityContainer RegisterMediatorHandlers(this IUnityContainer container, Assembly assembly)
         {
-            return container.RegisterTypesImplementingType(assembly, typeof(IRequestHandler<>))
-                            .RegisterTypesImplementingType(assembly, typeof(IRequestHandler<,>))
+            return container.RegisterTypesImplementingType(assembly, typeof(IRequestHandler<,>))
                             .RegisterNamedTypesImplementingType(assembly, typeof(INotificationHandler<>));
         }
 

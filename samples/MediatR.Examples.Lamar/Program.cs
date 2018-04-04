@@ -26,7 +26,6 @@ namespace MediatR.Examples.Lamar
                 {
                     scanner.AssemblyContainingType<Ping>();
                     scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
-                    scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
                 });
 

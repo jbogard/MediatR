@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using MediatR.Pipeline;
@@ -27,12 +28,19 @@ namespace MediatR.Examples.Windsor
             container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces());
-            container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());
 
             container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Component.For<TextWriter>().Instance(writer));
-            container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => k.Resolve));
+            container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => (type =>
+            {
+                var enumerableType = type
+                    .GetInterfaces()
+                    .Concat(new [] {type})
+                    .FirstOrDefault(t =>  t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                return enumerableType != null ? k.ResolveAll(enumerableType.GetGenericArguments()[0]) : k.Resolve(type);
+            })));
 
             //Pipeline
             container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));

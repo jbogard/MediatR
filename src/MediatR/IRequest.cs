@@ -12,7 +12,7 @@ namespace MediatR
     public interface IRequest<out TResponse> : IBaseRequest { }
 
     /// <summary>
-    /// Allows for generic type constraints of objects implementing IRequest or IRequest<TResponse>
+    /// Allows for generic type constraints of objects implementing IRequest or IRequest{TResponse}
     /// </summary>
     public interface IBaseRequest { }
 }

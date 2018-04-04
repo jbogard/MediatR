@@ -27,7 +27,6 @@ namespace MediatR.Examples.LightInject
                 serviceType.IsConstructedGenericType &&
                 (
                     serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
-                    serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<>) ||
                     serviceType.GetGenericTypeDefinition() == typeof(INotificationHandler<>)
                 ));
                     

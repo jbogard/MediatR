@@ -13,7 +13,6 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
-        private static readonly ConcurrentDictionary<Type, RequestHandlerWrapper> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandlerWrapper>();
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
@@ -26,7 +25,7 @@ namespace MediatR
             _serviceFactory = serviceFactory;
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -41,22 +40,7 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
-        public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            var requestType = request.GetType();
-
-            var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandlerWrapper) Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
-
-            return handler.Handle(request, cancellationToken, _serviceFactory);
-        }
-
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
             where TNotification : INotification
         {
             if (notification == null)

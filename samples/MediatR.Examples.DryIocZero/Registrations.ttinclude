@@ -41,10 +41,8 @@ ServiceInfo[] SpecifyResolutionRoots(ServiceRegistrationInfo reg)
         // Close known open-generics.
         // NOTE: This only needed because multiple services are located! via `MultiInstanceFactory` instead of to be injected as collection
         : type == typeof(IRequestHandler<,>) ? new []{
-            reg.ToServiceInfo<IRequestHandler<Ping, Pong>>()
-        }
-        : type == typeof(IRequestHandler<>) ? new [] {
-            reg.ToServiceInfo<IRequestHandler<Jing>>()
+            reg.ToServiceInfo<IRequestHandler<Ping, Pong>>(),
+            reg.ToServiceInfo<IRequestHandler<Jing, Unit>>()
         }
         : type == typeof(IPipelineBehavior<,>) ? new []{ 
             reg.ToServiceInfo<IPipelineBehavior<Ping, Pong>>(),

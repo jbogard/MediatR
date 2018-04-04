@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace MediatR.Internal
 {
     using System;
@@ -31,12 +29,6 @@ namespace MediatR.Internal
         }
     }
 
-    internal abstract class RequestHandlerWrapper : RequestHandlerBase
-    {
-        public abstract Task Handle(IRequest request, CancellationToken cancellationToken,
-            ServiceFactory serviceFactory);
-    }
-
     internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
@@ -55,25 +47,6 @@ namespace MediatR.Internal
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
                 .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
-        }
-    }
-
-    internal class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
-        where TRequest : IRequest
-    {
-        public override Task Handle(IRequest request, CancellationToken cancellationToken,
-            ServiceFactory serviceFactory)
-        {
-            async Task<Unit> Handler()
-            {
-                await GetHandler<IRequestHandler<TRequest>>(serviceFactory).Handle((TRequest) request, cancellationToken).ConfigureAwait(false);
-                return Unit.Value;
-            }
-
-            return serviceFactory
-                .GetInstances<IPipelineBehavior<TRequest, Unit>>()
-                .Reverse()
-                .Aggregate((RequestHandlerDelegate<Unit>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
         }
     }
 }

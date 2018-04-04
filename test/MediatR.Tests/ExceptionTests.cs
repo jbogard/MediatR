@@ -60,11 +60,11 @@ namespace MediatR.Tests
             }
         }
 
-        public class VoidNullPingHandler : IRequestHandler<VoidNullPing>
+        public class VoidNullPingHandler : IRequestHandler<VoidNullPing, Unit>
         {
-            public Task Handle(VoidNullPing request, CancellationToken cancellationToken)
+            public Task<Unit> Handle(VoidNullPing request, CancellationToken cancellationToken)
             {
-                return Task.FromResult(0);
+                return Unit.Task;
             }
         }
 
@@ -72,7 +72,7 @@ namespace MediatR.Tests
         {
             var container = new Container(cfg =>
             {
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<IMediator>().Use<Mediator>();
             });
             _mediator = container.GetInstance<IMediator>();
