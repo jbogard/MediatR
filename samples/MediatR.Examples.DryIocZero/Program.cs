@@ -1,17 +1,18 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using DryIocZero;
 
 namespace MediatR.Examples.DryIocZero
 {
     static class Program
     {
-        public static void Main()
+        public static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
 
-            Runner.Run(mediator, writer, "DryIocZero").Wait();
+            return Runner.Run(mediator, writer, "DryIocZero");
         }
 
         private static IMediator BuildMediator(TextWriter writer)
