@@ -12,24 +12,20 @@ namespace MediatR
     /// </summary>
     public class Mediator : IMediator
     {
-        private readonly SingleInstanceFactory _singleInstanceFactory;
-        private readonly MultiInstanceFactory _multiInstanceFactory;
-        private static readonly ConcurrentDictionary<Type, RequestHandlerWrapper> _voidRequestHandlers = new ConcurrentDictionary<Type, RequestHandlerWrapper>();
+        private readonly ServiceFactory _serviceFactory;
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
-        /// <param name="singleInstanceFactory">The single instance factory.</param>
-        /// <param name="multiInstanceFactory">The multi instance factory.</param>
-        public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
+        /// <param name="serviceFactory">The single instance factory.</param>
+        public Mediator(ServiceFactory serviceFactory)
         {
-            _singleInstanceFactory = singleInstanceFactory;
-            _multiInstanceFactory = multiInstanceFactory;
+            _serviceFactory = serviceFactory;
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -41,25 +37,10 @@ namespace MediatR
             var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
                 t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
+            return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
-        public Task Send(IRequest request, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            var requestType = request.GetType();
-
-            var handler = _voidRequestHandlers.GetOrAdd(requestType,
-                t => (RequestHandlerWrapper) Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType)));
-
-            return handler.Handle(request, cancellationToken, _singleInstanceFactory, _multiInstanceFactory);
-        }
-
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
             where TNotification : INotification
         {
             if (notification == null)
@@ -71,7 +52,7 @@ namespace MediatR
             var handler = _notificationHandlers.GetOrAdd(notificationType,
                 t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
 
-            return handler.Handle(notification, cancellationToken, _multiInstanceFactory, PublishCore);
+            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
 
         /// <summary>

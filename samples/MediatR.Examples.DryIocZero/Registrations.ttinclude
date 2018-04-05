@@ -11,7 +11,7 @@
 <#
 // TODO: Insert assemblies and namespaces with your services to register in container 
 #>
-<#@ assembly Name="$(SolutionDir)src\MediatR\bin\Debug\netstandard1.1\MediatR.dll" #>
+<#@ assembly Name="$(SolutionDir)src\MediatR\bin\Debug\net45\MediatR.dll" #>
 <#@ import namespace="MediatR" #>
 <#@ import namespace="MediatR.Pipeline" #>
 <#@ assembly Name="$(SolutionDir)samples\MediatR.Examples\bin\Debug\net45\MediatR.Examples.dll" #>
@@ -23,8 +23,7 @@ IContainer GetContainerWithRegistrations()
     var container = new Container();
 
     container.RegisterPlaceholder<System.IO.TextWriter>();
-    container.RegisterPlaceholder<SingleInstanceFactory>();
-    container.RegisterPlaceholder<MultiInstanceFactory>();
+    container.RegisterPlaceholder<ServiceFactory>();
 
     container.RegisterMany(
         new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() },
@@ -42,10 +41,8 @@ ServiceInfo[] SpecifyResolutionRoots(ServiceRegistrationInfo reg)
         // Close known open-generics.
         // NOTE: This only needed because multiple services are located! via `MultiInstanceFactory` instead of to be injected as collection
         : type == typeof(IRequestHandler<,>) ? new []{
-            reg.ToServiceInfo<IRequestHandler<Ping, Pong>>()
-        }
-        : type == typeof(IRequestHandler<>) ? new [] {
-            reg.ToServiceInfo<IRequestHandler<Jing>>()
+            reg.ToServiceInfo<IRequestHandler<Ping, Pong>>(),
+            reg.ToServiceInfo<IRequestHandler<Jing, Unit>>()
         }
         : type == typeof(IPipelineBehavior<,>) ? new []{ 
             reg.ToServiceInfo<IPipelineBehavior<Ping, Pong>>(),

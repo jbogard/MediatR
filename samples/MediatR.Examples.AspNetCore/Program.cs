@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
@@ -20,8 +19,7 @@ namespace MediatR.Examples.AspNetCore
         {
             var services = new ServiceCollection();
 
-            services.AddScoped<SingleInstanceFactory>(p => p.GetRequiredService);
-            services.AddScoped<MultiInstanceFactory>(p => p.GetRequiredServices);
+            services.AddScoped<ServiceFactory>(p => p.GetService);
 
             services.AddSingleton<TextWriter>(writer);
 
@@ -47,10 +45,5 @@ namespace MediatR.Examples.AspNetCore
 
             return provider.GetRequiredService<IMediator>();
         }
-
-        private static IEnumerable<object> GetRequiredServices(this IServiceProvider provider, Type serviceType)
-        {
-            return (IEnumerable<object>) provider.GetRequiredService(typeof(IEnumerable<>).MakeGenericType(serviceType));
-        } 
     }
 }

@@ -52,8 +52,7 @@ namespace MediatR.Tests.Pipeline
                     scanner.AddAllTypesOf(typeof(IRequestPostProcessor<,>));
                 });
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 

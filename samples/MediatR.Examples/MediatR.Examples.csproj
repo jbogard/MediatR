@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AssemblyName>MediatR.Examples</AssemblyName>
     <PackageId>MediatR.Examples</PackageId>
   </PropertyGroup>

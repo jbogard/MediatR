@@ -23,7 +23,16 @@ namespace MediatR.Examples
             await mediator.Publish(new Pinged());
 
             await writer.WriteLineAsync("Publishing Ponged...");
-            await mediator.Publish(new Ponged());
+            var failedPong = false;
+            try
+            {
+                await mediator.Publish(new Ponged());
+            }
+            catch (Exception e)
+            {
+                failedPong = true;
+                await writer.WriteLineAsync(e.ToString());
+            }
 
             bool failedJing = false;
             await writer.WriteLineAsync("Sending Jing...");
@@ -59,7 +68,7 @@ namespace MediatR.Examples
                 OrderedPipelineBehaviors = order.SequenceEqual(order.OrderBy(i => i)),
                 NotificationHandler = contents.Contains("Got pinged async"),
                 MultipleNotificationHandlers = contents.Contains("Got pinged async") && contents.Contains("Got pinged also async"),
-                ConstrainedGenericNotificationHandler = contents.Contains("Got pinged constrained async"),
+                ConstrainedGenericNotificationHandler = contents.Contains("Got pinged constrained async") && !failedPong,
                 CovariantNotificationHandler = contents.Contains("Got notified")
             };
 

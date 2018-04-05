@@ -1,0 +1,8 @@
+<Project>
+
+    <PropertyGroup>
+        <Authors>Jimmy Bogard</Authors>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+</Project>

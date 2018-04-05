@@ -59,12 +59,12 @@ namespace MediatR.Tests
             public string Message { get; set; }
         }
 
-        public class JingHandler : IRequestHandler<Jing>
+        public class JingHandler : IRequestHandler<Jing, Unit>
         {
-            public Task Handle(Jing request, CancellationToken cancellationToken)
+            public Task<Unit> Handle(Jing request, CancellationToken cancellationToken)
             {
                 // empty handle
-                return Task.CompletedTask;
+                return Unit.Task;
             }
         }
 
@@ -99,10 +99,8 @@ namespace MediatR.Tests
                     scanner.IncludeNamespaceContainingType<Jing>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<>));
                 });
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<IMediator>().Use<Mediator>();
             });
 

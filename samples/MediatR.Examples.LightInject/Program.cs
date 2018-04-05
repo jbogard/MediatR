@@ -27,7 +27,6 @@ namespace MediatR.Examples.LightInject
                 serviceType.IsConstructedGenericType &&
                 (
                     serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
-                    serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<>) ||
                     serviceType.GetGenericTypeDefinition() == typeof(INotificationHandler<>)
                 ));
                     
@@ -50,8 +49,7 @@ namespace MediatR.Examples.LightInject
             serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));            
             
 
-            serviceContainer.Register<SingleInstanceFactory>(fac => fac.GetInstance);
-            serviceContainer.Register<MultiInstanceFactory>(fac => fac.GetAllInstances);
+            serviceContainer.Register<ServiceFactory>(fac => fac.GetInstance);
             return serviceContainer.GetInstance<IMediator>(); 
         }
     }

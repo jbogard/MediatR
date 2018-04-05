@@ -66,8 +66,7 @@ namespace MediatR.Tests
                 });
                 cfg.For<TextWriter>().Use(writer);
                 cfg.For<IMediator>().Use<Mediator>();
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             });
 
             var mediator = container.GetInstance<IMediator>();
@@ -81,8 +80,8 @@ namespace MediatR.Tests
 
         public class SequentialMediator : Mediator
         {
-            public SequentialMediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory) 
-                : base(singleInstanceFactory, multiInstanceFactory)
+            public SequentialMediator(ServiceFactory serviceFactory) 
+                : base(serviceFactory)
             {
             }
 
@@ -112,8 +111,7 @@ namespace MediatR.Tests
                 });
                 cfg.For<TextWriter>().Use(writer);
                 cfg.For<IMediator>().Use<SequentialMediator>();
-                cfg.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             });
 
             var mediator = container.GetInstance<IMediator>();
