@@ -1,18 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using SimpleInjector;
 
 namespace MediatR.Examples.SimpleInjector
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using global::SimpleInjector;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -24,7 +23,10 @@ namespace MediatR.Examples.SimpleInjector
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
-            container.RegisterSingleton<IMediator, Mediator>();
+
+            container.Register(typeof(IRequestMediator<,>), typeof(RequestMediator<,>));
+            container.Register(typeof(INotificationMediator<>), typeof(NotificationMediator<>));
+
             container.Register(typeof(IRequestHandler<,>), assemblies);
 
             // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
@@ -37,7 +39,7 @@ namespace MediatR.Examples.SimpleInjector
 
             container.RegisterSingleton<TextWriter>(writer);
 
-            //Pipeline
+            //Pipeline(
             container.RegisterCollection(typeof(IPipelineBehavior<,>), new []
             {
                 typeof(RequestPreProcessorBehavior<,>),
@@ -47,13 +49,9 @@ namespace MediatR.Examples.SimpleInjector
             container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
             container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
-            container.RegisterSingleton(new ServiceFactory(container.GetInstance));
-
             container.Verify();
 
-            var mediator = container.GetInstance<IMediator>();
-
-            return mediator;
+            return new Mediator(container.GetInstance);
         }
 
         private static IEnumerable<Assembly> GetAssemblies()

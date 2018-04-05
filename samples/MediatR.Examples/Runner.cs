@@ -127,5 +127,4 @@ namespace MediatR.Examples
 
         public string Contents => _stringWriter.ToString();
     }
-
 }

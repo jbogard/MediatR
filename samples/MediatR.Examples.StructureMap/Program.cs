@@ -1,16 +1,14 @@
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
-using StructureMap.Pipeline;
+using StructureMap;
 
 namespace MediatR.Examples.StructureMap
 {
-    using System;
-    using System.IO;
-    using global::StructureMap;
-
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -41,16 +39,13 @@ namespace MediatR.Examples.StructureMap
                 cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
 
                 // This is the default but let's be explicit. At most we should be container scoped.
-                cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
+                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
+                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
 
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
             });
 
-
-            var mediator = container.GetInstance<IMediator>();
-
-            return mediator;
+            return new Mediator(container.GetInstance);
         }
     }
 }

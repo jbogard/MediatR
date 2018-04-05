@@ -1,7 +1,6 @@
-using System.Threading;
-
 namespace MediatR.Tests.Pipeline
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using MediatR.Pipeline;
     using Shouldly;
@@ -52,11 +51,10 @@ namespace MediatR.Tests.Pipeline
                     scanner.AddAllTypesOf(typeof(IRequestPostProcessor<,>));
                 });
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                cfg.For(typeof(IRequestMediator<,>)).Add(typeof(RequestMediator<,>));
             });
 
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             var response = await mediator.Send(new Ping { Message = "Ping" });
 

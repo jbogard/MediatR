@@ -26,22 +26,20 @@ THE SOFTWARE.
 ========================================================================================================
 NOTE: The code below is generated automatically at compile-time and not supposed to be changed by hand.
 ========================================================================================================
-There are 4 generation issues (may be not an error dependent on context):
+There are 1 generation issues (may be not an error dependent on context):
 
 The issues with run-time registrations may be solved by `container.RegisterPlaceholder<T>()` 
 in Registrations.ttinclude. Then you can replace placeholders using `DryIocZero.Container.Register`
 at runtime.
 
 --------------------------------------------------------------------------------------------------------
-1. MediatR.Pipeline.IRequestPreProcessor<>
-Error: Resolving open-generic service type is not possible for type: MediatR.Pipeline.IRequestPreProcessor<>.
-2. MediatR.Pipeline.IRequestPostProcessor<,> {ServiceKey=DefaultKey(0)}
-Error: Resolving open-generic service type is not possible for type: MediatR.Pipeline.IRequestPostProcessor<,>.
-3. MediatR.Pipeline.IRequestPostProcessor<,> {ServiceKey=DefaultKey(1)}
-Error: Resolving open-generic service type is not possible for type: MediatR.Pipeline.IRequestPostProcessor<,>.
-4. MediatR.INotificationHandler<MediatR.Examples.Ponged> {RequiredServiceType=MediatR.INotificationHandler<>}
-Error: Open-generic service does not match with registered open-generic implementation constraints MediatR.Examples.ConstrainedPingedHandler<> when resolving: MediatR.Examples.ConstrainedPingedHandler<>: MediatR.INotificationHandler<MediatR.Examples.Ponged> {RequiredServiceType=MediatR.INotificationHandler<>} #42
-  from container.
+1. MediatR.IMediator
+Error: Unable to resolve MediatR.ServiceFactory as parameter "serviceFactory"
+  in MediatR.Mediator: MediatR.IMediator #28
+  from container
+Where no service registrations found
+  and no dynamic registrations found in 0 Rules.DynamicServiceProviders
+  and nothing in 0 Rules.UnknownServiceResolvers
 */
 
 using System;
@@ -58,113 +56,32 @@ namespace DryIocZero
         [ExcludeFromCodeCoverage]
         partial void GetLastGeneratedFactoryID(ref int lastFactoryID)
         {
-            lastFactoryID = 60; // generated: equals to last used Factory.FactoryID 
+            lastFactoryID = 66; // generated: equals to last used Factory.FactoryID 
         }
 
         [ExcludeFromCodeCoverage]
         partial void ResolveGenerated(ref object service, Type serviceType)
         {
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>))
-                service = Get10_INotificationHandler(this);
+            if (serviceType == typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>))
+                service = Get0_IRequestMediator(this);
 
             else
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.INotification>))
-                service = Get11_INotificationHandler(this);
+            if (serviceType == typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>))
+                service = Get1_IRequestMediator(this);
 
             else
-            if (serviceType == typeof(MediatR.IRequestHandler<MediatR.Examples.Ping, MediatR.Examples.Pong>))
-                service = Get12_IRequestHandler(this);
+            if (serviceType == typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>))
+                service = Get2_INotificationMediator(this);
 
             else
-            if (serviceType == typeof(MediatR.IRequest<MediatR.Examples.Pong>))
-                service = Get13_IRequest(this);
-
-            else
-            if (serviceType == typeof(MediatR.IRequest))
-                service = Get16_IRequest(this);
-
-            else
-            if (serviceType == typeof(MediatR.IRequestHandler<MediatR.Examples.Jing, MediatR.Unit>))
-                service = Get17_IRequestHandler(this);
-
-            else
-            if (serviceType == typeof(MediatR.IMediator))
-                service = Get18_IMediator(this);
-
-            else
-            if (serviceType == typeof(MediatR.IRequest<MediatR.Unit>))
-                service = Get19_IRequest(this);
-
-            else
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>))
-                service = Get20_INotificationHandler(this);
+            if (serviceType == typeof(MediatR.INotificationMediator<MediatR.Examples.Ponged>))
+                service = Get3_INotificationMediator(this);
         }
 
         [ExcludeFromCodeCoverage]
         partial void ResolveGenerated(ref object service,
             Type serviceType, object serviceKey, Type requiredServiceType, Request preRequestParent, object[] args)
         {
-            if (serviceType == typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>)) 
-            {
-                if (DefaultKey.Of(0).Equals(serviceKey))
-                    service = Get0_IPipelineBehavior(this);
-
-                else
-                if (DefaultKey.Of(1).Equals(serviceKey))
-                    service = Get2_IPipelineBehavior(this);
-
-                else
-                if (DefaultKey.Of(2).Equals(serviceKey))
-                    service = Get4_IPipelineBehavior(this);
-            }
-
-            else
-            if (serviceType == typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>)) 
-            {
-                if (DefaultKey.Of(0).Equals(serviceKey))
-                    service = Get1_IPipelineBehavior(this);
-
-                else
-                if (DefaultKey.Of(1).Equals(serviceKey))
-                    service = Get3_IPipelineBehavior(this);
-
-                else
-                if (DefaultKey.Of(2).Equals(serviceKey))
-                    service = Get5_IPipelineBehavior(this);
-            }
-
-            else
-            if (serviceType == typeof(MediatR.INotification)) 
-            {
-                if (DefaultKey.Of(0).Equals(serviceKey))
-                    service = Get6_INotification(this);
-
-                else
-                if (DefaultKey.Of(1).Equals(serviceKey))
-                    service = Get7_INotification(this);
-            }
-
-            else
-            if (serviceType == typeof(MediatR.IBaseRequest)) 
-            {
-                if (DefaultKey.Of(0).Equals(serviceKey))
-                    service = Get8_IBaseRequest(this);
-
-                else
-                if (DefaultKey.Of(1).Equals(serviceKey))
-                    service = Get9_IBaseRequest(this);
-            }
-
-            else
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>)) 
-            {
-                if (DefaultKey.Of(0).Equals(serviceKey))
-                    service = Get14_INotificationHandler(this);
-
-                else
-                if (DefaultKey.Of(1).Equals(serviceKey))
-                    service = Get15_INotificationHandler(this);
-            }
         }
 
         [ExcludeFromCodeCoverage]
@@ -176,207 +93,50 @@ namespace DryIocZero
         [ExcludeFromCodeCoverage]
         private IEnumerable<ResolveManyResult> ResolveManyGenerated(Type serviceType)
         {
-            if (serviceType == typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>))
+            if (serviceType == typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>))
             {
-                yield return Of(Get0_IPipelineBehavior, DefaultKey.Of(0), typeof(MediatR.IPipelineBehavior<,>));
-                yield return Of(Get2_IPipelineBehavior, DefaultKey.Of(1), typeof(MediatR.IPipelineBehavior<,>));
-                yield return Of(Get4_IPipelineBehavior, DefaultKey.Of(2), typeof(MediatR.IPipelineBehavior<,>));
+                yield return Of(Get0_IRequestMediator, typeof(MediatR.IRequestMediator<,>));
             }
 
-            if (serviceType == typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>))
+            if (serviceType == typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>))
             {
-                yield return Of(Get1_IPipelineBehavior, DefaultKey.Of(0), typeof(MediatR.IPipelineBehavior<,>));
-                yield return Of(Get3_IPipelineBehavior, DefaultKey.Of(1), typeof(MediatR.IPipelineBehavior<,>));
-                yield return Of(Get5_IPipelineBehavior, DefaultKey.Of(2), typeof(MediatR.IPipelineBehavior<,>));
+                yield return Of(Get1_IRequestMediator, typeof(MediatR.IRequestMediator<,>));
             }
 
-            if (serviceType == typeof(MediatR.INotification))
+            if (serviceType == typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>))
             {
-                yield return Of(Get6_INotification, DefaultKey.Of(0));
-                yield return Of(Get7_INotification, DefaultKey.Of(1));
+                yield return Of(Get2_INotificationMediator, typeof(MediatR.INotificationMediator<>));
             }
 
-            if (serviceType == typeof(MediatR.IBaseRequest))
+            if (serviceType == typeof(MediatR.INotificationMediator<MediatR.Examples.Ponged>))
             {
-                yield return Of(Get8_IBaseRequest, DefaultKey.Of(0));
-                yield return Of(Get9_IBaseRequest, DefaultKey.Of(1));
-            }
-
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>))
-            {
-                yield return Of(Get10_INotificationHandler);
-                yield return Of(Get11_INotificationHandler); // co-variant
-            }
-
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.INotification>))
-            {
-                yield return Of(Get11_INotificationHandler);
-            }
-
-            if (serviceType == typeof(MediatR.IRequestHandler<MediatR.Examples.Ping, MediatR.Examples.Pong>))
-            {
-                yield return Of(Get12_IRequestHandler);
-            }
-
-            if (serviceType == typeof(MediatR.IRequest<MediatR.Examples.Pong>))
-            {
-                yield return Of(Get13_IRequest);
-            }
-
-            if (serviceType == typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>))
-            {
-                yield return Of(Get14_INotificationHandler, DefaultKey.Of(0));
-                yield return Of(Get15_INotificationHandler, DefaultKey.Of(1));
-                yield return Of(Get20_INotificationHandler, typeof(MediatR.INotificationHandler<>));
-                yield return Of(Get11_INotificationHandler); // co-variant
-            }
-
-            if (serviceType == typeof(MediatR.IRequest))
-            {
-                yield return Of(Get16_IRequest);
-            }
-
-            if (serviceType == typeof(MediatR.IRequestHandler<MediatR.Examples.Jing, MediatR.Unit>))
-            {
-                yield return Of(Get17_IRequestHandler);
-            }
-
-            if (serviceType == typeof(MediatR.IMediator))
-            {
-                yield return Of(Get18_IMediator);
-            }
-
-            if (serviceType == typeof(MediatR.IRequest<MediatR.Unit>))
-            {
-                yield return Of(Get19_IRequest);
+                yield return Of(Get3_INotificationMediator, typeof(MediatR.INotificationMediator<>));
             }
 
         }
 
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>)
-        internal static object Get0_IPipelineBehavior(IResolverContext r)
+        // typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>)
+        internal static object Get0_IRequestMediator(IResolverContext r)
         {
-            return new MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>(new MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>[] { new MediatR.Examples.ConstrainedRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(0), 48, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 49, FactoryType.Service, typeof(MediatR.Examples.ConstrainedRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(0), 48, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 50, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
+            return new MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>(new MediatR.Examples.PingHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IRequestMediator<,>), (object)null, 50, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(MediatR.IRequestHandler<MediatR.Examples.Ping, MediatR.Examples.Pong>), 46, typeof(MediatR.Examples.PingHandler), Reuse.Transient), default(object[]))), new MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>[] { new MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>(new MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>[] { new MediatR.Examples.ConstrainedRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IRequestMediator<,>), (object)null, 50, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 51, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 52, FactoryType.Service, typeof(MediatR.Examples.ConstrainedRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IRequestMediator<,>), (object)null, 50, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 51, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 53, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) }), new MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>(new MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>[] { new MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Ping>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IRequestMediator<,>), (object)null, 50, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 54, FactoryType.Service, typeof(MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 55, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Ping>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) }), new MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IRequestMediator<,>), (object)null, 50, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)DefaultKey.Of(2), IfUnresolved.ReturnDefaultIfNotRegistered, 56, FactoryType.Service, typeof(MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
         }
 
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>)
-        internal static object Get1_IPipelineBehavior(IResolverContext r)
+        // typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>)
+        internal static object Get1_IRequestMediator(IResolverContext r)
         {
-            return new MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>(new MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>[] { new MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(0), 51, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 52, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
+            return new MediatR.RequestMediator<MediatR.Examples.Jing, MediatR.Unit>(new MediatR.Examples.JingHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IRequestMediator<,>), (object)null, 57, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(MediatR.IRequestHandler<MediatR.Examples.Jing, MediatR.Unit>), 39, typeof(MediatR.Examples.JingHandler), Reuse.Transient), default(object[]))), new MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>[] { new MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>(new MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>[] { new MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IRequestMediator<,>), (object)null, 57, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 58, FactoryType.Service, typeof(MediatR.Pipeline.RequestPostProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, ((RequestFlags)0), 0).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 59, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPostProcessor<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) }), new MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>(new MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>[] { new MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Jing>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IRequestMediator<,>), (object)null, 57, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 60, FactoryType.Service, typeof(MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, ((RequestFlags)0), 0).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 61, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Jing>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) }), new MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestMediator<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IRequestMediator<,>), (object)null, 57, FactoryType.Service, typeof(MediatR.RequestMediator<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)DefaultKey.Of(2), IfUnresolved.ReturnDefaultIfNotRegistered, 62, FactoryType.Service, typeof(MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
         }
 
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>)
-        internal static object Get2_IPipelineBehavior(IResolverContext r)
+        // typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>)
+        internal static object Get2_INotificationMediator(IResolverContext r)
         {
-            return new MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>(new MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>[] { new MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Ping>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(1), 53, FactoryType.Service, typeof(MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Ping>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 54, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Ping>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
+            return new MediatR.NotificationMediator<MediatR.Examples.Pinged>(new MediatR.INotificationHandler<MediatR.Examples.Pinged>[] { new MediatR.Examples.GenericHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>), typeof(MediatR.INotificationMediator<>), (object)null, 63, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Pinged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Pinged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), typeof(MediatR.INotificationHandler<MediatR.INotification>), (object)null, IfUnresolved.ReturnDefaultIfNotRegistered, 34, FactoryType.Service, typeof(MediatR.Examples.GenericHandler), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.PingedHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>), typeof(MediatR.INotificationMediator<>), (object)null, 63, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Pinged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Pinged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 42, FactoryType.Service, typeof(MediatR.Examples.PingedHandler), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.ConstrainedPingedHandler<MediatR.Examples.Pinged>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>), typeof(MediatR.INotificationMediator<>), (object)null, 63, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Pinged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Pinged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 64, FactoryType.Service, typeof(MediatR.Examples.ConstrainedPingedHandler<MediatR.Examples.Pinged>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.PingedAlsoHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Pinged>), typeof(MediatR.INotificationMediator<>), (object)null, 63, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Pinged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Pinged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), default(System.Type), (object)DefaultKey.Of(1), IfUnresolved.ReturnDefaultIfNotRegistered, 45, FactoryType.Service, typeof(MediatR.Examples.PingedAlsoHandler), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
         }
 
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>)
-        internal static object Get3_IPipelineBehavior(IResolverContext r)
+        // typeof(MediatR.INotificationMediator<MediatR.Examples.Ponged>)
+        internal static object Get3_INotificationMediator(IResolverContext r)
         {
-            return new MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>(new MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>[] { new MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Jing>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(1), 55, FactoryType.Service, typeof(MediatR.Pipeline.RequestPreProcessorBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.Pipeline.IRequestPreProcessor<MediatR.Examples.Jing>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 56, FactoryType.Service, typeof(MediatR.Examples.GenericRequestPreProcessor<MediatR.Examples.Jing>), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
-        }
-
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>)
-        internal static object Get4_IPipelineBehavior(IResolverContext r)
-        {
-            return new MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(2), 57, FactoryType.Service, typeof(MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Ping, MediatR.Examples.Pong>), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>)
-        internal static object Get5_IPipelineBehavior(IResolverContext r)
-        {
-            return new MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), typeof(MediatR.IPipelineBehavior<,>), (object)DefaultKey.Of(2), 58, FactoryType.Service, typeof(MediatR.Examples.GenericPipelineBehavior<MediatR.Examples.Jing, MediatR.Unit>), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.INotification)
-        internal static object Get6_INotification(IResolverContext r)
-        {
-            return new MediatR.Examples.Pinged();
-        }
-
-        // typeof(MediatR.INotification)
-        internal static object Get7_INotification(IResolverContext r)
-        {
-            return new MediatR.Examples.Ponged();
-        }
-
-        // typeof(MediatR.IBaseRequest)
-        internal static object Get8_IBaseRequest(IResolverContext r)
-        {
-            return new MediatR.Examples.Jing();
-        }
-
-        // typeof(MediatR.IBaseRequest)
-        internal static object Get9_IBaseRequest(IResolverContext r)
-        {
-            return new MediatR.Examples.Ping();
-        }
-
-        // typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>)
-        internal static object Get10_INotificationHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.PongedHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>), default(System.Type), (object)null, 41, FactoryType.Service, typeof(MediatR.Examples.PongedHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.INotificationHandler<MediatR.INotification>)
-        internal static object Get11_INotificationHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.GenericHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationHandler<MediatR.INotification>), default(System.Type), (object)null, 32, FactoryType.Service, typeof(MediatR.Examples.GenericHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IRequestHandler<MediatR.Examples.Ping, MediatR.Examples.Pong>)
-        internal static object Get12_IRequestHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.PingHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestHandler<MediatR.Examples.Ping, MediatR.Examples.Pong>), default(System.Type), (object)null, 44, FactoryType.Service, typeof(MediatR.Examples.PingHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IRequest<MediatR.Examples.Pong>)
-        internal static object Get13_IRequest(IResolverContext r)
-        {
-            return new MediatR.Examples.Ping();
-        }
-
-        // typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>)
-        internal static object Get14_INotificationHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.PingedHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), default(System.Type), (object)DefaultKey.Of(0), 40, FactoryType.Service, typeof(MediatR.Examples.PingedHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>)
-        internal static object Get15_INotificationHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.PingedAlsoHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), default(System.Type), (object)DefaultKey.Of(1), 43, FactoryType.Service, typeof(MediatR.Examples.PingedAlsoHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IRequest)
-        internal static object Get16_IRequest(IResolverContext r)
-        {
-            return new MediatR.Examples.Jing();
-        }
-
-        // typeof(MediatR.IRequestHandler<MediatR.Examples.Jing, MediatR.Unit>)
-        internal static object Get17_IRequestHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.JingHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IRequestHandler<MediatR.Examples.Jing, MediatR.Unit>), default(System.Type), (object)null, 37, FactoryType.Service, typeof(MediatR.Examples.JingHandler), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IMediator)
-        internal static object Get18_IMediator(IResolverContext r)
-        {
-            return new MediatR.Mediator((MediatR.ServiceFactory)r.Resolve(typeof(MediatR.ServiceFactory), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.IMediator), default(System.Type), (object)null, 28, FactoryType.Service, typeof(MediatR.Mediator), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
-        }
-
-        // typeof(MediatR.IRequest<MediatR.Unit>)
-        internal static object Get19_IRequest(IResolverContext r)
-        {
-            return new MediatR.Examples.Jing();
-        }
-
-        // typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>)
-        internal static object Get20_INotificationHandler(IResolverContext r)
-        {
-            return new MediatR.Examples.ConstrainedPingedHandler<MediatR.Examples.Pinged>((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Pinged>), typeof(MediatR.INotificationHandler<>), (object)null, 59, FactoryType.Service, typeof(MediatR.Examples.ConstrainedPingedHandler<MediatR.Examples.Pinged>), Reuse.Transient, RequestFlags.IsResolutionCall), default(object[])));
+            return new MediatR.NotificationMediator<MediatR.Examples.Ponged>(new MediatR.INotificationHandler<MediatR.Examples.Ponged>[] { new MediatR.Examples.GenericHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Ponged>), typeof(MediatR.INotificationMediator<>), (object)null, 65, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Ponged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Ponged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>), typeof(MediatR.INotificationHandler<MediatR.INotification>), (object)null, IfUnresolved.ReturnDefaultIfNotRegistered, 34, FactoryType.Service, typeof(MediatR.Examples.GenericHandler), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))), new MediatR.Examples.PongedHandler((System.IO.TextWriter)r.Resolve(typeof(System.IO.TextWriter), null, IfUnresolved.Throw, default(System.Type), Request.Empty.Push(typeof(MediatR.INotificationMediator<MediatR.Examples.Ponged>), typeof(MediatR.INotificationMediator<>), (object)null, 65, FactoryType.Service, typeof(MediatR.NotificationMediator<MediatR.Examples.Ponged>), Reuse.Transient, RequestFlags.IsResolutionCall).Push(typeof(System.Collections.Generic.IEnumerable<MediatR.INotificationHandler<MediatR.Examples.Ponged>>), default(System.Type), (object)null, 2, FactoryType.Wrapper, default(System.Type), Reuse.Transient, ((RequestFlags)0)).Push(typeof(MediatR.INotificationHandler<MediatR.Examples.Ponged>), default(System.Type), (object)DefaultKey.Of(0), IfUnresolved.ReturnDefaultIfNotRegistered, 43, FactoryType.Service, typeof(MediatR.Examples.PongedHandler), Reuse.Transient, ((RequestFlags)0), 0), default(object[]))) });
         }
 
     }

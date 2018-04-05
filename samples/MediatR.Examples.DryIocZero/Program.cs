@@ -7,11 +7,10 @@ namespace MediatR.Examples.DryIocZero
 {
     static class Program
     {
-        public static Task Main()
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
-
             return Runner.Run(mediator, writer, "DryIocZero");
         }
 
@@ -19,10 +18,9 @@ namespace MediatR.Examples.DryIocZero
         {
             var container = new Container();
 
-            container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
             container.UseInstance(writer);
 
-            return container.Resolve<IMediator>();
+            return new Mediator(container.Resolve);
         }
     }
 }

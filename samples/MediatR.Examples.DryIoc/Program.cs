@@ -19,14 +19,10 @@ namespace MediatR.Examples.DryIoc
         {
             var container = new Container();
 
-            container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
             container.UseInstance<TextWriter>(writer);
-
-            //Pipeline works out of the box here
-
             container.RegisterMany(new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() }, Registrator.Interfaces);
 
-            return container.Resolve<IMediator>();
+            return new Mediator(container.Resolve);
         }
     }
 }

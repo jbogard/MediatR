@@ -25,7 +25,7 @@ namespace MediatR
     public abstract class NotificationHandler<TNotification> : INotificationHandler<TNotification>
         where TNotification : INotification
     {
-        public Task Handle(TNotification notification, CancellationToken cancellationToken)
+        Task INotificationHandler<TNotification>.Handle(TNotification notification, CancellationToken cancellationToken)
         {
             Handle(notification);
             return Unit.Task;

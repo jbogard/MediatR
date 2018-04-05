@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Lamar;
 using MediatR.Pipeline;
@@ -10,7 +8,7 @@ namespace MediatR.Examples.Lamar
 {
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -40,17 +38,13 @@ namespace MediatR.Examples.Lamar
                 //Constrained notification handlers
                 cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
 
-                // This is the default but let's be explicit. At most we should be container scoped.
-                cfg.For<IMediator>().Use<Mediator>().Transient();
+                cfg.For(typeof(IRequestMediator<,>)).Add(typeof(RequestMediator<,>));
+                cfg.For(typeof(INotificationMediator<>)).Add(typeof(NotificationMediator<>));
 
-                cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
             });
 
-
-            var mediator = container.GetInstance<IMediator>();
-
-            return mediator;
+            return new Mediator(container.GetInstance);
         }
     }
 }

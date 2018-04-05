@@ -1,8 +1,7 @@
-using System.Threading;
-
 namespace MediatR.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
@@ -72,6 +71,9 @@ namespace MediatR.Tests
         {
             var container = new Container(cfg =>
             {
+                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
+                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
+
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<IMediator>().Use<Mediator>();
             });
@@ -81,13 +83,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new Ping()));
         }
 
         [Fact]
         public async Task Should_throw_for_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new VoidPing()));
         }
 
         [Fact]
@@ -108,13 +110,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_async_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new AsyncPing()));
         }
 
         [Fact]
         public async Task Should_throw_for_async_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
+            await Should.ThrowAsync<StructureMapConfigurationException>(async () => await _mediator.Send(new AsyncVoidPing()));
         }
 
         [Fact]
@@ -164,12 +166,11 @@ namespace MediatR.Tests
                     scanner.AssemblyContainingType(typeof(VoidNullPing));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
-            var mediator = container.GetInstance<IMediator>();
+
+            var mediator = new Mediator(container.GetInstance);
 
             VoidNullPing request = null;
 
@@ -177,7 +178,7 @@ namespace MediatR.Tests
         }
 
         [Fact]
-        public async Task Should_throw_argument_exception_for_publish_when_request_is_null()
+        public async Task Should_throw_argument_exception_for_publish_when_notification_is_null()
         {
             var container = new Container(cfg =>
             {
@@ -186,12 +187,12 @@ namespace MediatR.Tests
                     scanner.AssemblyContainingType(typeof(NullPinged));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
             });
-            var mediator = container.GetInstance<IMediator>();
+
+            var mediator = new Mediator(container.GetInstance);
 
             NullPinged notification = null;
 

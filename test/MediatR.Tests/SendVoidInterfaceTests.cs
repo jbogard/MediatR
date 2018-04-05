@@ -18,10 +18,15 @@ namespace MediatR.Tests
         {
             private readonly TextWriter _writer;
 
-            public PingHandler(TextWriter writer) => _writer = writer;
+            public PingHandler(TextWriter writer)
+            {
+                _writer = writer;
+            }
 
             protected override Task Handle(Ping request)
-                => _writer.WriteAsync(request.Message + " Pong");
+            {
+                return _writer.WriteAsync(request.Message + " Pong");
+            }
         }
 
         [Fact]
@@ -37,15 +42,13 @@ namespace MediatR.Tests
                     scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For<IMediator>().Use<Mediator>();
+                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
-
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             await mediator.Send(new Ping { Message = "Ping" });
 

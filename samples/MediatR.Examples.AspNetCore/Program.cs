@@ -8,7 +8,7 @@ namespace MediatR.Examples.AspNetCore
 {
     public static class Program
     {
-        public static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -19,8 +19,6 @@ namespace MediatR.Examples.AspNetCore
         {
             var services = new ServiceCollection();
 
-            services.AddScoped<ServiceFactory>(p => p.GetService);
-
             services.AddSingleton<TextWriter>(writer);
 
             //Pipeline
@@ -29,6 +27,9 @@ namespace MediatR.Examples.AspNetCore
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>));
             services.AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
             services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>));
+
+            services.AddScoped(typeof(IRequestMediator<,>), typeof(RequestMediator<,>));
+            services.AddScoped(typeof(INotificationMediator<>), typeof(NotificationMediator<>));
 
             //This causes a type load exception. https://github.com/jbogard/MediatR.Extensions.Microsoft.DependencyInjection/issues/12
             //services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>));
@@ -43,7 +44,7 @@ namespace MediatR.Examples.AspNetCore
 
             var provider = services.BuildServiceProvider();
 
-            return provider.GetRequiredService<IMediator>();
+            return new Mediator(provider.GetRequiredService);
         }
     }
 }
