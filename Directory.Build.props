@@ -2,6 +2,6 @@
   <PropertyGroup>
     <Authors>Jimmy Bogard</Authors>
     <LangVersion>latest</LangVersion>
-    <VersionPrefix>5.0.1-alpha-0001</VersionPrefix>
+    <VersionPrefix>5.0.1-alpha-0002</VersionPrefix>
   </PropertyGroup>
 </Project>
