@@ -25,9 +25,9 @@ namespace MediatR
     public abstract class NotificationHandler<TNotification> : INotificationHandler<TNotification>
         where TNotification : INotification
     {
-        public Task Handle(TNotification notification, CancellationToken cancellationToken)
+        Task INotificationHandler<TNotification>.Handle(TNotification notification, CancellationToken cancellationToken)
         {
-            HandleCore(notification);
+            Handle(notification);
             return Unit.Task;
         }
 
@@ -35,7 +35,7 @@ namespace MediatR
         /// Override in a derived class for the handler logic
         /// </summary>
         /// <param name="notification">Notification</param>
-        protected abstract void HandleCore(TNotification notification);
+        protected abstract void Handle(TNotification notification);
     }
 
     /// <summary>
@@ -46,13 +46,13 @@ namespace MediatR
         where TNotification : INotification
     {
         public Task Handle(TNotification notification, CancellationToken cancellationToken)
-            => HandleCore(notification);
+            => Handle(notification);
 
         /// <summary>
         /// Override in a derived class for the handler logic 
         /// </summary>
         /// <param name="notification">Notification</param>
         /// <returns>A task</returns>
-        protected abstract Task HandleCore(TNotification notification);
+        protected abstract Task Handle(TNotification notification);
     }
 }
