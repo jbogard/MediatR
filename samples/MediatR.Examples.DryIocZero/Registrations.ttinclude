@@ -38,9 +38,6 @@ ServiceInfo[] SpecifyResolutionRoots(ServiceRegistrationInfo reg)
     var type = reg.ServiceType;
 
     return
-        type == typeof(IMediator) ? new []{ reg.ToServiceInfo() } :
-
-        // Close known open-generics
         type == typeof(IRequestMediator<,>) ? new []{
             reg.ToServiceInfo<IRequestMediator<Ping, Pong>>(),
             reg.ToServiceInfo<IRequestMediator<Jing, Unit>>()

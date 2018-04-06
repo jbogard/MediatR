@@ -26,20 +26,8 @@ THE SOFTWARE.
 ========================================================================================================
 NOTE: The code below is generated automatically at compile-time and not supposed to be changed by hand.
 ========================================================================================================
-There are 1 generation issues (may be not an error dependent on context):
-
-The issues with run-time registrations may be solved by `container.RegisterPlaceholder<T>()` 
-in Registrations.ttinclude. Then you can replace placeholders using `DryIocZero.Container.Register`
-at runtime.
-
+Generation is completed successfully.
 --------------------------------------------------------------------------------------------------------
-1. MediatR.IMediator
-Error: Unable to resolve MediatR.ServiceFactory as parameter "serviceFactory"
-  in MediatR.Mediator: MediatR.IMediator #28
-  from container
-Where no service registrations found
-  and no dynamic registrations found in 0 Rules.DynamicServiceProviders
-  and nothing in 0 Rules.UnknownServiceResolvers
 */
 
 using System;
