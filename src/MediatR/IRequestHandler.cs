@@ -37,9 +37,9 @@ namespace MediatR
     public abstract class AsyncRequestHandler<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
-        public async Task<Unit> Handle(TRequest request, CancellationToken cancellationToken)
+        async Task<Unit> IRequestHandler<TRequest, Unit>.Handle(TRequest request, CancellationToken cancellationToken)
         {
-            await HandleCore(request, cancellationToken).ConfigureAwait(false);
+            await Handle(request, cancellationToken).ConfigureAwait(false);
             return Unit.Value;
         }
 
@@ -49,7 +49,7 @@ namespace MediatR
         /// <param name="request">Request</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Response</returns>
-        protected abstract Task HandleCore(TRequest request, CancellationToken cancellationToken);
+        protected abstract Task Handle(TRequest request, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -60,15 +60,15 @@ namespace MediatR
     public abstract class RequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
     {
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
-            => Task.FromResult(HandleCore(request));
+        Task<TResponse> IRequestHandler<TRequest, TResponse>.Handle(TRequest request, CancellationToken cancellationToken)
+            => Task.FromResult(Handle(request));
 
         /// <summary>
         /// Override in a derived class for the handler logic
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Response</returns>
-        protected abstract TResponse HandleCore(TRequest request);
+        protected abstract TResponse Handle(TRequest request);
     }
 
     /// <summary>
@@ -78,12 +78,12 @@ namespace MediatR
     public abstract class RequestHandler<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
-        public Task<Unit> Handle(TRequest request, CancellationToken cancellationToken)
+        Task<Unit> IRequestHandler<TRequest, Unit>.Handle(TRequest request, CancellationToken cancellationToken)
         {
-            HandleCore(request);
+            Handle(request);
             return Unit.Task;
         }
 
-        protected abstract void HandleCore(TRequest request);
+        protected abstract void Handle(TRequest request);
     }
 }

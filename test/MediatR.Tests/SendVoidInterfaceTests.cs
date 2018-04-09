@@ -22,7 +22,7 @@ namespace MediatR.Tests
 
             public PingHandler(TextWriter writer) => _writer = writer;
 
-            protected override Task HandleCore(Ping request, CancellationToken cancellationToken)
+            protected override Task Handle(Ping request, CancellationToken cancellationToken)
                 => _writer.WriteAsync(request.Message + " Pong");
         }
 
