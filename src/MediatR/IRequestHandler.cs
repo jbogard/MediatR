@@ -30,28 +30,8 @@ namespace MediatR
     {
     }
 
-
     /// <summary>
-    /// Wrapper class for a handler that asynchronously handles a request and returns a response, ignoring the cancellation token
-    /// </summary>
-    /// <typeparam name="TRequest">The type of request being handled</typeparam>
-    /// <typeparam name="TResponse">The type of response from the handler</typeparam>
-    public abstract class AsyncRequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
-    {
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
-            => Handle(request);
-
-        /// <summary>
-        /// Override in a derived class for the handler logic
-        /// </summary>
-        /// <param name="request">Request</param>
-        /// <returns>Response</returns>
-        protected abstract Task<TResponse> Handle(TRequest request);
-    }
-
-    /// <summary>
-    /// Wrapper class for a handler that asynchronously handles a request and does not return a response, ignoring the cancellation token
+    /// Wrapper class for a handler that asynchronously handles a request and does not return a response
     /// </summary>
     /// <typeparam name="TRequest">The type of request being handled</typeparam>
     public abstract class AsyncRequestHandler<TRequest> : IRequestHandler<TRequest>
@@ -59,7 +39,7 @@ namespace MediatR
     {
         public async Task<Unit> Handle(TRequest request, CancellationToken cancellationToken)
         {
-            await Handle(request).ConfigureAwait(false);
+            await HandleCore(request, cancellationToken).ConfigureAwait(false);
             return Unit.Value;
         }
 
@@ -67,8 +47,9 @@ namespace MediatR
         /// Override in a derived class for the handler logic
         /// </summary>
         /// <param name="request">Request</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>Response</returns>
-        protected abstract Task Handle(TRequest request);
+        protected abstract Task HandleCore(TRequest request, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -80,14 +61,14 @@ namespace MediatR
         where TRequest : IRequest<TResponse>
     {
         public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken)
-            => Task.FromResult(Handle(request));
+            => Task.FromResult(HandleCore(request));
 
         /// <summary>
         /// Override in a derived class for the handler logic
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Response</returns>
-        protected abstract TResponse Handle(TRequest request);
+        protected abstract TResponse HandleCore(TRequest request);
     }
 
     /// <summary>
@@ -99,10 +80,10 @@ namespace MediatR
     {
         public Task<Unit> Handle(TRequest request, CancellationToken cancellationToken)
         {
-            Handle(request);
+            HandleCore(request);
             return Unit.Task;
         }
 
-        protected abstract void Handle(TRequest request);
+        protected abstract void HandleCore(TRequest request);
     }
 }

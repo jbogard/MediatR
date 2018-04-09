@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace MediatR.Tests
 {
     using System.IO;
@@ -20,7 +22,7 @@ namespace MediatR.Tests
 
             public PingHandler(TextWriter writer) => _writer = writer;
 
-            protected override Task Handle(Ping request)
+            protected override Task HandleCore(Ping request, CancellationToken cancellationToken)
                 => _writer.WriteAsync(request.Message + " Pong");
         }
 
