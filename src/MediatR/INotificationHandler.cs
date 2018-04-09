@@ -37,22 +37,4 @@ namespace MediatR
         /// <param name="notification">Notification</param>
         protected abstract void Handle(TNotification notification);
     }
-
-    /// <summary>
-    /// Wrapper class for an async notification handler, ignoring the cancellation token
-    /// </summary>
-    /// <typeparam name="TNotification">The notification type</typeparam>
-    public abstract class AsyncNotificationHandler<TNotification> : INotificationHandler<TNotification>
-        where TNotification : INotification
-    {
-        public Task Handle(TNotification notification, CancellationToken cancellationToken)
-            => Handle(notification);
-
-        /// <summary>
-        /// Override in a derived class for the handler logic 
-        /// </summary>
-        /// <param name="notification">Notification</param>
-        /// <returns>A task</returns>
-        protected abstract Task Handle(TNotification notification);
-    }
 }
