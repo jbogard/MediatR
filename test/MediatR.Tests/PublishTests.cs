@@ -75,10 +75,10 @@ namespace MediatR.Tests
             result.ShouldContain("Ping Pung");
         }
 
-        public class SequentialMediator : Mediator
+        public class SequentialMediator<T> : NotificationMediator<T> where T : INotification
         {
-            public SequentialMediator(ServiceFactory serviceFactory) 
-                : base(serviceFactory)
+            public SequentialMediator(IEnumerable<INotificationHandler<T>> notificationHandlers)
+                : base(notificationHandlers)
             {
             }
 
@@ -107,7 +107,7 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
+                cfg.For(typeof(INotificationMediator<>)).Use(typeof(SequentialMediator<>));
             });
 
             var mediator = new Mediator(container.GetInstance);

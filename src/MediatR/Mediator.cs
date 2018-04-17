@@ -1,7 +1,6 @@
 namespace MediatR
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -43,16 +42,8 @@ namespace MediatR
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            var mediator = _serviceFactory.GetInstance<INotificationMediator<TNotification>>();
-            return mediator.Publish(notification, cancellationToken, PublishBehavior);
+            var mediator = (INotificationMediator<TNotification>)_serviceFactory(typeof(INotificationMediator<TNotification>));
+            return mediator.Publish(notification, cancellationToken);
         }
-
-        /// <summary>
-        /// Override in a derived class to control how the tasks are awaited. By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task})" />
-        /// </summary>
-        /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
-        /// <returns>A task representing invoking all handlers</returns>
-        protected virtual Task PublishBehavior(IEnumerable<Task> allHandlers) =>
-            Task.WhenAll(allHandlers);
     }
 }
