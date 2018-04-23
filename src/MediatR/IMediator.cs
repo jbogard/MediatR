@@ -1,29 +1,26 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace MediatR
 {
+    using System;
+
     /// <summary>
-    /// Defines a mediator to encapsulate request/response and publishing interaction patterns
+    /// Defines the mediator able to send requests and notifications
     /// </summary>
     public interface IMediator
     {
         /// <summary>
-        /// Asynchronously send a request to a single handler
+        /// Creates request pipeline handler
         /// </summary>
         /// <typeparam name="TResponse">Response type</typeparam>
-        /// <param name="request">Request object</param>
-        /// <param name="cancellationToken">Optional cancellation token</param>
-        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
-        Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
+        /// <param name="requestType">Reflected request type</param>
+        /// <returns>The subject</returns>
+        IRequestMediator<TResponse> GetRequestMediator<TResponse>(Type requestType);
 
         /// <summary>
-        /// Asynchronously send a notification to multiple handlers
+        /// Creates notification hub
         /// </summary>
-        /// <param name="notification">Notification object</param>
-        /// <param name="cancellationToken">Optional cancellation token</param>
-        /// <returns>A task that represents the publish operation.</returns>
-        Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+        /// <typeparam name="TNotification">Notification type</typeparam>
+        /// <returns>The subject</returns>
+        INotificationMediator<TNotification> GetNotificationMediator<TNotification>()
             where TNotification : INotification;
     }
 }

@@ -47,8 +47,11 @@ namespace MediatR.Examples.Autofac
             builder.RegisterGeneric(typeof(ConstrainedRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
             builder.RegisterGeneric(typeof(ConstrainedPingedHandler<>)).As(typeof(INotificationHandler<>));
 
-            builder.RegisterGeneric(typeof(RequestMediator<,>)).As(typeof(IRequestMediator<,>));
-            builder.RegisterGeneric(typeof(NotificationMediator<>)).As(typeof(INotificationMediator<>));
+            builder.Register<ServiceFactory>(ctx =>
+            {
+                var c = ctx.Resolve<IComponentContext>();
+                return t => c.Resolve(t);
+            });
 
             var container = builder.Build();
 
@@ -61,7 +64,9 @@ namespace MediatR.Examples.Autofac
             //    .Resolve<IEnumerable<IPipelineBehavior<Ping, Pong>>>()
             //    .ToList();
 
-            return new Mediator(container.Resolve);
+            var mediator = container.Resolve<IMediator>();
+
+            return mediator;
         }
     }
 }

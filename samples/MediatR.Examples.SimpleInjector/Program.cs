@@ -23,10 +23,7 @@ namespace MediatR.Examples.SimpleInjector
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
-
-            container.Register(typeof(IRequestMediator<,>), typeof(RequestMediator<,>));
-            container.Register(typeof(INotificationMediator<>), typeof(NotificationMediator<>));
-
+            container.RegisterSingleton<IMediator, Mediator>();
             container.Register(typeof(IRequestHandler<,>), assemblies);
 
             // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
@@ -49,9 +46,13 @@ namespace MediatR.Examples.SimpleInjector
             container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
             container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
+            container.RegisterSingleton(new ServiceFactory(container.GetInstance));
+
             container.Verify();
 
-            return new Mediator(container.GetInstance);
+            var mediator = container.GetInstance<IMediator>();
+
+            return mediator;
         }
 
         private static IEnumerable<Assembly> GetAssemblies()

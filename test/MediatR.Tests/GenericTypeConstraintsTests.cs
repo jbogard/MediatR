@@ -97,7 +97,6 @@ namespace MediatR.Tests
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             _mediator = new Mediator(container.GetInstance);

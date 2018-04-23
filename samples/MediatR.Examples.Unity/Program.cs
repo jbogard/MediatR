@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Unity;
+using Unity.Lifetime;
 
 namespace MediatR.Examples.Unity
 {
@@ -23,6 +25,7 @@ namespace MediatR.Examples.Unity
             var container = new UnityContainer();
 
             container.RegisterInstance<TextWriter>(writer)
+                     .RegisterMediator(new HierarchicalLifetimeManager())
                      .RegisterMediatorHandlers(Assembly.GetAssembly(typeof(Ping)));
 
             container.RegisterType(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), "RequestPreProcessorBehavior");
@@ -31,20 +34,35 @@ namespace MediatR.Examples.Unity
             container.RegisterType(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>), "GenericRequestPreProcessor");
             container.RegisterType(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>), "GenericRequestPostProcessor");
 
-            container.RegisterType(typeof(IRequestMediator<,>), typeof(RequestMediator<,>));
-            container.RegisterType(typeof(INotificationMediator<>), typeof(NotificationMediator<>));
-
             // note: Unity doesn't support generic constraints
             //container.RegisterType(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>), "ConstrainedPingedHandler");
             //container.RegisterType(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>), "ConstrainedRequestPostProcessor");
 
-            return new Mediator(t => container.Resolve(t));
+            return container.Resolve<IMediator>();
         }
     }
 
     // ReSharper disable once InconsistentNaming
     public static class IUnityContainerExtensions
     {
+        public static IUnityContainer RegisterMediator(this IUnityContainer container, LifetimeManager lifetimeManager)
+        {
+            return container.RegisterType<IMediator, Mediator>(lifetimeManager)
+                .RegisterInstance<ServiceFactory>(type =>
+                {
+                    var enumerableType = type
+                        .GetInterfaces()
+                        .Concat(new[] { type })
+                        .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                    return enumerableType != null
+                        ? container.ResolveAll(enumerableType.GetGenericArguments()[0])
+                        : container.IsRegistered(type)
+                            ? container.Resolve(type)
+                            : null;
+                });
+        }
+
         public static IUnityContainer RegisterMediatorHandlers(this IUnityContainer container, Assembly assembly)
         {
             return container.RegisterTypesImplementingType(assembly, typeof(IRequestHandler<,>))

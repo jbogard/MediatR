@@ -42,7 +42,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             var mediator = new Mediator(container.GetInstance);

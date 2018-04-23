@@ -69,15 +69,8 @@ namespace MediatR.Tests
 
         public ExceptionTests()
         {
-            var container = new Container(cfg =>
-            {
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
-                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
-
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<IMediator>().Use<Mediator>();
-            });
-            _mediator = container.GetInstance<IMediator>();
+            var container = new Container();
+            _mediator = new Mediator(container.GetInstance);
         }
 
         [Fact]
@@ -146,10 +139,9 @@ namespace MediatR.Tests
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
             });
-            var mediator = container.GetInstance<IMediator>();
+
+            var mediator = new Mediator(container.GetInstance);
 
             NullPing request = null;
 
@@ -167,7 +159,6 @@ namespace MediatR.Tests
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
                 });
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             var mediator = new Mediator(container.GetInstance);
@@ -187,9 +178,7 @@ namespace MediatR.Tests
                     scanner.AssemblyContainingType(typeof(NullPinged));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-
                 });
-                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
             });
 
             var mediator = new Mediator(container.GetInstance);

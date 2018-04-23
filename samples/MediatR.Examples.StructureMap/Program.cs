@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using StructureMap;
+using StructureMap.Pipeline;
 
 namespace MediatR.Examples.StructureMap
 {
@@ -39,13 +40,16 @@ namespace MediatR.Examples.StructureMap
                 cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
 
                 // This is the default but let's be explicit. At most we should be container scoped.
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
-                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
+                cfg.For<IMediator>().LifecycleIs<TransientLifecycle>().Use<Mediator>();
 
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
             });
 
-            return new Mediator(container.GetInstance);
+
+            var mediator = container.GetInstance<IMediator>();
+
+            return mediator;
         }
     }
 }

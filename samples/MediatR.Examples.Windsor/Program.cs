@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using System.Threading.Tasks;
@@ -27,7 +29,17 @@ namespace MediatR.Examples.Windsor
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());
 
+            container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
             container.Register(Component.For<TextWriter>().Instance(writer));
+            container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => (type =>
+            {
+                var enumerableType = type
+                    .GetInterfaces()
+                    .Concat(new[] { type })
+                    .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                return enumerableType != null ? k.ResolveAll(enumerableType.GetGenericArguments()[0]) : k.Resolve(type);
+            })));
 
             //Pipeline
             container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));
@@ -38,10 +50,9 @@ namespace MediatR.Examples.Windsor
             container.Register(Component.For(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>)).NamedAutomatically("ConstrainedRequestPostProcessor"));
             container.Register(Component.For(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>)).NamedAutomatically("ConstrainedPingedHandler"));
 
-            container.Register(Component.For(typeof(IRequestMediator<,>), typeof(RequestMediator<,>)));
-            container.Register(Component.For(typeof(INotificationMediator<>), typeof(NotificationMediator<>)));
+            var mediator = container.Resolve<IMediator>();
 
-            return new Mediator(container.Resolve);
+            return mediator;
         }
     }
 }

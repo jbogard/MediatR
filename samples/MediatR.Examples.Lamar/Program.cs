@@ -38,13 +38,17 @@ namespace MediatR.Examples.Lamar
                 //Constrained notification handlers
                 cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
 
-                cfg.For(typeof(IRequestMediator<,>)).Add(typeof(RequestMediator<,>));
-                cfg.For(typeof(INotificationMediator<>)).Add(typeof(NotificationMediator<>));
+                // This is the default but let's be explicit. At most we should be container scoped.
+                cfg.For<IMediator>().Use<Mediator>().Transient();
 
+                cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
             });
 
-            return new Mediator(container.GetInstance);
+
+            var mediator = container.GetInstance<IMediator>();
+
+            return mediator;
         }
     }
 }

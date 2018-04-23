@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
@@ -12,9 +11,22 @@ namespace MediatR.Examples.DryIoc
         {
             var writer = new WrappingWriter(Console.Out);
 
-            var mediator = new Mediator(serviceType => Bootstrap(serviceType, writer));
+            var mediator = new InjectingMediator(serviceType => Bootstrap(serviceType, writer));
 
             return Runner.Run(mediator, writer, "DryIoc");
+        }
+
+        class InjectingMediator : IMediator
+        {
+            private readonly ServiceFactory _factory;
+
+            public InjectingMediator(ServiceFactory factory) => _factory = factory;
+
+            public IRequestMediator<TResponse> GetRequestMediator<TResponse>(Type requestType) =>
+                (IRequestMediator<TResponse>)_factory(typeof(IRequestMediator<,>).MakeGenericType(requestType, typeof(TResponse)));
+
+            public INotificationMediator<TNotification> GetNotificationMediator<TNotification>() where TNotification : INotification =>
+                (INotificationMediator<TNotification>)_factory(typeof(INotificationMediator<>).MakeGenericType(typeof(TNotification)));
         }
 
         private static object Bootstrap(Type serviceType, TextWriter writer)

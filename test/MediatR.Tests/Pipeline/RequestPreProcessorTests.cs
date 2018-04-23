@@ -51,7 +51,6 @@ namespace MediatR.Tests.Pipeline
                     scanner.AddAllTypesOf(typeof(IRequestPreProcessor<>));
                 });
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
-                cfg.For(typeof(IRequestMediator<,>)).Add(typeof(RequestMediator<,>));
             });
 
             var mediator = new Mediator(container.GetInstance);

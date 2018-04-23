@@ -39,7 +39,8 @@ namespace MediatR
             PublishBehavior(_notificationHandlers.Select(x => x.Handle(notification, cancellationToken)));
 
         /// <summary>
-        /// Override in a derived class to control how the tasks are awaited. By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task})" />
+        /// Override in a derived class to control how the tasks are awaited.
+        /// By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task})" />
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>

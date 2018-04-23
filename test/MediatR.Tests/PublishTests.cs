@@ -63,7 +63,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof (INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For(typeof(INotificationMediator<>)).Use(typeof(NotificationMediator<>));
             });
 
             var mediator = new Mediator(container.GetInstance);

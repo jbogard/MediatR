@@ -27,6 +27,7 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(scan => scan.FromAssemblyContaining<IMediator>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<,>)).BindDefaultInterface());
 
             kernel.Bind<TextWriter>().ToConstant(writer);
+            kernel.Bind<IMediator>().To<Mediator>();
 
             // note: Generic constraints are not supported out-of-the-box
             bool SkipConstrained(Type x) => !x.Name.StartsWith("Constrained");
@@ -43,18 +44,11 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(typeof(IRequestPreProcessor<>)).To(typeof(GenericRequestPreProcessor<>));
             kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(GenericRequestPostProcessor<,>));
 
-            // note: Generic constraints are not supported out-of-the-box
-            //kernel.Bind(typeof(INotificationHandler<>)).To(typeof(ConstrainedPingedHandler<>));
-            //kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(ConstrainedRequestPostProcessor<,>));
+            kernel.Bind<ServiceFactory>().ToMethod(ctx => t => ctx.Kernel.TryGet(t));
 
-            kernel.Bind(typeof(IRequestMediator<,>)).To(typeof(RequestMediator<,>))
-                .WhenNotificationMatchesType(new[] { typeof(Ping), typeof(Pong)},
-                                             new[] { typeof(Jing), typeof(Unit) });
+            var mediator = kernel.Get<IMediator>();
 
-            kernel.Bind(typeof(INotificationMediator<>)).To(typeof(NotificationMediator<>))
-                .WhenNotificationMatchesType(new[] { typeof(Pinged) }, new[] { typeof(Ponged) });
-
-            return new Mediator(t => kernel.TryGet(t));
+            return mediator;
         }
     }
 

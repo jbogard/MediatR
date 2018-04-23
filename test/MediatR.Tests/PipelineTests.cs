@@ -196,8 +196,6 @@ namespace MediatR.Tests
                 cfg.For<Logger>().Singleton().Use(output);
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
                 cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             var mediator = new Mediator(container.GetInstance);
@@ -233,8 +231,6 @@ namespace MediatR.Tests
 
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
-
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
@@ -273,8 +269,6 @@ namespace MediatR.Tests
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
-
-                cfg.For(typeof(IRequestMediator<,>)).Use(typeof(RequestMediator<,>));
             });
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();
