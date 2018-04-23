@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Lamar;
 using MediatR.Pipeline;
@@ -10,7 +8,7 @@ namespace MediatR.Examples.Lamar
 {
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);

@@ -9,7 +9,7 @@ namespace MediatR.Examples.LightInject
 {
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -20,7 +20,7 @@ namespace MediatR.Examples.LightInject
         private static IMediator BuildMediator(WrappingWriter writer)
         {
             var serviceContainer = new ServiceContainer();
-            serviceContainer.Register<IMediator, Mediator>();            
+            serviceContainer.Register<IMediator, Mediator>();
             serviceContainer.RegisterInstance<TextWriter>(writer);
 
             serviceContainer.RegisterAssembly(typeof(Ping).GetTypeInfo().Assembly, (serviceType, implementingType) =>
@@ -45,12 +45,12 @@ namespace MediatR.Examples.LightInject
                     typeof(GenericRequestPostProcessor<,>),
                     typeof(ConstrainedRequestPostProcessor<,>)
                 }, type => new PerContainerLifetime());
-                   
-            serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));            
-            
+
+            serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
+
 
             serviceContainer.Register<ServiceFactory>(fac => fac.GetInstance);
-            return serviceContainer.GetInstance<IMediator>(); 
+            return serviceContainer.GetInstance<IMediator>();
         }
     }
 }

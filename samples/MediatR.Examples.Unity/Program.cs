@@ -7,18 +7,15 @@ using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Unity;
 using Unity.Lifetime;
-using Unity.Registration;
 
 namespace MediatR.Examples.Unity
 {
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
-
-            writer.WriteLine("Unity is not a very good container and breaks immediately");
 
             return Runner.Run(mediator, writer, "Unity");
         }
@@ -36,10 +33,10 @@ namespace MediatR.Examples.Unity
             container.RegisterType(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>), "GenericPipelineBehavior");
             container.RegisterType(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>), "GenericRequestPreProcessor");
             container.RegisterType(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>), "GenericRequestPostProcessor");
-            container.RegisterType(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>), "ConstrainedRequestPostProcessor");
 
-            // Unity doesn't support generic constraints
+            // note: Unity doesn't support generic constraints
             //container.RegisterType(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>), "ConstrainedPingedHandler");
+            //container.RegisterType(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>), "ConstrainedRequestPostProcessor");
 
             return container.Resolve<IMediator>();
         }
@@ -70,26 +67,6 @@ namespace MediatR.Examples.Unity
         {
             return container.RegisterTypesImplementingType(assembly, typeof(IRequestHandler<,>))
                             .RegisterNamedTypesImplementingType(assembly, typeof(INotificationHandler<>));
-        }
-
-        internal static bool IsGenericTypeOf(this Type type, Type genericType)
-        {
-            return type.IsGenericType &&
-                   type.GetGenericTypeDefinition() == genericType;
-        }
-
-        internal static void AddGenericTypes(this List<object> list, IUnityContainer container, Type genericType)
-        {
-            var genericHandlerRegistrations =
-                container.Registrations.Where(reg => reg.RegisteredType == genericType);
-
-            foreach (var handlerRegistration in genericHandlerRegistrations)
-            {
-                if (list.All(item => item.GetType() != handlerRegistration.MappedToType))
-                {
-                    list.Add(container.Resolve(handlerRegistration.MappedToType));
-                }
-            }
         }
 
         /// <summary>

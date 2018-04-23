@@ -41,13 +41,10 @@ namespace MediatR.Tests
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For<IMediator>().Use<Mediator>();
             });
 
-
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             await mediator.Send(new Ping { Message = "Ping" });
 

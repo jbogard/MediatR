@@ -1,17 +1,15 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using MediatR.Pipeline;
+using Autofac;
+
 namespace MediatR.Examples.Autofac
 {
-    using global::Autofac;
-    using MediatR.Pipeline;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading.Tasks;
-
     internal static class Program
     {
-        public static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);

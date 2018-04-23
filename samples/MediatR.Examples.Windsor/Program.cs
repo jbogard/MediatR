@@ -1,19 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Castle.MicroKernel.Registration;
+using Castle.Windsor;
 using System.Threading.Tasks;
-using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 using MediatR.Pipeline;
+using Castle.MicroKernel.Resolvers.SpecializedResolvers;
 
 namespace MediatR.Examples.Windsor
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Castle.MicroKernel.Registration;
-    using Castle.Windsor;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -36,8 +35,8 @@ namespace MediatR.Examples.Windsor
             {
                 var enumerableType = type
                     .GetInterfaces()
-                    .Concat(new [] {type})
-                    .FirstOrDefault(t =>  t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                    .Concat(new[] { type })
+                    .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
                 return enumerableType != null ? k.ResolveAll(enumerableType.GetGenericArguments()[0]) : k.Resolve(type);
             })));

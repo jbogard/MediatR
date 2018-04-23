@@ -1,14 +1,12 @@
-using System.Reflection;
-using System.Threading;
-
 namespace MediatR.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Shouldly;
     using StructureMap;
     using System.Threading.Tasks;
+    using System.Reflection;
+    using System.Threading;
     using Xunit;
 
     public class GenericTypeConstraintsTests
@@ -63,7 +61,6 @@ namespace MediatR.Tests
         {
             public Task<Unit> Handle(Jing request, CancellationToken cancellationToken)
             {
-                // empty handle
                 return Unit.Task;
             }
         }
@@ -100,11 +97,9 @@ namespace MediatR.Tests
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<IMediator>().Use<Mediator>();
             });
 
-            _mediator = container.GetInstance<IMediator>();
+            _mediator = new Mediator(container.GetInstance);
         }
 
         [Fact]

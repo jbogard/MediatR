@@ -1,68 +1,95 @@
 namespace MediatR
 {
-    using Internal;
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Collections.Generic;
 
     /// <summary>
-    /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
+    /// Provides access to the request and notification pipelines.
+    /// The life-time of the <see cref="IMediator"/> may be controlled by registering it in IoC Container
+    /// with specific sharing policy, e.g. as Singleton, Scoped, Transient, etc.
     /// </summary>
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
-        private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
-        private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Mediator"/> class.
+        /// Initializes the default mediator by providing the service factory for creating the request and notification mediators.
+        /// Service factory may be a delegate wrapping resolution from IoC Container library.
         /// </summary>
-        /// <param name="serviceFactory">The single instance factory.</param>
-        public Mediator(ServiceFactory serviceFactory)
-        {
+        /// <param name="serviceFactory">The service factory.</param>
+        public Mediator(ServiceFactory serviceFactory) =>
             _serviceFactory = serviceFactory;
+
+        /// <inheritdoc />
+        public IRequestMediator<TResponse> GetRequestMediator<TResponse>(Type requestType)
+        {
+            Type[] requestResponseTypes = { requestType, typeof(TResponse) };
+            return (IRequestMediator<TResponse>)Activator.CreateInstance(
+                _requestMediatorType.MakeGenericType(requestResponseTypes),
+                    _serviceFactory(_requestHandlerType.MakeGenericType(requestResponseTypes)),
+                    _serviceFactory(_enumerableType.MakeGenericType(_requestPipelineType.MakeGenericType(requestResponseTypes))));
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
-        {
-            if (request == null)
+        /// <inheritdoc />
+        public INotificationMediator<TNotification> GetNotificationMediator<TNotification>()
+            where TNotification : INotification
             {
-                throw new ArgumentNullException(nameof(request));
+                Type[] notificationType = { typeof(TNotification) };
+                return (INotificationMediator<TNotification>)Activator.CreateInstance(
+                    _notificationMediator.MakeGenericType(notificationType),
+                    _serviceFactory(_enumerableType.MakeGenericType(_notificationHandler.MakeGenericType(notificationType))));
             }
 
-            var requestType = request.GetType();
+        private static readonly Type _enumerableType = typeof(IEnumerable<>);
 
-            var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
-                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+        private static readonly Type _requestMediatorType = typeof(RequestMediator<,>);
+        private static readonly Type _requestHandlerType = typeof(IRequestHandler<,>);
+        private static readonly Type _requestPipelineType = typeof(IPipelineBehavior<,>);
 
-            return handler.Handle(request, cancellationToken, _serviceFactory);
+        private static readonly Type _notificationMediator = typeof(NotificationMediator<>);
+        private static readonly Type _notificationHandler = typeof(INotificationHandler<>);
+    }
+
+    /// <summary>
+    /// Handy extensions to simplify sending requests and publishing notifications via mediator.
+    /// </summary>
+    public static class MediatorExtensions
+    {
+        /// <summary>
+        /// Asynchronously sends a request to a single handler and pipeline behaviors if any.
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="mediator">Mediator to use</param>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
+        public static Task<TResponse> Send<TResponse>(this IMediator mediator,
+            IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            var requestType = request.NotNull(nameof(request)).GetType();
+            var requestMediator = mediator.GetRequestMediator<TResponse>(requestType);
+            return requestMediator.Send(request, cancellationToken);
         }
 
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Asynchronously sends a notification to multiple handlers
+        /// </summary>
+        /// <param name="mediator">Mediator to use</param>
+        /// <param name="notification">Notification object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the publish operation.</returns>
+        public static Task Publish<TNotification>(this IMediator mediator,
+            TNotification notification, CancellationToken cancellationToken = default)
             where TNotification : INotification
         {
-            if (notification == null)
-            {
-                throw new ArgumentNullException(nameof(notification));
-            }
-
-            var notificationType = notification.GetType();
-            var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
-
-            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
+            notification = notification.NotNull(nameof(notification));
+            var notificationMediator = mediator.GetNotificationMediator<TNotification>();
+            return notificationMediator.Publish(notification, cancellationToken);
         }
 
-        /// <summary>
-        /// Override in a derived class to control how the tasks are awaited. By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task})" />
-        /// </summary>
-        /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
-        /// <returns>A task representing invoking all handlers</returns>
-        protected virtual Task PublishCore(IEnumerable<Task> allHandlers)
-        {
-            return Task.WhenAll(allHandlers);
-        }
+        static T NotNull<T>(this T arg, string name) =>
+            arg != null ? arg : throw new ArgumentNullException(name);
     }
 }

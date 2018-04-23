@@ -1,18 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using SimpleInjector;
 
 namespace MediatR.Examples.SimpleInjector
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using global::SimpleInjector;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -37,7 +36,7 @@ namespace MediatR.Examples.SimpleInjector
 
             container.RegisterSingleton<TextWriter>(writer);
 
-            //Pipeline
+            //Pipeline(
             container.RegisterCollection(typeof(IPipelineBehavior<,>), new []
             {
                 typeof(RequestPreProcessorBehavior<,>),

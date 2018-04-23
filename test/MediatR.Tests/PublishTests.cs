@@ -1,15 +1,13 @@
-using System.Threading;
-
 namespace MediatR.Tests
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using Shouldly;
     using StructureMap;
-    using StructureMap.Graph;
     using Xunit;
 
     public class PublishTests
@@ -65,11 +63,9 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof (INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For<IMediator>().Use<Mediator>();
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             });
 
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             await mediator.Publish(new Ping { Message = "Ping" });
 
@@ -78,14 +74,14 @@ namespace MediatR.Tests
             result.ShouldContain("Ping Pung");
         }
 
-        public class SequentialMediator : Mediator
+        public class SequentialMediator<T> : NotificationMediator<T> where T : INotification
         {
-            public SequentialMediator(ServiceFactory serviceFactory) 
-                : base(serviceFactory)
+            public SequentialMediator(IEnumerable<INotificationHandler<T>> notificationHandlers)
+                : base(notificationHandlers)
             {
             }
 
-            protected override async Task PublishCore(IEnumerable<Task> allHandlers)
+            protected override async Task PublishBehavior(IEnumerable<Task> allHandlers)
             {
                 foreach (var handler in allHandlers)
                 {
@@ -110,11 +106,10 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For<IMediator>().Use<SequentialMediator>();
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For(typeof(INotificationMediator<>)).Use(typeof(SequentialMediator<>));
             });
 
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             await mediator.Publish(new Ping { Message = "Ping" });
 

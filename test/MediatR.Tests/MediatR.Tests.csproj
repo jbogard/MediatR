@@ -24,6 +24,12 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="MediatR">
+      <HintPath>..\..\samples\MediatR.Examples\bin\Debug\net45\MediatR.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
   </PropertyGroup>

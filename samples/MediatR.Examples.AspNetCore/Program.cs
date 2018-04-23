@@ -8,7 +8,7 @@ namespace MediatR.Examples.AspNetCore
 {
     public static class Program
     {
-        public static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);

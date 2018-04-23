@@ -51,7 +51,6 @@ foreach ($sample in $samples) {
 
     try {
         exec { & dotnet run -c Release --no-build }
-    } catch {
     } finally {
         Pop-Location
     }

@@ -1,8 +1,7 @@
-using System.Threading;
-
 namespace MediatR.Tests
 {
     using System.Threading.Tasks;
+    using System.Threading;
     using Shouldly;
     using StructureMap;
     using Xunit;
@@ -40,11 +39,9 @@ namespace MediatR.Tests
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
                 });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
             });
 
-            var mediator = container.GetInstance<IMediator>();
+            var mediator = new Mediator(container.GetInstance);
 
             var response = await mediator.Send(new Ping { Message = "Ping" });
 

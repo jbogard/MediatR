@@ -1,16 +1,15 @@
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using StructureMap;
 using StructureMap.Pipeline;
 
 namespace MediatR.Examples.StructureMap
 {
-    using System;
-    using System.IO;
-    using global::StructureMap;
-
     class Program
     {
-        static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);

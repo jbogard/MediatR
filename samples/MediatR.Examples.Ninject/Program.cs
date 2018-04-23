@@ -1,19 +1,18 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using MediatR.Pipeline;
+using Ninject;
 using Ninject.Syntax;
+using Ninject.Extensions.Conventions;
+using Ninject.Planning.Bindings.Resolvers;
 
 namespace MediatR.Examples.Ninject
 {
-    using System;
-    using System.IO;
-    using global::Ninject;
-    using global::Ninject.Extensions.Conventions;
-    using global::Ninject.Planning.Bindings.Resolvers;
-
     internal class Program
     {
-        private static Task Main(string[] args)
+        static Task Main()
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
@@ -25,11 +24,18 @@ namespace MediatR.Examples.Ninject
         {
             var kernel = new StandardKernel();
             kernel.Components.Add<IBindingResolver, ContravariantBindingResolver>();
-            kernel.Bind(scan => scan.FromAssemblyContaining<IMediator>().SelectAllClasses().BindDefaultInterface());
-            kernel.Bind<TextWriter>().ToConstant(writer);
+            kernel.Bind(scan => scan.FromAssemblyContaining<IMediator>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<,>)).BindDefaultInterface());
 
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<,>)).BindAllInterfaces());
-            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(INotificationHandler<>)).BindAllInterfaces());
+            kernel.Bind<TextWriter>().ToConstant(writer);
+            kernel.Bind<IMediator>().To<Mediator>();
+
+            // note: Generic constraints are not supported out-of-the-box
+            bool SkipConstrained(Type x) => !x.Name.StartsWith("Constrained");
+
+            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(IRequestHandler<,>))
+                .Where(SkipConstrained).BindAllInterfaces());
+            kernel.Bind(scan => scan.FromAssemblyContaining<Ping>().SelectAllClasses().InheritedFrom(typeof(INotificationHandler<>))
+                .Where(SkipConstrained).BindAllInterfaces());
 
             //Pipeline
             kernel.Bind(typeof(IPipelineBehavior<,>)).To(typeof(RequestPreProcessorBehavior<,>));
@@ -37,8 +43,6 @@ namespace MediatR.Examples.Ninject
             kernel.Bind(typeof(IPipelineBehavior<,>)).To(typeof(GenericPipelineBehavior<,>));
             kernel.Bind(typeof(IRequestPreProcessor<>)).To(typeof(GenericRequestPreProcessor<>));
             kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(GenericRequestPostProcessor<,>));
-            kernel.Bind(typeof(IRequestPostProcessor<,>)).To(typeof(ConstrainedRequestPostProcessor<,>));
-            kernel.Bind(typeof(INotificationHandler<>)).To(typeof(ConstrainedPingedHandler<>)).WhenNotificationMatchesType<Pinged>();
 
             kernel.Bind<ServiceFactory>().ToMethod(ctx => t => ctx.Kernel.TryGet(t));
 
@@ -50,11 +54,13 @@ namespace MediatR.Examples.Ninject
 
     public static class BindingExtensions
     {
-        public static IBindingInNamedWithOrOnSyntax<object> WhenNotificationMatchesType<TNotification>(this IBindingWhenSyntax<object> syntax)
-            where TNotification : INotification
-        {
-            return syntax.When(request => typeof(TNotification).IsAssignableFrom(request.Service.GenericTypeArguments.Single()));
-        }
+        // note: May be done better to check Request constraints, but for sample is fine
+        public static IBindingInNamedWithOrOnSyntax<object> WhenNotificationMatchesType(
+            this IBindingWhenSyntax<object> syntax, params Type[][] typeArgsVariants) =>
+            syntax.When(request =>
+            {
+                var typeArgs = request.Service.GenericTypeArguments;
+                return typeArgsVariants.Any(closedTypeArgs => closedTypeArgs.Select((t, i) => t.IsAssignableFrom(typeArgs[i])).All(id => id));
+            });
     }
-
 }
