@@ -33,21 +33,21 @@ namespace MediatR.Examples.SimpleInjector
                 IncludeGenericTypeDefinitions = true,
                 IncludeComposites = false,
             });
-            container.RegisterCollection(typeof(INotificationHandler<>), notificationHandlerTypes);
+            container.Register(typeof(INotificationHandler<>), notificationHandlerTypes);
 
-            container.RegisterSingleton<TextWriter>(writer);
+            container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
             //Pipeline
-            container.RegisterCollection(typeof(IPipelineBehavior<,>), new []
+            container.Register(typeof(IPipelineBehavior<,>), new []
             {
                 typeof(RequestPreProcessorBehavior<,>),
                 typeof(RequestPostProcessorBehavior<,>),
                 typeof(GenericPipelineBehavior<,>)
             });
-            container.RegisterCollection(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
-            container.RegisterCollection(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
+            container.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
+            container.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
-            container.RegisterSingleton(new ServiceFactory(container.GetInstance));
+            container.Register(() => new ServiceFactory(container.GetInstance), Lifestyle.Singleton);
 
             container.Verify();
 

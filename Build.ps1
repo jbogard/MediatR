@@ -24,8 +24,6 @@ function Exec
 
 if(Test-Path .\src\MediatR\artifacts) { Remove-Item .\src\MediatR\artifacts -Force -Recurse }
 
-exec { & dotnet restore }
-
 $branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
 $revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
@@ -40,7 +38,11 @@ exec { & dotnet build MediatR.sln -c Release --version-suffix=$buildSuffix }
 
 Push-Location -Path .\test\MediatR.Tests
 
-exec { & dotnet xunit -configuration Release --no-build }
+try {
+    exec { & dotnet test -c Release --no-build --no-restore }
+} finally {
+    Pop-Location
+}
 
 Pop-Location
 
@@ -50,7 +52,7 @@ foreach ($sample in $samples) {
     Push-Location -Path $sample
 
     try {
-        exec { & dotnet run -c Release --no-build }
+        exec { & dotnet run -c Release --no-build --no-restore }
     } catch {
     } finally {
         Pop-Location
