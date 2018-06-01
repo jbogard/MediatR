@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net451</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>MediatR.Examples.Unity</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.Unity</PackageId>
@@ -9,16 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Unity" Version="5.8.4" />
+    <PackageReference Include="Unity.Container" Version="5.8.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>MediatR.Examples.LightInject</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>MediatR.Examples.LightInject</PackageId>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="5.1.2" />
+    <PackageReference Include="LightInject" Version="5.1.3" />
   </ItemGroup>
 
 </Project>

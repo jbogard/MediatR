@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
     <AssemblyName>MediatR.Tests</AssemblyName>
     <PackageId>MediatR.Tests</PackageId>
   </PropertyGroup>
@@ -11,21 +11,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <PackageReference Include="xunit" Version="2.4.0-beta.2.build4010" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
     <PackageReference Include="Shouldly" Version="3.0.0" />
-    <PackageReference Include="structuremap" Version="4.5.3" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="structuremap" Version="4.6.1" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.5.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0-beta.2.build4010" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="2.0.1" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <RuntimeFrameworkVersion>2.0.3</RuntimeFrameworkVersion>
-  </PropertyGroup>
 
 </Project>
