@@ -38,14 +38,14 @@ namespace MediatR.Examples.SimpleInjector
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
             //Pipeline
-            container.Register(typeof(IPipelineBehavior<,>), new []
+            container.Collection.Register(typeof(IPipelineBehavior<,>), new []
             {
                 typeof(RequestPreProcessorBehavior<,>),
                 typeof(RequestPostProcessorBehavior<,>),
                 typeof(GenericPipelineBehavior<,>)
             });
-            container.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
-            container.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
+            container.Collection.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
+            container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
             container.Register(() => new ServiceFactory(container.GetInstance), Lifestyle.Singleton);
 
