@@ -1,7 +1,6 @@
 namespace MediatR.Pipeline
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -21,7 +20,10 @@ namespace MediatR.Pipeline
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            await Task.WhenAll(_preProcessors.Select(p => p.Process(request, cancellationToken))).ConfigureAwait(false);
+            foreach (var processor in _preProcessors)
+            {
+                await processor.Process(request, cancellationToken).ConfigureAwait(false);
+            }
 
             return await next().ConfigureAwait(false);
         }

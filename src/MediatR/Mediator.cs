@@ -56,13 +56,16 @@ namespace MediatR
         }
 
         /// <summary>
-        /// Override in a derived class to control how the tasks are awaited. By default the implementation is <see cref="Task.WhenAll(IEnumerable{Task})" />
+        /// Override in a derived class to control how the tasks are awaited. By default the implementation is a foreach and await of each handler
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual Task PublishCore(IEnumerable<Task> allHandlers)
+        protected virtual async Task PublishCore(IEnumerable<Task> allHandlers)
         {
-            return Task.WhenAll(allHandlers);
+            foreach (var handler in allHandlers)
+            {
+                await handler;
+            }
         }
     }
 }
