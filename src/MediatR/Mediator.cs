@@ -64,7 +64,7 @@ namespace MediatR
         {
             foreach (var handler in allHandlers)
             {
-                await handler;
+                await handler.ConfigureAwait(false);
             }
         }
     }
