@@ -13,17 +13,19 @@ namespace MediatR.Pipeline
     public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
+        private readonly ITaskExecutionStrategy _taskExecutionStrategy;
 
-        public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors)
+        public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors, ITaskExecutionStrategy taskExecutionStrategy)
         {
             _postProcessors = postProcessors;
+            _taskExecutionStrategy = taskExecutionStrategy;
         }
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var response = await next().ConfigureAwait(false);
 
-            await Task.WhenAll(_postProcessors.Select(p => p.Process(request, response))).ConfigureAwait(false);
+            await _taskExecutionStrategy.Execute(_postProcessors.Select(p => p.Process(request, response))).ConfigureAwait(false);
 
             return response;
         }

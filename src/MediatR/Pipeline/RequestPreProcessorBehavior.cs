@@ -13,15 +13,17 @@ namespace MediatR.Pipeline
     public class RequestPreProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly IEnumerable<IRequestPreProcessor<TRequest>> _preProcessors;
+        private readonly ITaskExecutionStrategy _taskExecutionStrategy;
 
-        public RequestPreProcessorBehavior(IEnumerable<IRequestPreProcessor<TRequest>> preProcessors)
+        public RequestPreProcessorBehavior(IEnumerable<IRequestPreProcessor<TRequest>> preProcessors, ITaskExecutionStrategy taskExecutionStrategy)
         {
             _preProcessors = preProcessors;
+            _taskExecutionStrategy = taskExecutionStrategy;
         }
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
-            await Task.WhenAll(_preProcessors.Select(p => p.Process(request, cancellationToken))).ConfigureAwait(false);
+            await _taskExecutionStrategy.Execute((_preProcessors.Select(p => p.Process(request, cancellationToken)))).ConfigureAwait(false);
 
             return await next().ConfigureAwait(false);
         }

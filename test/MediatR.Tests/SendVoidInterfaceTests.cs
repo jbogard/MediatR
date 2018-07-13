@@ -43,6 +43,7 @@ namespace MediatR.Tests
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
 

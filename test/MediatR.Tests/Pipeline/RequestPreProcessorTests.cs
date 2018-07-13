@@ -53,6 +53,7 @@ namespace MediatR.Tests.Pipeline
                 });
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
 

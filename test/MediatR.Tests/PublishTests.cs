@@ -54,7 +54,7 @@ namespace MediatR.Tests
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
-            
+
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
@@ -65,6 +65,7 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof (INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
+                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             });
@@ -76,22 +77,6 @@ namespace MediatR.Tests
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");
             result.ShouldContain("Ping Pung");
-        }
-
-        public class SequentialMediator : Mediator
-        {
-            public SequentialMediator(ServiceFactory serviceFactory) 
-                : base(serviceFactory)
-            {
-            }
-
-            protected override async Task PublishCore(IEnumerable<Task> allHandlers)
-            {
-                foreach (var handler in allHandlers)
-                {
-                    await handler;
-                }
-            }
         }
 
         [Fact]
@@ -110,7 +95,8 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(INotificationHandler<>));
                 });
                 cfg.For<TextWriter>().Use(writer);
-                cfg.For<IMediator>().Use<SequentialMediator>();
+                cfg.For<ITaskExecutionStrategy>().Use<SequentialExecutionStrategy>();
+                cfg.For<IMediator>().Use<Mediator>();
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             });
 
