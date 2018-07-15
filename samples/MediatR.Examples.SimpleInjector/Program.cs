@@ -33,7 +33,7 @@ namespace MediatR.Examples.SimpleInjector
                 IncludeGenericTypeDefinitions = true,
                 IncludeComposites = false,
             });
-            container.Register(typeof(INotificationHandler<>), notificationHandlerTypes);
+            container.Collection.Register(typeof(INotificationHandler<>), notificationHandlerTypes);
 
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
