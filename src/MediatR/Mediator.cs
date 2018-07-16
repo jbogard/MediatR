@@ -13,6 +13,8 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
+        private readonly ITaskExecutionStrategy _taskExecutionStrategy;
+
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
@@ -20,9 +22,13 @@ namespace MediatR
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
         /// <param name="serviceFactory">The single instance factory.</param>
-        public Mediator(ServiceFactory serviceFactory)
+        /// <param name="sequentialExecution">Sequential execution switch.</param>
+        public Mediator(ServiceFactory serviceFactory, bool sequentialExecution = false)
         {
             _serviceFactory = serviceFactory;
+            _taskExecutionStrategy = sequentialExecution
+                ? (ITaskExecutionStrategy) new SequentialExecutionStrategy()
+                : new DefaultExecutionStrategy();
         }
 
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
@@ -60,9 +66,7 @@ namespace MediatR
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual Task PublishCore(IEnumerable<Task> allHandlers)
-        {
-            return Task.WhenAll(allHandlers);
-        }
+        protected virtual Task PublishCore(IEnumerable<Task> allHandlers) =>
+            _taskExecutionStrategy.Execute(allHandlers);
     }
 }
