@@ -101,7 +101,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
 

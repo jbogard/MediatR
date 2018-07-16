@@ -73,7 +73,6 @@ namespace MediatR.Tests
             var container = new Container(cfg =>
             {
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
             _mediator = container.GetInstance<IMediator>();
@@ -146,7 +145,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
@@ -169,7 +167,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
@@ -192,7 +189,6 @@ namespace MediatR.Tests
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<ITaskExecutionStrategy>().Use<DefaultExecutionStrategy>();
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();

@@ -22,10 +22,13 @@ namespace MediatR
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
         /// <param name="serviceFactory">The single instance factory.</param>
-        public Mediator(ServiceFactory serviceFactory, ITaskExecutionStrategy taskExecutionStrategy)
+        /// <param name="sequentialExecution">Sequential execution switch.</param>
+        public Mediator(ServiceFactory serviceFactory, bool sequentialExecution = false)
         {
             _serviceFactory = serviceFactory;
-            _taskExecutionStrategy = taskExecutionStrategy;
+            _taskExecutionStrategy = sequentialExecution
+                ? (ITaskExecutionStrategy) new SequentialExecutionStrategy()
+                : new DefaultExecutionStrategy();
         }
 
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
