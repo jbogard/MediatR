@@ -1,7 +1,6 @@
 namespace MediatR.Pipeline
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -23,7 +22,10 @@ namespace MediatR.Pipeline
         {
             var response = await next().ConfigureAwait(false);
 
-            await Task.WhenAll(_postProcessors.Select(p => p.Process(request, response))).ConfigureAwait(false);
+            foreach (var processor in _postProcessors)
+            {
+                await processor.Process(request, response).ConfigureAwait(false);
+            }
 
             return response;
         }
