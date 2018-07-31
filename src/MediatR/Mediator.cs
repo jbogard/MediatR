@@ -41,7 +41,7 @@ namespace MediatR
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
-            where TNotification : INotification => Publish(notification, notification?.GetType(), cancellationToken);
+            where TNotification : INotification => Publish(notification, typeof(TNotification), cancellationToken);
 
         public Task Publish(INotification notification, Type notificationType, CancellationToken cancellationToken = default)
         {
