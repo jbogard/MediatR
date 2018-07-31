@@ -197,27 +197,5 @@ namespace MediatR.Tests
 
             await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
         }
-
-        [Fact]
-        public async Task Should_throw_argument_exception_for_publish_when_type_is_null()
-        {
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(NullPinged));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
-            });
-            var mediator = container.GetInstance<IMediator>();
-
-            var notification = new NullPinged();
-
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification, null));
-        }
     }
 }
