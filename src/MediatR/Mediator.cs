@@ -41,14 +41,19 @@ namespace MediatR
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
-            where TNotification : INotification
+            where TNotification : INotification => Publish(notification, notification?.GetType(), cancellationToken);
+
+        public Task Publish(INotification notification, Type notificationType, CancellationToken cancellationToken = default)
         {
             if (notification == null)
             {
                 throw new ArgumentNullException(nameof(notification));
             }
+            if (notificationType == null)
+            {
+                throw new ArgumentNullException(nameof(notificationType));
+            }
 
-            var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
                 t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
 
