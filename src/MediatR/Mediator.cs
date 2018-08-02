@@ -47,12 +47,8 @@ namespace MediatR
             {
                 throw new ArgumentNullException(nameof(notification));
             }
-            
-            var notificationType = typeof(TNotification);
-            var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
 
-            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
+            return Publish(notification, typeof(TNotification));
         }
 
         public Task Publish(object notification, CancellationToken cancellationToken = default)
@@ -63,7 +59,7 @@ namespace MediatR
             }
             if (notification is INotification instance)
             {
-                return Publish(instance, cancellationToken);
+                return Publish(instance, notification.GetType(), cancellationToken);
             }
             
             throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}");
@@ -80,6 +76,14 @@ namespace MediatR
             {
                 await handler.ConfigureAwait(false);
             }
+        }
+
+        private Task Publish(INotification notification, Type notificationType, CancellationToken cancellationToken = default) 
+        {
+            var handler = _notificationHandlers.GetOrAdd(notificationType,
+                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
+
+            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
     }
 }
