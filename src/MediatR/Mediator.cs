@@ -41,18 +41,28 @@ namespace MediatR
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
-            where TNotification : INotification
+             where TNotification : INotification
         {
             if (notification == null)
             {
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            var notificationType = notification.GetType();
-            var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
+            return PublishNotification(notification, cancellationToken);
+        }
 
-            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
+        public Task Publish(object notification, CancellationToken cancellationToken = default)
+        {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+            if (notification is INotification instance)
+            {
+                return PublishNotification(instance, cancellationToken);
+            }
+
+            throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}");
         }
 
         /// <summary>
@@ -66,6 +76,15 @@ namespace MediatR
             {
                 await handler.ConfigureAwait(false);
             }
+        }
+
+        private Task PublishNotification(INotification notification, CancellationToken cancellationToken = default)
+        {
+            var notificationType = notification.GetType();
+            var handler = _notificationHandlers.GetOrAdd(notificationType,
+                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
+
+            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +17,14 @@ namespace MediatR
         /// <param name="cancellationToken">Optional cancellation token</param>
         /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
         Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously send a notification to multiple handlers
+        /// </summary>
+        /// <param name="notification">Notification object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the publish operation.</returns>
+        Task Publish(object notification, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously send a notification to multiple handlers
