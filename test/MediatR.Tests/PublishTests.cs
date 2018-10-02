@@ -78,6 +78,7 @@ namespace MediatR.Tests
             result.ShouldContain("Ping Pung");
         }
 
+        [Fact]
         public async Task Should_resolve_main_handler_when_object_is_passed()
         {
             var builder = new StringBuilder();
