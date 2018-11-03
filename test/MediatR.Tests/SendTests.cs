@@ -50,5 +50,42 @@ namespace MediatR.Tests
 
             response.Message.ShouldBe("Ping Pong");
         }
+
+        [Fact]
+        public async Task Should_resolve_main_handler_with_mediator_extension()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(PublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            var response = await
+                new Ping { Message = "Ping" }
+                    .Send(mediator);
+
+            response.Message.ShouldBe("Ping Pong");
+        }
+
+        [Fact]
+        public async Task Should_resolve_main_handler_with_handler_extension()
+        {
+           var handler = new PingHandler();
+
+            var response = await
+                new Ping { Message = "Ping" }
+                    .Send(handler);
+
+            response.Message.ShouldBe("Ping Pong");
+        }
     }
 }
