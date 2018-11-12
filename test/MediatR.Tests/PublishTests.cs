@@ -184,7 +184,7 @@ namespace MediatR.Tests
         }
 
         [Fact]
-        public async Task Should_resolve_handlers_given_interface_with_mediator_extnesion()
+        public async Task Should_resolve_handlers_given_interface_with_mediator_extension()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
