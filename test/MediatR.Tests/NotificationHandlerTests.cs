@@ -29,7 +29,7 @@ namespace MediatR.Tests
         }
 
         [Fact]
-        public async Task Should_call_abstract_handler()
+        public async Task Should_call_abstract_handle_method()
         {
             var builder = new StringBuilder();
             var writer = new StringWriter(builder);
