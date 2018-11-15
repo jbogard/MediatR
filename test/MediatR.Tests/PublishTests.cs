@@ -115,11 +115,11 @@ namespace MediatR.Tests
             {
             }
 
-            protected override async Task PublishCore(IEnumerable<Task> allHandlers)
+            protected override async Task PublishCore(IEnumerable<Func<Task>> allHandlers)
             {
                 foreach (var handler in allHandlers)
                 {
-                    await handler;
+                    await handler().ConfigureAwait(false);
                 }
             }
         }
