@@ -18,7 +18,7 @@ namespace MediatR.Internal
         {
             var handlers = serviceFactory
                 .GetInstances<INotificationHandler<TNotification>>()
-                .Select(x => x.Handle((TNotification)notification, cancellationToken));
+                .Select(async x => await x.Handle((TNotification)notification, cancellationToken));
 
             return publish(handlers);
         }
