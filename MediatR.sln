@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.DryIocZero
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Lamar", "samples\MediatR.Examples.Lamar\MediatR.Examples.Lamar.csproj", "{F014598D-8B85-4D7E-942A-3493107ABE43}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.PublishStrategies", "samples\MediatR.Examples.PublishStrategies\MediatR.Examples.PublishStrategies.csproj", "{867EBA13-62F4-4525-8F92-B0AD828EE6D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{867EBA13-62F4-4525-8F92-B0AD828EE6D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{867EBA13-62F4-4525-8F92-B0AD828EE6D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{867EBA13-62F4-4525-8F92-B0AD828EE6D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{867EBA13-62F4-4525-8F92-B0AD828EE6D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,6 +132,7 @@ Global
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{F014598D-8B85-4D7E-942A-3493107ABE43} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
+		{867EBA13-62F4-4525-8F92-B0AD828EE6D4} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D58286E3-878B-4ACB-8E76-F61E708D4339}
