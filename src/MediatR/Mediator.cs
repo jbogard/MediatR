@@ -70,11 +70,11 @@ namespace MediatR
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual async Task PublishCore(IEnumerable<Task> allHandlers)
+        protected virtual async Task PublishCore(IEnumerable<Func<Task>> allHandlers)
         {
             foreach (var handler in allHandlers)
             {
-                await handler.ConfigureAwait(false);
+                await handler().ConfigureAwait(false);
             }
         }
 
