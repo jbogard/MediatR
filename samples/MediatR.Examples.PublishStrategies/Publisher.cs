@@ -95,11 +95,7 @@ namespace MediatR.Examples.PublishStrategies
                 {
                     tasks.Add(handler());
                 }
-                catch (AggregateException ex)
-                {
-                    exceptions.AddRange(ex.InnerExceptions);
-                }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
                 {
                     exceptions.Add(ex);
                 }
@@ -107,13 +103,13 @@ namespace MediatR.Examples.PublishStrategies
 
             try
             {
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             catch (AggregateException ex)
             {
-                exceptions.AddRange(ex.InnerExceptions);
+                exceptions.AddRange(ex.Flatten().InnerExceptions);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
             {
                 exceptions.Add(ex);
             }
@@ -140,13 +136,13 @@ namespace MediatR.Examples.PublishStrategies
             {
                 try
                 {
-                    await handler();
+                    await handler().ConfigureAwait(false);
                 }
                 catch (AggregateException ex)
                 {
-                    exceptions.AddRange(ex.InnerExceptions);
+                    exceptions.AddRange(ex.Flatten().InnerExceptions);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
                 {
                     exceptions.Add(ex);
                 }
