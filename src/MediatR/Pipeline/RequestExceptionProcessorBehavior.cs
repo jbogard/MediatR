@@ -1,9 +1,8 @@
-using System.Reflection;
-
 namespace MediatR.Pipeline
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -32,7 +31,6 @@ namespace MediatR.Pipeline
             catch (Exception exception)
             {
                 var state = new RequestExceptionHandlerState<TResponse>();
-
                 Type exceptionType = exception.GetType();
 
                 do
@@ -48,7 +46,7 @@ namespace MediatR.Pipeline
                     }
 
                     exceptionType = exceptionType.BaseType;
-                } while (exceptionType != typeof(object));
+                } while (exceptionType != typeof(Exception).BaseType);
 
                 foreach (var exceptionHandler in _exceptionHandlers)
                 {
