@@ -35,6 +35,16 @@ namespace MediatR.Tests.Pipeline
             }
         }
 
+        public class PingPongExceptionHandlerForType : IRequestExceptionHandler<Ping, Pong, PingException>
+        {
+            public Task Handle(Ping request, PingException exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
+            {
+                state.SetHandled(new Pong() { Message = exception.Message + " Handled by Type" });
+
+                return Task.CompletedTask;
+            }
+        }
+
         public class PingPongExceptionHandler : IRequestExceptionHandler<Ping, Pong>
         {
             public Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
@@ -61,6 +71,7 @@ namespace MediatR.Tests.Pipeline
             {
                 cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
                 cfg.For<IRequestExceptionHandler<Ping, Pong>>().Use<PingPongExceptionHandler>();
+                cfg.For<IRequestExceptionHandler<Ping, Pong, PingException>>().Use<PingPongExceptionHandlerForType>();
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
