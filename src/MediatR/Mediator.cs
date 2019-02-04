@@ -13,6 +13,9 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
+        /// <summary>
+        /// _requestHandlers is no longer necessaruy if we drop <code></code>>Task<TResponse> Send<TResponse>(..)</code> interface
+        /// </summary>
         private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
@@ -24,7 +27,7 @@ namespace MediatR
         {
             _serviceFactory = serviceFactory;
         }
-
+        
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
@@ -40,6 +43,15 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
+        public Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest<TResponse> {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            var handler = new RequestHandlerWrapperImpl<TRequest, TResponse>();
+            
+            return handler.Handle(request, cancellationToken, _serviceFactory);
+        }
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
              where TNotification : INotification
         {
