@@ -44,14 +44,14 @@ namespace MediatR
         }
 
         public Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default) where TRequest : IRequest<TResponse> {
-            if (request == null)
-            {
+            if (request == null) {
                 throw new ArgumentNullException(nameof(request));
             }
             var handler = new RequestHandlerWrapperImpl<TRequest, TResponse>();
             
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
+
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
              where TNotification : INotification
         {
