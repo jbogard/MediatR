@@ -24,7 +24,7 @@ namespace MediatR.Pipeline
 
             foreach (var processor in _postProcessors)
             {
-                await processor.Process(request, response).ConfigureAwait(false);
+                await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
             }
 
             return response;
