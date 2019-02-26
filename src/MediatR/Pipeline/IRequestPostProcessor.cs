@@ -1,5 +1,6 @@
-﻿namespace MediatR.Pipeline
+namespace MediatR.Pipeline
 {
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -14,7 +15,8 @@
         /// </summary>
         /// <param name="request">Request instance</param>
         /// <param name="response">Response instance</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>An awaitable task</returns>
-        Task Process(TRequest request, TResponse response);
+        Task Process(TRequest request, TResponse response, CancellationToken cancellationToken);
     }
 }
