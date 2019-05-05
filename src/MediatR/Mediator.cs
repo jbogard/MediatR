@@ -40,6 +40,29 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
+        public Task<object> Send(object request, CancellationToken cancellationToken = default)
+        {
+            if(request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            var requestType = request.GetType();
+            var requestInterfaceType = Array.Find(requestType.GetInterfaces(),
+                i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>) );
+            bool isValidRequest = requestInterfaceType != null;
+            if(isValidRequest)
+            {
+                var responseType = requestInterfaceType.GetGenericArguments()[0];
+                var handler = _requestHandlers.GetOrAdd(requestType,
+                    t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType)));
+
+                // call via dynamic dispatch to avoid calling through reflection for performance reasons
+                return (handler as RequestHandlerBase).Handle(request, cancellationToken, _serviceFactory);
+            }
+
+            throw new ArgumentException($"{nameof(request)} does not implement ${nameof(IRequest)}");
+        }
+
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
              where TNotification : INotification
         {

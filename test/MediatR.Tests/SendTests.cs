@@ -50,5 +50,29 @@ namespace MediatR.Tests
 
             response.Message.ShouldBe("Ping Pong");
         }
+
+        [Fact]
+        public async Task Should_resolve_main_handler_via_dynamic_dispatch()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(PublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            object request = (object)new Ping{ Message = "Ping" };
+            var response = await mediator.Send(request);
+
+            (response as Pong).Message.ShouldBe("Ping Pong");
+        }
     }
 }

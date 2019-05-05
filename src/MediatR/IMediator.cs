@@ -19,6 +19,14 @@ namespace MediatR
         Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Asynchronously send an object request to a single handler via dynamic dispatch
+        /// </summary>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the send operation. The task result contains the type erased handler response</returns>
+        Task<object> Send(object request, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Asynchronously send a notification to multiple handlers
         /// </summary>
         /// <param name="notification">Notification object</param>
