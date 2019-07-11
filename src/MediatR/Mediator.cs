@@ -4,6 +4,7 @@ namespace MediatR
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -47,7 +48,7 @@ namespace MediatR
                 throw new ArgumentNullException(nameof(request));
             }
             var requestType = request.GetType();
-            var requestInterfaceType = Array.Find(requestType.GetInterfaces(),
+            var requestInterfaceType = requestType.GetInterfaces().FirstOrDefault(
                 i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>) );
             bool isValidRequest = requestInterfaceType != null;
             if(isValidRequest)
