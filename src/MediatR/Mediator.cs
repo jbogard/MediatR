@@ -43,25 +43,27 @@ namespace MediatR
 
         public Task<object> Send(object request, CancellationToken cancellationToken = default)
         {
-            if(request == null)
+            if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
             var requestType = request.GetType();
-            var requestInterfaceType = requestType.GetInterfaces().FirstOrDefault(
-                i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>) );
-            bool isValidRequest = requestInterfaceType != null;
-            if(isValidRequest)
-            {
-                var responseType = requestInterfaceType.GetGenericArguments()[0];
-                var handler = _requestHandlers.GetOrAdd(requestType,
-                    t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType)));
+            var requestInterfaceType = requestType
+                .GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+            var isValidRequest = requestInterfaceType != null;
 
-                // call via dynamic dispatch to avoid calling through reflection for performance reasons
-                return (handler as RequestHandlerBase).Handle(request, cancellationToken, _serviceFactory);
+            if (!isValidRequest)
+            {
+                throw new ArgumentException($"{nameof(request)} does not implement ${nameof(IRequest)}");
             }
 
-            throw new ArgumentException($"{nameof(request)} does not implement ${nameof(IRequest)}");
+            var responseType = requestInterfaceType.GetGenericArguments()[0];
+            var handler = _requestHandlers.GetOrAdd(requestType,
+                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType)));
+
+            // call via dynamic dispatch to avoid calling through reflection for performance reasons
+            return ((RequestHandlerBase) handler).Handle(request, cancellationToken, _serviceFactory);
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
