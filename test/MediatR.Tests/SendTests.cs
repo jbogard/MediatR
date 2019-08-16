@@ -38,7 +38,7 @@ namespace MediatR.Tests
                     scanner.AssemblyContainingType(typeof(PublishTests));
                     scanner.IncludeNamespaceContainingType<Ping>();
                     scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
@@ -49,6 +49,31 @@ namespace MediatR.Tests
             var response = await mediator.Send(new Ping { Message = "Ping" });
 
             response.Message.ShouldBe("Ping Pong");
+        }
+
+        [Fact]
+        public async Task Should_resolve_main_handler_via_dynamic_dispatch()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(PublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            object request = new Ping { Message = "Ping" };
+            var response = await mediator.Send(request);
+
+            var pong = response.ShouldBeOfType<Pong>();
+            pong.Message.ShouldBe("Ping Pong");
         }
     }
 }

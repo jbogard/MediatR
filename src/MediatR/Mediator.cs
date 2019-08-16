@@ -4,6 +4,7 @@ namespace MediatR
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -38,6 +39,31 @@ namespace MediatR
                 t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
             return handler.Handle(request, cancellationToken, _serviceFactory);
+        }
+
+        public Task<object> Send(object request, CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+            var requestType = request.GetType();
+            var requestInterfaceType = requestType
+                .GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+            var isValidRequest = requestInterfaceType != null;
+
+            if (!isValidRequest)
+            {
+                throw new ArgumentException($"{nameof(request)} does not implement ${nameof(IRequest)}");
+            }
+
+            var responseType = requestInterfaceType.GetGenericArguments()[0];
+            var handler = _requestHandlers.GetOrAdd(requestType,
+                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType)));
+
+            // call via dynamic dispatch to avoid calling through reflection for performance reasons
+            return ((RequestHandlerBase) handler).Handle(request, cancellationToken, _serviceFactory);
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
