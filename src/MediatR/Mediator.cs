@@ -95,12 +95,14 @@ namespace MediatR
         /// Override in a derived class to control how the tasks are awaited. By default the implementation is a foreach and await of each handler
         /// </summary>
         /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
+        /// <param name="notification">The notification being published</param>
+        /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual async Task PublishCore(IEnumerable<Func<Task>> allHandlers)
+        protected virtual async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
         {
             foreach (var handler in allHandlers)
             {
-                await handler().ConfigureAwait(false);
+                await handler(notification, cancellationToken).ConfigureAwait(false);
             }
         }
 

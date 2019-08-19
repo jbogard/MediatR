@@ -8,19 +8,21 @@ namespace MediatR.Internal
 
     internal abstract class NotificationHandlerWrapper
     {
-        public abstract Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory, Func<IEnumerable<Func<Task>>, Task> publish);
+        public abstract Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
+                                    Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish);
     }
 
     internal class NotificationHandlerWrapperImpl<TNotification> : NotificationHandlerWrapper
         where TNotification : INotification
     {
-        public override Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory, Func<IEnumerable<Func<Task>>, Task> publish)
+        public override Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
+                                    Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish)
         {
             var handlers = serviceFactory
                 .GetInstances<INotificationHandler<TNotification>>()
-                .Select(x => new Func<Task>(() => x.Handle((TNotification)notification, cancellationToken)));
+                .Select(x => new Func<INotification, CancellationToken, Task>((theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));
 
-            return publish(handlers);
+            return publish(handlers, notification, cancellationToken);
         }
     }
 }
