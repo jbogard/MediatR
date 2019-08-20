@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,15 @@ namespace MediatR
         /// <param name="cancellationToken">Optional cancellation token</param>
         /// <returns>A task that represents the send operation. The task result contains the type erased handler response</returns>
         Task<object> Send(object request, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Asynchronously send a request to multiple handlers
+        /// </summary>
+        /// <typeparam name="TResponse">Response type</typeparam>
+        /// <param name="request">Request object</param>
+        /// <param name="cancellationToken">Optional cancellation token</param>
+        /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
+        Task<TResponse[]> SendToMany<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously send a notification to multiple handlers

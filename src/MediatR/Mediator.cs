@@ -66,6 +66,21 @@ namespace MediatR
             return ((RequestHandlerBase) handler).Handle(request, cancellationToken, _serviceFactory);
         }
 
+        public Task<TResponse[]> SendToMany<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var requestType = request.GetType();
+
+            var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
+                                                                                      t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+
+            return handler.HandleMany(request, cancellationToken, _serviceFactory);
+        }
+
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
              where TNotification : INotification
         {

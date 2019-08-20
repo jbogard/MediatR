@@ -20,4 +20,53 @@ namespace MediatR.Examples
             return new Pong { Message = request.Message + " Pong" };
         }
     }
+
+    public class BroadcastPing1Handler : IRequestHandler<BroadcastPing, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public BroadcastPing1Handler(TextWriter writer)
+        {
+            _writer = writer;
+        }
+
+        public async Task<Pong> Handle(BroadcastPing request, CancellationToken cancellationToken)
+        {
+            await _writer.WriteLineAsync($"--- Handled Broadcast Ping1: {request.Message}");
+            return new Pong { Message = request.Message + " Pong1" };
+        }
+    }
+
+    public class BroadcastPing2Handler : IRequestHandler<BroadcastPing, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public BroadcastPing2Handler(TextWriter writer)
+        {
+            _writer = writer;
+        }
+
+        public async Task<Pong> Handle(BroadcastPing request, CancellationToken cancellationToken)
+        {
+            await _writer.WriteLineAsync($"--- Handled Broadcast Ping2: {request.Message}");
+            return new Pong { Message = request.Message + " Pong2" };
+        }
+    }
+
+
+    public class GenericRequestHandler : IRequestHandler<GenericRequest, GenericResponse>
+    {
+        private readonly TextWriter _writer;
+
+        public GenericRequestHandler(TextWriter writer)
+        {
+            _writer = writer;
+        }
+
+        public async Task<GenericResponse> Handle(GenericRequest request, CancellationToken cancellationToken)
+        {
+            await _writer.WriteLineAsync($"--- Handled generic: {request.Body.ToString()}");
+            return new GenericResponse() { Body = request.Body };
+        }
+    }
 }
