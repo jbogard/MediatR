@@ -26,13 +26,13 @@ namespace MediatR.Internal
                 throw new InvalidOperationException($"Error constructing handler for request of type {typeof(THandler)}. Register your handlers with the container. See the samples in GitHub for examples.", e);
             }
 
-            if (handlers == null || !handlers.Any())
+            if (handlers?.Any() ?? false)
             {
-                throw new InvalidOperationException(
-                    $"Handler was not found for request of type {typeof(THandler)}. Register your handlers with the container. See the samples in GitHub for examples.");
+                return handlers;
             }
 
-            return handlers;
+            throw new InvalidOperationException(
+                    $"Handler was not found for request of type {typeof(THandler)}. Register your handlers with the container. See the samples in GitHub for examples.");
         }
 
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
@@ -42,7 +42,7 @@ namespace MediatR.Internal
             if (handlers.Count() > 1)
             {
                 throw new InvalidOperationException(
-                    $"There more that one handler defined for type {typeof(THandler)}. Use SendToMany or remove unnessesary handlers.");
+                    $"There are more than one handler for request of type {typeof(THandler)}. Use SendToMany or remove unnessesary handlers.");
             }
 
             return handlers.FirstOrDefault();
