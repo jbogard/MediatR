@@ -37,7 +37,7 @@ namespace MediatR.Internal
 
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
         {
-            var handlers = factory.GetInstances<THandler>();
+            var handlers = GetHandlers<THandler>(factory);
 
             if (handlers.Count() > 1)
             {
@@ -71,11 +71,8 @@ namespace MediatR.Internal
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            Task<TResponse> Handler()
-            {
-                var handler = GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory);
-                return handler.Handle((TRequest)request, cancellationToken);
-            }
+            Task<TResponse> Handler() =>
+                GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest)request, cancellationToken);
 
             return serviceFactory
                   .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
