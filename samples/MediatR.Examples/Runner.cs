@@ -19,13 +19,22 @@ namespace MediatR.Examples
             var pong = await mediator.Send(new Ping { Message = "Ping" });
             await writer.WriteLineAsync("Received: " + pong.Message);
 
-            await writer.WriteLineAsync("Sending Broadcast Ping...");
-            var pongs = await mediator.SendToMany(new BroadcastPing() { Message = "BroadcastPing" });
-            foreach (var p in pongs)
+            try
             {
-                await writer.WriteLineAsync("Received: " + p.Message);
+                //contrained generic resolution problem in AspNetCore DI
+                await writer.WriteLineAsync("Sending Broadcast Ping...");
+                var pongs = await mediator.SendToMany(new BroadcastPing() { Message = "BroadcastPing" });
+                foreach (var p in pongs)
+                {
+                    await writer.WriteLineAsync("Received: " + p.Message);
+                }
             }
-            
+            catch (Exception e)
+            {
+                await writer.WriteLineAsync(e.ToString());
+            }
+
+
             await writer.WriteLineAsync("Publishing Pinged...");
             await mediator.Publish(new Pinged());
 

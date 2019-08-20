@@ -9,15 +9,4 @@ namespace MediatR.Examples
     {
         public string Message { get; set; }
     }
-
-
-    public class GenericResponse
-    {
-        public object Body { get; set; }
-    }
-
-    public class GenericRequest : IRequest<GenericResponse>
-    {
-        public object Body { get; set; }
-    }
 }

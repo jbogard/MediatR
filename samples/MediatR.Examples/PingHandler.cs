@@ -52,21 +52,4 @@ namespace MediatR.Examples
             return new Pong { Message = request.Message + " Pong2" };
         }
     }
-
-
-    public class GenericRequestHandler : IRequestHandler<GenericRequest, GenericResponse>
-    {
-        private readonly TextWriter _writer;
-
-        public GenericRequestHandler(TextWriter writer)
-        {
-            _writer = writer;
-        }
-
-        public async Task<GenericResponse> Handle(GenericRequest request, CancellationToken cancellationToken)
-        {
-            await _writer.WriteLineAsync($"--- Handled generic: {request.Body.ToString()}");
-            return new GenericResponse() { Body = request.Body };
-        }
-    }
 }
