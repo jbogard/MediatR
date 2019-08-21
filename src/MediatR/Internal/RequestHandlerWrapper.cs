@@ -90,16 +90,6 @@ namespace MediatR.Internal
                 return Task.WhenAll(_result);
             }
 
-            //var instances = serviceFactory.GetInstances<IPipelineBehavior<TRequest, TResponse[]>>();
-            //var result = (RequestHandlerDelegate<TResponse[]>)Handler;
-            //foreach (var behavior in instances.Reverse())
-            //{
-            //    var prevResult = result;
-            //    result = () => behavior.Handle((TRequest)request, cancellationToken, prevResult);
-            //}
-
-            //return result();
-
             return serviceFactory
                    .GetInstances<IPipelineBehavior<TRequest, TResponse[]>>()
                    .Reverse()
