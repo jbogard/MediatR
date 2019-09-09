@@ -50,41 +50,41 @@ namespace MediatR.Examples.PublishStrategies
             return mediator.Publish(notification, cancellationToken);
         }
 
-        private Task ParallelWhenAll(IEnumerable<Func<Task>> handlers)
+        private Task ParallelWhenAll(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
             foreach (var handler in handlers)
             {
-                tasks.Add(Task.Run(() => handler()));
+                tasks.Add(Task.Run(() => handler(notification, cancellationToken)));
             }
 
             return Task.WhenAll(tasks);
         }
 
-        private Task ParallelWhenAny(IEnumerable<Func<Task>> handlers)
+        private Task ParallelWhenAny(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
 
             foreach (var handler in handlers)
             {
-                tasks.Add(Task.Run(() => handler()));
+                tasks.Add(Task.Run(() => handler(notification, cancellationToken)));
             }
 
             return Task.WhenAny(tasks);
         }
 
-        private Task ParallelNoWait(IEnumerable<Func<Task>> handlers)
+        private Task ParallelNoWait(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             foreach (var handler in handlers)
             {
-                Task.Run(() => handler());
+                Task.Run(() => handler(notification, cancellationToken));
             }
 
             return Task.CompletedTask;
         }
 
-        private async Task AsyncContinueOnException(IEnumerable<Func<Task>> handlers)
+        private async Task AsyncContinueOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
             var exceptions = new List<Exception>();
@@ -93,7 +93,7 @@ namespace MediatR.Examples.PublishStrategies
             {
                 try
                 {
-                    tasks.Add(handler());
+                    tasks.Add(handler(notification, cancellationToken));
                 }
                 catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
                 {
@@ -120,15 +120,15 @@ namespace MediatR.Examples.PublishStrategies
             }
         }
 
-        private async Task SyncStopOnException(IEnumerable<Func<Task>> handlers)
+        private async Task SyncStopOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             foreach (var handler in handlers)
             {
-                await handler().ConfigureAwait(false);
+                await handler(notification, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task SyncContinueOnException(IEnumerable<Func<Task>> handlers)
+        private async Task SyncContinueOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
         {
             var exceptions = new List<Exception>();
 
@@ -136,7 +136,7 @@ namespace MediatR.Examples.PublishStrategies
             {
                 try
                 {
-                    await handler().ConfigureAwait(false);
+                    await handler(notification, cancellationToken).ConfigureAwait(false);
                 }
                 catch (AggregateException ex)
                 {
