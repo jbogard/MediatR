@@ -56,4 +56,21 @@ namespace MediatR.Examples.ExceptionHandler
             return Task.CompletedTask;
         }
     }
+
+    public class ServerExceptionHandler : IRequestExceptionHandler<PingNewResource, Pong, ServerException>
+    {
+        private readonly TextWriter _writer;
+
+        public ServerExceptionHandler(TextWriter writer) => _writer = writer;
+
+        public virtual Task Handle(PingNewResource request,
+            ServerException exception,
+            RequestExceptionHandlerState<Pong> state,
+            CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ServerExceptionHandler).FullName}'");
+            state.SetHandled(new Pong());
+            return Task.CompletedTask;
+        }
+    }
 }

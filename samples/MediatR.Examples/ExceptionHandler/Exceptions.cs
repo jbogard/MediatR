@@ -7,4 +7,7 @@ namespace MediatR.Examples.ExceptionHandler
     public class ForbiddenException : ConnectionException { }
 
     public class ResourceNotFoundException : ConnectionException { }
+
+    public class ServerException : Exception { }
+
 }

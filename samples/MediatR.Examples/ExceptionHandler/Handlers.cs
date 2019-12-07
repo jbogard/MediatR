@@ -17,6 +17,19 @@ namespace MediatR.Examples.ExceptionHandler
         }
     }
 
+    public class PingNewResourceHandler : IRequestHandler<PingNewResource, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public PingNewResourceHandler(TextWriter writer) => _writer = writer;
+
+        public Task<Pong> Handle(PingNewResource request, CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"--- Exception: {typeof(ServerException).FullName}");
+            throw new ServerException();
+        }
+    }
+
     public class PingResourceTimeoutHandler : IRequestHandler<PingResourceTimeout, Pong>
     {
         private readonly TextWriter _writer;

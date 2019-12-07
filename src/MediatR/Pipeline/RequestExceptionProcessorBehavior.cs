@@ -62,35 +62,48 @@ namespace MediatR.Pipeline
 
             var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
 
-            return RemoveOverriddenHandlers(request, exceptionHandlers.ToList());
+            return PrioritizeExceptionHandlers(request, exceptionHandlers.ToList());
         }
 
-        private IList<object> RemoveOverriddenHandlers(TRequest request, IList<object> exceptionHandlers)
+        private IList<object> PrioritizeExceptionHandlers(TRequest request, IList<object> handlers)
         {
-            if (exceptionHandlers.Count < 2)
+            if (handlers.Count < 2)
             {
-                return exceptionHandlers;
+                return handlers;
             }
 
             var requestObjectDetails = new ObjectDetails(request);
-            var allExceptionHandlers = exceptionHandlers.Select(s => new ObjectDetails(s)).ToList();            
+            var allExceptionHandlers = handlers.Select(s => new ObjectDetails(s)).ToList();            
 
-            var uniqueHandlersGroups = allExceptionHandlers.GroupBy(g => g.Name).ToList();
-            if (uniqueHandlersGroups.Count == exceptionHandlers.Count)
+            var uniqueHandlers = RemoveOverriddenHandlers(allExceptionHandlers).ToArray();
+            Array.Sort(uniqueHandlers, requestObjectDetails);
+
+            return uniqueHandlers.Select(s => s.Value).ToList();
+        }
+
+        private IEnumerable<ObjectDetails> RemoveOverriddenHandlers(IList<ObjectDetails> handlersData)
+        {
+            for (int i = 0; i < handlersData.Count - 1; i++)
             {
-                return exceptionHandlers;
+                for (int j = i + 1; j < handlersData.Count; j++)
+                {
+                    if (handlersData[i].IsOverridden || handlersData[j].IsOverridden)
+                    {
+                        continue;
+                    }
+
+                    if (handlersData[i].Type.IsAssignableFrom(handlersData[j].Type))
+                    {
+                        handlersData[i].IsOverridden = true;
+                    }
+                    else if (handlersData[j].Type.IsAssignableFrom(handlersData[i].Type))
+                    {
+                        handlersData[j].IsOverridden = true;
+                    }
+                }
             }
 
-            var uniqueHandlers = new List<object>();
-            foreach (var uniqueHandlersGroup in uniqueHandlersGroups)
-            {
-                var sameHandlers = uniqueHandlersGroup.ToArray();
-                Array.Sort(sameHandlers, requestObjectDetails);
-
-                uniqueHandlers.Add(sameHandlers[0].Value);
-            }
-
-            return uniqueHandlers;
+            return handlersData.Where(w => !w.IsOverridden);
         }
     }
 
@@ -104,9 +117,14 @@ namespace MediatR.Pipeline
 
         public object Value { get; private set; }
 
+        public Type Type { get; private set; }
+
+        public bool IsOverridden { get; set; }
+
         public ObjectDetails(object value)
         {
             Value = value;
+            Type = Value.GetType();
             var exceptionHandlerType = value.GetType();
 
             Name = exceptionHandlerType.Name;

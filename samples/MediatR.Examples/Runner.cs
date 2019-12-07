@@ -55,6 +55,7 @@ namespace MediatR.Examples
             var isHandlerForSameExceptionWorks = await IsHandlerForSameExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForBaseExceptionWorks = await IsHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForLessSpecificExceptionWorks = await IsHandlerForLessSpecificExceptionWorks(mediator, writer).ConfigureAwait(false);
+            var isPreferredHandlerForBaseExceptionWorks = await IsPreferredHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isOverriddenHandlerForBaseExceptionWorks = await IsOverriddenHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
 
             await writer.WriteLineAsync("---------------");
@@ -84,6 +85,7 @@ namespace MediatR.Examples
                 HandlerForSameException = isHandlerForSameExceptionWorks,
                 HandlerForBaseException = isHandlerForBaseExceptionWorks,
                 HandlerForLessSpecificException = isHandlerForLessSpecificExceptionWorks,
+                PreferredHandlerForBaseException = isPreferredHandlerForBaseExceptionWorks,
                 OverriddenHandlerForBaseException = isOverriddenHandlerForBaseExceptionWorks,
             };
 
@@ -100,15 +102,18 @@ namespace MediatR.Examples
             await writer.WriteLineAsync($"Covariant Notification Handler.....................................{(results.CovariantNotificationHandler ? "Y" : "N")}");
             await writer.WriteLineAsync($"Handler for inherited request with same exception used.............{(results.HandlerForSameException ? "Y" : "N")}");
             await writer.WriteLineAsync($"Handler for inherited request with base exception used.............{(results.HandlerForBaseException ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Handler for request with less specific exception used..............{(results.HandlerForLessSpecificException ? "Y" : "N")}");
-            await writer.WriteLineAsync($"Overridden handler for inherited request with base exception used..{(results.OverriddenHandlerForBaseException ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Handler for request with less specific exception used by priority..{(results.HandlerForLessSpecificException ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Preferred handler for inherited request with base exception used...{(results.PreferredHandlerForBaseException ? "Y" : "N")}");
+            await writer.WriteLineAsync($"Overridden handler for inherited request with same exception used..{(results.OverriddenHandlerForBaseException ? "Y" : "N")}");
+
+            await writer.WriteLineAsync();
         }
 
         private static async Task<bool> IsHandlerForSameExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
             var isHanledCorrectly = false;
 
-            await writer.WriteLineAsync("Sending Ping to protected resource...");
+            await writer.WriteLineAsync("Checking handler to catch exact exception...");
             try
             {
                 await mediator.Send(new PingProtectedResource { Message = "Ping to protected resource" });
@@ -127,7 +132,7 @@ namespace MediatR.Examples
         {
             var isHanledCorrectly = false;
 
-            await writer.WriteLineAsync("Sending Ping to missed resource...");
+            await writer.WriteLineAsync("Checking shared handler to catch exception by base type...");
             try
             {
                 await mediator.Send(new PingResource { Message = "Ping to missed resource" });
@@ -146,7 +151,7 @@ namespace MediatR.Examples
         {
             var isHanledCorrectly = false;
 
-            await writer.WriteLineAsync("Sending Ping to International Space Station resource...");
+            await writer.WriteLineAsync("Checking base handler to catch any exception...");
             try
             {
                 await mediator.Send(new PingResourceTimeout { Message = "Ping to ISS resource" });
@@ -161,16 +166,36 @@ namespace MediatR.Examples
             return isHanledCorrectly;
         }
 
+        private static async Task<bool> IsPreferredHandlerForBaseExceptionWorks(IMediator mediator, WrappingWriter writer)
+        {
+            var isHanledCorrectly = false;
+
+            await writer.WriteLineAsync("Selecting preferred handler to handle exception...");
+
+            try
+            {
+                await mediator.Send(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
+                isHanledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
+            }
+            catch (Exception e)
+            {
+                await writer.WriteLineAsync(e.Message);
+            }
+            await writer.WriteLineAsync();
+
+            return isHanledCorrectly;
+        }
+
         private static async Task<bool> IsOverriddenHandlerForBaseExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
             var isHanledCorrectly = false;
 
-            await writer.WriteLineAsync("Sending Ping without handler (override)...");
+            await writer.WriteLineAsync("Selecting new handler to handle exception...");
 
             try
             {
-                await mediator.Send(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (override)" });
-                isHanledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
+                await mediator.Send(new PingNewResource { Message = "Ping to ISS resource (override)" });
+                isHanledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
             }
             catch (Exception e)
             {
@@ -207,6 +232,7 @@ namespace MediatR.Examples
         public bool HandlerForSameException { get; set; }
         public bool HandlerForBaseException { get; set; }
         public bool HandlerForLessSpecificException { get; set; }
+        public bool PreferredHandlerForBaseException { get; set; }
         public bool OverriddenHandlerForBaseException { get; set; }
     }
 
