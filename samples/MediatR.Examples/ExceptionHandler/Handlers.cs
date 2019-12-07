@@ -1,0 +1,58 @@
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MediatR.Examples.ExceptionHandler
+{
+    public class PingResourceHandler : IRequestHandler<PingResource, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public PingResourceHandler(TextWriter writer) => _writer = writer;
+
+        public Task<Pong> Handle(PingResource request, CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"--- Exception: {typeof(ResourceNotFoundException).FullName}");
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    public class PingResourceTimeoutHandler : IRequestHandler<PingResourceTimeout, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public PingResourceTimeoutHandler(TextWriter writer) => _writer = writer;
+
+        public Task<Pong> Handle(PingResourceTimeout request, CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"--- Exception: {typeof(TaskCanceledException).FullName}");
+            throw new TaskCanceledException();
+        }
+    }
+
+    public class PingResourceTimeoutOverrideHandler : IRequestHandler<Overrides.PingResourceTimeout, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public PingResourceTimeoutOverrideHandler(TextWriter writer) => _writer = writer;
+
+        public Task<Pong> Handle(Overrides.PingResourceTimeout request, CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"--- Exception: {typeof(TaskCanceledException).FullName}");
+            throw new TaskCanceledException();
+        }
+    }
+
+    public class PingProtectedResourceHandler : IRequestHandler<PingProtectedResource, Pong>
+    {
+        private readonly TextWriter _writer;
+
+        public PingProtectedResourceHandler(TextWriter writer) => _writer = writer;
+
+        public Task<Pong> Handle(PingProtectedResource request, CancellationToken cancellationToken)
+        {
+            _writer.WriteLineAsync($"--- Exception: {typeof(ForbiddenException).FullName}");
+            throw new ForbiddenException();
+        }
+    }
+}

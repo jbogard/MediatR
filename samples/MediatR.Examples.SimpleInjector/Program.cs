@@ -27,19 +27,15 @@ namespace MediatR.Examples.SimpleInjector
             container.RegisterSingleton<IMediator, Mediator>();
             container.Register(typeof(IRequestHandler<,>), assemblies);
 
-            // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
-            var notificationHandlerTypes = container.GetTypesToRegister(typeof(INotificationHandler<>), assemblies, new TypesToRegisterOptions
-            {
-                IncludeGenericTypeDefinitions = true,
-                IncludeComposites = false,
-            });
-            container.Collection.Register(typeof(INotificationHandler<>), notificationHandlerTypes);
+            RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
+            RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
 
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
             //Pipeline
             container.Collection.Register(typeof(IPipelineBehavior<,>), new []
             {
+                typeof(RequestExceptionProcessorBehavior<,>),
                 typeof(RequestPreProcessorBehavior<,>),
                 typeof(RequestPostProcessorBehavior<,>),
                 typeof(GenericPipelineBehavior<,>)
@@ -54,6 +50,18 @@ namespace MediatR.Examples.SimpleInjector
             var mediator = container.GetInstance<IMediator>();
 
             return mediator;
+        }
+
+        private static void RegisterHandlers(Container container, Type collectionType, Assembly[] assemblies)
+        {
+            // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
+            var handlerTypes = container.GetTypesToRegister(collectionType, assemblies, new TypesToRegisterOptions
+            {
+                IncludeGenericTypeDefinitions = true,
+                IncludeComposites = false,
+            });
+
+            container.Collection.Register(collectionType, handlerTypes);
         }
 
         private static IEnumerable<Assembly> GetAssemblies()

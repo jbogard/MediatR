@@ -10,7 +10,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     /// <typeparam name="TException">Exception type</typeparam>
-    public interface IRequestExceptionHandler<in TRequest, TResponse, in TException>
+    public interface IRequestExceptionHandler<in TRequest, TResponse, TException>
         where TException : Exception
     {
         /// <summary>
@@ -29,8 +29,8 @@ namespace MediatR.Pipeline
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
-    public interface IRequestExceptionHandler<in TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse, Exception>
+    public abstract class RequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse, Exception>
     {
-
+        public abstract Task Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken);
     }
 }
