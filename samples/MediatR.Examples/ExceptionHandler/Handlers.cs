@@ -12,7 +12,6 @@ namespace MediatR.Examples.ExceptionHandler
 
         public Task<Pong> Handle(PingResource request, CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"--- Exception: {typeof(ResourceNotFoundException).FullName}");
             throw new ResourceNotFoundException();
         }
     }
@@ -25,7 +24,6 @@ namespace MediatR.Examples.ExceptionHandler
 
         public Task<Pong> Handle(PingNewResource request, CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"--- Exception: {typeof(ServerException).FullName}");
             throw new ServerException();
         }
     }
@@ -38,7 +36,6 @@ namespace MediatR.Examples.ExceptionHandler
 
         public Task<Pong> Handle(PingResourceTimeout request, CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"--- Exception: {typeof(TaskCanceledException).FullName}");
             throw new TaskCanceledException();
         }
     }
@@ -51,7 +48,6 @@ namespace MediatR.Examples.ExceptionHandler
 
         public Task<Pong> Handle(Overrides.PingResourceTimeout request, CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"--- Exception: {typeof(TaskCanceledException).FullName}");
             throw new TaskCanceledException();
         }
     }
@@ -64,7 +60,6 @@ namespace MediatR.Examples.ExceptionHandler
 
         public Task<Pong> Handle(PingProtectedResource request, CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"--- Exception: {typeof(ForbiddenException).FullName}");
             throw new ForbiddenException();
         }
     }

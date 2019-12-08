@@ -5,7 +5,7 @@ namespace MediatR.Pipeline
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Defines an exception handler for a request
+    /// Defines an exception handler for a request and response
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
@@ -25,7 +25,7 @@ namespace MediatR.Pipeline
     }
 
     /// <summary>
-    /// Defines an exception handler for a request
+    /// Defines an exception handler for a request and response
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>

@@ -28,6 +28,7 @@ namespace MediatR.Examples.SimpleInjector
             container.Register(typeof(IRequestHandler<,>), assemblies);
 
             RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
+            RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
 
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
@@ -36,6 +37,7 @@ namespace MediatR.Examples.SimpleInjector
             container.Collection.Register(typeof(IPipelineBehavior<,>), new []
             {
                 typeof(RequestExceptionProcessorBehavior<,>),
+                typeof(RequestExceptionActionProcessorBehavior<,>),
                 typeof(RequestPreProcessorBehavior<,>),
                 typeof(RequestPostProcessorBehavior<,>),
                 typeof(GenericPipelineBehavior<,>)
