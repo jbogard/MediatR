@@ -61,7 +61,7 @@ namespace MediatR.Pipeline
         {
             var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
             var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-            handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(RequestExceptionHandler<TRequest, TResponse>.Handle));
+            handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle));
 
             var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
 

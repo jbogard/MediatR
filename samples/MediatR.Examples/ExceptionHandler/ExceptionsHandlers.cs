@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 namespace MediatR.Examples.ExceptionHandler
 {
-    public class CommonExceptionHandler : RequestExceptionHandler<PingResource, Pong>
+    public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResource, Pong>
     {
         private readonly TextWriter _writer;
 
         public CommonExceptionHandler(TextWriter writer) => _writer = writer;
 
-        public override Task Handle(PingResource request,
+        protected async override Task Handle(PingResource request,
             Exception exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"---- Exception Handler: '{typeof(CommonExceptionHandler).FullName}'");
+            await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(CommonExceptionHandler).FullName}'").ConfigureAwait(false);
             state.SetHandled(new Pong());
-            return Task.CompletedTask;
         }
     }
 
@@ -29,14 +28,13 @@ namespace MediatR.Examples.ExceptionHandler
 
         public ConnectionExceptionHandler(TextWriter writer) => _writer = writer;
 
-        public Task Handle(PingResource request,
+        public async Task Handle(PingResource request,
             ConnectionException exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ConnectionExceptionHandler).FullName}'");
+            await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ConnectionExceptionHandler).FullName}'").ConfigureAwait(false);
             state.SetHandled(new Pong());
-            return Task.CompletedTask;
         }
     }
 
@@ -46,14 +44,13 @@ namespace MediatR.Examples.ExceptionHandler
 
         public AccessDeniedExceptionHandler(TextWriter writer) => _writer = writer;
 
-        public Task Handle(PingResource request,
+        public async Task Handle(PingResource request,
             ForbiddenException exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"---- Exception Handler: '{typeof(AccessDeniedExceptionHandler).FullName}'");
+            await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(AccessDeniedExceptionHandler).FullName}'").ConfigureAwait(false);
             state.SetHandled(new Pong());
-            return Task.CompletedTask;
         }
     }
 
@@ -63,14 +60,13 @@ namespace MediatR.Examples.ExceptionHandler
 
         public ServerExceptionHandler(TextWriter writer) => _writer = writer;
 
-        public virtual Task Handle(PingNewResource request,
+        public async virtual Task Handle(PingNewResource request,
             ServerException exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
         {
-            _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ServerExceptionHandler).FullName}'");
+            await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ServerExceptionHandler).FullName}'").ConfigureAwait(false);
             state.SetHandled(new Pong());
-            return Task.CompletedTask;
         }
     }
 }

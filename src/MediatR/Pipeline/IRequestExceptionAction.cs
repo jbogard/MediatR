@@ -34,6 +34,27 @@ namespace MediatR.Pipeline
     }
 
     /// <summary>
+    /// Wrapper class that asynchronously performs an action on a request for base exception
+    /// </summary>
+    /// <typeparam name="TRequest">The type of failed request</typeparam>
+    public abstract class AsyncRequestExceptionAction<TRequest> : IRequestExceptionAction<TRequest>
+        where TRequest : IRequest
+    {
+        async Task IRequestExceptionAction<TRequest, Exception>.Execute(TRequest request, Exception exception, CancellationToken cancellationToken)
+        {
+            await Execute(request, exception, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Override in a derived class for the action logic
+        /// </summary>
+        /// <param name="request">Failed request</param>
+        /// <param name="exception">Original exception from request handler</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        protected abstract Task Execute(TRequest request, Exception exception, CancellationToken cancellationToken);
+    }
+
+    /// <summary>
     /// Wrapper class that synchronously performs an action on a request for specific exception
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
@@ -46,6 +67,11 @@ namespace MediatR.Pipeline
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Override in a derived class for the action logic
+        /// </summary>
+        /// <param name="request">Failed request</param>
+        /// <param name="exception">Original exception from request handler</param>
         protected abstract void Execute(TRequest request, TException exception);
     }
 
@@ -61,6 +87,11 @@ namespace MediatR.Pipeline
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Override in a derived class for the action logic
+        /// </summary>
+        /// <param name="request">Failed request</param>
+        /// <param name="exception">Original exception from request handler</param>
         protected abstract void Execute(TRequest request, Exception exception);
     }
 }

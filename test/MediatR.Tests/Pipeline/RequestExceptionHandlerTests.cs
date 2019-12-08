@@ -47,20 +47,17 @@ namespace MediatR.Tests.Pipeline
 
         public class PingPongExceptionHandler : RequestExceptionHandler<Ping, Pong>
         {
-            public override Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
+            protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
             {
                 state.SetHandled(new Pong() { Message = exception.Message + " Handled"});
-
-                return Task.CompletedTask;
             }
         }
 
         public class PingPongExceptionHandlerNotHandled : RequestExceptionHandler<Ping, Pong>
         {
-            public override Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
+            protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
             {
                 request.Message = exception.Message + " Not Handled";
-                return Task.CompletedTask;
             }
         }
 
