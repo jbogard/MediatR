@@ -1,26 +1,25 @@
 namespace MediatR.Pipeline
 {
+    using MediatR.Internal;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/> or <see cref="IRequestExceptionHandler{TRequest,TResponse}"/> instances after an exception is thrown by the request handler
+    /// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/>
+    ///     or <see cref="RequestExceptionHandler{TRequest,TResponse}"/> instances
+    ///     after an exception is thrown by the following pipeline steps
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly ServiceFactory _serviceFactory;
-        private readonly IEnumerable<IRequestExceptionHandler<TRequest, TResponse>> _exceptionHandlers;
 
-        public RequestExceptionProcessorBehavior(ServiceFactory serviceFactory, IEnumerable<IRequestExceptionHandler<TRequest, TResponse>> exceptionHandlers)
-        {
-            _serviceFactory = serviceFactory;
-            _exceptionHandlers = exceptionHandlers;
-        }
+        public RequestExceptionProcessorBehavior(ServiceFactory serviceFactory) => _serviceFactory = serviceFactory;
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
@@ -31,26 +30,22 @@ namespace MediatR.Pipeline
             catch (Exception exception)
             {
                 var state = new RequestExceptionHandlerState<TResponse>();
-                var exceptionType = exception.GetType();
+                Type exceptionType = null;
 
-                do
+                while (!state.Handled && exceptionType != typeof(Exception))
                 {
-                    var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
-                    var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-                    var handleMethod = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse>.Handle));
-                    var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
+                    exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType;
+                    var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
 
                     foreach (var exceptionHandler in exceptionHandlers)
                     {
                         await ((Task)handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })).ConfigureAwait(false);
+
+                        if (state.Handled)
+                        {
+                            break;
+                        }
                     }
-
-                    exceptionType = exceptionType.BaseType;
-                } while (exceptionType != typeof(Exception).BaseType);
-
-                foreach (var exceptionHandler in _exceptionHandlers)
-                {
-                    await exceptionHandler.Handle(request, exception, state, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (!state.Handled)
@@ -61,5 +56,16 @@ namespace MediatR.Pipeline
                 return state.Response;
             }
         }
-    } 
+
+        private IList<object> GetExceptionHandlers(TRequest request, Type exceptionType, out MethodInfo handleMethodInfo)
+        {
+            var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
+            var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
+            handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle));
+
+            var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
+
+            return HandlersOrderer.Prioritize(exceptionHandlers.ToList(), request);
+        }
+    }
 }
