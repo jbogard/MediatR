@@ -29,7 +29,7 @@ namespace MediatR.Pipeline
     ///     <see cref="IRequestExceptionAction{TRequest, TException}" /> interface.
     /// </summary>
     /// <typeparam name="TRequest">The type of failed request</typeparam>
-    public interface IRequestExceptionAction<TRequest> : IRequestExceptionAction<TRequest, Exception>
+    public interface IRequestExceptionAction<in TRequest> : IRequestExceptionAction<TRequest, Exception>
     {
     }
 
