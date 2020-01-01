@@ -27,6 +27,8 @@ namespace MediatR.Examples.Autofac
             var mediatrOpenTypes = new[]
             {
                 typeof(IRequestHandler<,>),
+                typeof(IRequestExceptionHandler<,,>),
+                typeof(IRequestExceptionAction<,>),
                 typeof(INotificationHandler<>),
             };
 
@@ -35,6 +37,11 @@ namespace MediatR.Examples.Autofac
                 builder
                     .RegisterAssemblyTypes(typeof(Ping).GetTypeInfo().Assembly)
                     .AsClosedTypesOf(mediatrOpenType)
+                    // when having a single class implementing several handler types
+                    // this call will cause a handler to be called twice
+                    // in general you should try to avoid having a class implementing for instance `IRequestHandler<,>` and `INotificationHandler<>`
+                    // the other option would be to remove this call
+                    // see also https://github.com/jbogard/MediatR/issues/462
                     .AsImplementedInterfaces();
             }
 
@@ -43,6 +50,8 @@ namespace MediatR.Examples.Autofac
             // It appears Autofac returns the last registered types first
             builder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+            builder.RegisterGeneric(typeof(RequestExceptionActionProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
+            builder.RegisterGeneric(typeof(RequestExceptionProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(GenericRequestPreProcessor<>)).As(typeof(IRequestPreProcessor<>));
             builder.RegisterGeneric(typeof(GenericRequestPostProcessor<,>)).As(typeof(IRequestPostProcessor<,>));
             builder.RegisterGeneric(typeof(GenericPipelineBehavior<,>)).As(typeof(IPipelineBehavior<,>));
@@ -61,6 +70,8 @@ namespace MediatR.Examples.Autofac
             //  - RequestPreProcessorBehavior
             //  - RequestPostProcessorBehavior
             //  - GenericPipelineBehavior
+            //  - RequestExceptionActionProcessorBehavior
+            //  - RequestExceptionProcessorBehavior
 
             //var behaviors = container
             //    .Resolve<IEnumerable<IPipelineBehavior<Ping, Pong>>>()
