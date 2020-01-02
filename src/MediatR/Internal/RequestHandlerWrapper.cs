@@ -2,6 +2,7 @@ namespace MediatR.Internal
 {
     using System;
     using System.Linq;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -45,7 +46,14 @@ namespace MediatR.Internal
             ServiceFactory serviceFactory)
         {
             return Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
-                .ContinueWith(t => (object) t.Result, cancellationToken);
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
+                    }
+                    return (object)t.Result;
+                }, cancellationToken);
         }
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
