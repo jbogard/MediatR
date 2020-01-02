@@ -241,5 +241,62 @@ namespace MediatR.Tests
 
             await Should.ThrowAsync<ArgumentException>(async () => await mediator.Publish(notification));
         }
+
+        public class PingException : IRequest
+        {
+ 
+        }
+ 
+        public class PingExceptionHandler : IRequestHandler<PingException>
+        {
+            public async Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+        }
+ 
+        [Fact]
+        public async Task Should_throw_exception_for_non_generic_send_when_exception_occurs()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(NullPinged));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+            var mediator = container.GetInstance<IMediator>();
+ 
+            object pingException = new PingException();
+ 
+            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+        }
+ 
+        [Fact]
+        public async Task Should_throw_exception_for_generic_send_when_exception_occurs()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(NullPinged));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+            var mediator = container.GetInstance<IMediator>();
+ 
+            PingException pingException = new PingException();
+ 
+            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+        }
     }
 }
