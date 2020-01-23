@@ -7,7 +7,7 @@ namespace MediatR.Composite
     using System.Collections.Generic;
 
     /// <summary>
-    /// Defines an asynchronous handler for DynamicCompositeRequests <see cref="CompositeRequest"/>
+    /// defines an asynchronous handler for AsyncCompositeRequest <see cref="AsyncCompositeRequest"/>
     /// </summary>
     /// <remarks>Output will always be an ExpandoObject <see cref="ExpandoObject"/></remarks>
     public class AsyncCompositeRequestHandler : IRequestHandler<AsyncCompositeRequest, ExpandoObject>
@@ -34,10 +34,9 @@ namespace MediatR.Composite
 
 
     /// <summary>
-    /// Defines a synchronous handler for DynamicCompositeRequests <see cref="CompositeRequest"/>
+    /// defines a synchronous handler for CompositeRequests <see cref="CompositeRequest"/>
     /// </summary>
     /// <remarks>Output will always be an ExpandoObject <see cref="ExpandoObject"/></remarks>
-    /// <typeparam name="TCompositeRequest">The type of request being handled, must inherit from DynamicCompositeRequest</typeparam>
     public class CompositeRequestHandler : IRequestHandler<CompositeRequest, ExpandoObject>
     {
         private IMediator _mediator;
