@@ -148,6 +148,5 @@ namespace MediatR.Tests.Composite
             Assert.Equal(responseFromFunc.Noo.Total, 9001);
         }
 
-
     }
 }

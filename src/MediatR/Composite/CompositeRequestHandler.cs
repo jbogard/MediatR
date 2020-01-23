@@ -30,31 +30,4 @@ namespace MediatR.Composite
             return response as ExpandoObject;
         }
     }
-
-
-
-    /// <summary>
-    /// defines a synchronous handler for CompositeRequests <see cref="CompositeRequest"/>
-    /// </summary>
-    /// <remarks>Output will always be an ExpandoObject <see cref="ExpandoObject"/></remarks>
-    public class CompositeRequestHandler : IRequestHandler<CompositeRequest, ExpandoObject>
-    {
-        private IMediator _mediator;
-
-        public CompositeRequestHandler(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
-        public Task<ExpandoObject> Handle(CompositeRequest compositeRequest, CancellationToken cancellationToken)
-        {
-            IDictionary<string, object> response = new ExpandoObject();
-            foreach (var request in compositeRequest.Requests)
-            {
-                response[request.Key] = _mediator.Send(request.Value);
-            }
-
-            return Task.FromResult(response as ExpandoObject);
-        }
-    }
 }
