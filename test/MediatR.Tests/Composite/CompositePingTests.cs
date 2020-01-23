@@ -9,6 +9,7 @@ namespace MediatR.Tests.Composite
     using Xunit;
     using System.Collections.Generic;
     using System.Dynamic;
+    using System;
 
     public class CompositePingTests
     {
@@ -52,44 +53,61 @@ namespace MediatR.Tests.Composite
         }
         #endregion
 
-        public class CompositePingRequest : DynamicCompositeRequest
-        {
-            private bool _merge;
-            public CompositePingRequest(bool merge = false)
-            {
-                _merge = merge;
-            }
 
-            public override IEnumerable<IBaseRequest> Requests()
+        [Fact]
+        public async Task Should_resolve_composite_handler_using_request_type_names()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(CompositePingTests));
+                    scanner.IncludeNamespaceContainingType<CompositePingTests>();
+                    scanner.AssemblyContainingType(typeof(AsyncCompositeRequestHandler));
+                    scanner.IncludeNamespaceContainingType<AsyncCompositeRequestHandler>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            // testing from param
+            var pongResponse = await mediator.Send(new Ping());
+            var pongAgainResponse = await mediator.Send(new Foo());
+
+            dynamic response = await mediator.Send(new AsyncCompositeRequest(new List<IBaseRequest> { new Ping(), new Foo() } ));
+
+            Assert.Equal(response.Ping.Message, "Ping Pong");
+            Assert.Equal(response.Foo.Total, 9001);
+
+            // Testing from function
+            IEnumerable<IBaseRequest> GetRequestList()
             {
                 yield return new Ping();
                 yield return new Foo();
             }
 
-            public override bool MergeRepsonses()
-            {
-                return _merge;
-            }
-        }
+            dynamic responseFromFunc = await mediator.Send(new AsyncCompositeRequest(GetRequestList));
 
-        public class CompositePingRequestHandler : AsyncDynamicCompositeRequestHandler<CompositePingRequest>
-        {
-            public CompositePingRequestHandler(IMediator mediator) : base(mediator)
-            {
-            }
+            Assert.Equal(responseFromFunc.Ping.Message, "Ping Pong");
+            Assert.Equal(responseFromFunc.Foo.Total, 9001);
         }
-
 
 
         [Fact]
-        public async Task Should_resolve_composite_handler_no_merge()
+        public async Task Should_resolve_composite_handler_dictionary_names()
         {
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
                 {
                     scanner.AssemblyContainingType(typeof(CompositePingTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.IncludeNamespaceContainingType<CompositePingTests>();
+                    scanner.AssemblyContainingType(typeof(AsyncCompositeRequestHandler));
+                    scanner.IncludeNamespaceContainingType<AsyncCompositeRequestHandler>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
@@ -102,39 +120,34 @@ namespace MediatR.Tests.Composite
             var pongResponse = await mediator.Send(new Ping());
             var pongAgainResponse = await mediator.Send(new Foo());
 
-            dynamic response = await mediator.Send(new CompositePingRequest());
-
-            Assert.Equal(response.Ping.Message, "Ping Pong");
-            Assert.Equal(response.Foo.Total, 9001);
-        }
-
-
-
-        [Fact]
-        public async Task Should_resolve_composite_handler_with_merge()
-        {
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
+            // testing from param
+            dynamic response = await mediator.Send(new AsyncCompositeRequest(
+                new Dictionary<string, IBaseRequest>()
                 {
-                    scanner.AssemblyContainingType(typeof(CompositePingTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
-            });
+                    { "Ning", new Ping() },
+                    { "Noo",  new Foo()  }
+                }
+            ));
 
-            var mediator = container.GetInstance<IMediator>();
+            Assert.Equal(response.Ning.Message, "Ping Pong");
+            Assert.Equal(response.Noo.Total, 9001);
 
-            var pongResponse = await mediator.Send(new Ping());
-            var pongAgainResponse = await mediator.Send(new Foo());
+            // Testing from function
+            Dictionary<string, IBaseRequest> GetRequestDict()
+            {
+                return new Dictionary<string, IBaseRequest>()
+                {
+                    { "Ning", new Ping() },
+                    { "Noo",  new Foo()  }
+                };
+            }
 
-            dynamic response = await mediator.Send(new CompositePingRequest(merge: true));
+            dynamic responseFromFunc = await mediator.Send(new AsyncCompositeRequest(GetRequestDict));
 
-            Assert.Equal(response.Message, "Ping Pong");
-            Assert.Equal(response.Total, 9001);
+            Assert.Equal(responseFromFunc.Ning.Message, "Ping Pong");
+            Assert.Equal(responseFromFunc.Noo.Total, 9001);
         }
+
+
     }
 }
