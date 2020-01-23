@@ -63,11 +63,10 @@ namespace MediatR.Tests.Composite
                 {
                     scanner.AssemblyContainingType(typeof(CompositePingTests));
                     scanner.IncludeNamespaceContainingType<CompositePingTests>();
-                    scanner.AssemblyContainingType(typeof(AsyncCompositeRequestHandler));
-                    scanner.IncludeNamespaceContainingType<AsyncCompositeRequestHandler>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
+                cfg.For<IRequestHandler<AsyncCompositeRequest, ExpandoObject>>().Use<AsyncCompositeRequestHandler>();
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
@@ -106,11 +105,10 @@ namespace MediatR.Tests.Composite
                 {
                     scanner.AssemblyContainingType(typeof(CompositePingTests));
                     scanner.IncludeNamespaceContainingType<CompositePingTests>();
-                    scanner.AssemblyContainingType(typeof(AsyncCompositeRequestHandler));
-                    scanner.IncludeNamespaceContainingType<AsyncCompositeRequestHandler>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
                 });
+                cfg.For<IRequestHandler<AsyncCompositeRequest, ExpandoObject>>().Use<AsyncCompositeRequestHandler>();
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
