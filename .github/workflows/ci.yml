@@ -1,0 +1,17 @@
+name: .NET Core
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: [windows-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.1.803
+    - name: build
+      run: ./Build.ps1
