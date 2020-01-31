@@ -15,3 +15,8 @@ jobs:
         dotnet-version: 2.1.803
     - name: build
       run: ./Build.ps1
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with: 
+        name: NuGet
+        path: .\src\MediatR\artifacts\**\*.nupkg
