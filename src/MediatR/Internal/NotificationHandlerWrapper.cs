@@ -26,10 +26,10 @@ namespace MediatR.Internal
 
             IEnumerable<Func<INotification, CancellationToken, Task>> handlersToPublish;
 
-            if (allHandlers.All(x => x.GetType().GetCustomAttribute<NotificationOrderAttribute>() != null))
+            if (allHandlers.All(x => x.GetType().GetCustomAttribute<NotificationHandlerOrderAttribute>() != null))
             {
                 var groupedHandlers = allHandlers
-                    .GroupBy(x => x.GetType().GetCustomAttribute<NotificationOrderAttribute>().Value)
+                    .GroupBy(x => x.GetType().GetCustomAttribute<NotificationHandlerOrderAttribute>().Value)
                     .OrderBy(x => x.Key);
 
                 foreach (var handlersGroup in groupedHandlers)
@@ -40,11 +40,13 @@ namespace MediatR.Internal
 
                     publish(handlersToPublish, notification, cancellationToken);
                 }
+
+                return Task.CompletedTask;
             }
 
             handlersToPublish = allHandlers.Select(x =>
                 new Func<INotification, CancellationToken, Task>((theNotification, theToken) =>
-                    x.Handle((TNotification) theNotification, theToken)));
+                    x.Handle((TNotification)theNotification, theToken)));
 
             return publish(handlersToPublish, notification, cancellationToken);
         }

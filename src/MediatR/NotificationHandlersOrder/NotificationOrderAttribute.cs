@@ -1,12 +1,16 @@
-using System;
-
 namespace MediatR.NotificationHandlersOrder
 {
-    public class NotificationOrderAttribute : Attribute
+    using System;
+
+    /// <summary>
+    /// Defines a value of the processing order of notification handlers
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class NotificationHandlerOrderAttribute : Attribute
     {
         public int Value { get; }
 
-        public NotificationOrderAttribute(int value)
+        public NotificationHandlerOrderAttribute(int value)
         {
             Value = value;
         }
