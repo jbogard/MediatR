@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -61,6 +62,9 @@ namespace MediatR.Tests
             };
         }
 
+        public static object[][] CompareToValueData()
+            => ValueData().Select(objects => new[] { objects[0] }).ToArray();
+
         [Theory]
         [MemberData(nameof(ValueData))]
         public void Should_be_equal(object value, bool isEqual)
@@ -74,8 +78,8 @@ namespace MediatR.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ValueData))]
-        public void Should_compareto_value_as_zero(object value, bool _)
+        [MemberData(nameof(CompareToValueData))]
+        public void Should_compareto_value_as_zero(object value)
         {
             var unit1 = new Unit();
 

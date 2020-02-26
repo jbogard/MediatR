@@ -249,7 +249,7 @@ namespace MediatR.Tests
  
         public class PingExceptionHandler : IRequestHandler<PingException>
         {
-            public async Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
+            public Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
