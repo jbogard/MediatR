@@ -58,6 +58,7 @@ namespace MediatR.Pipeline
     /// Wrapper class that synchronously performs an action on a request for specific exception
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
+    /// <typeparam name="TException">Exception type</typeparam>
     public abstract class RequestExceptionAction<TRequest, TException> : IRequestExceptionAction<TRequest, TException>
         where TException : Exception
     {
