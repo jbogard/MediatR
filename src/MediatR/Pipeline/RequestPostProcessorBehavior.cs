@@ -9,6 +9,7 @@ namespace MediatR.Pipeline
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
+    [PipelinePriority(PipelinePriorityOrder.RequestPostProcessor)]
     public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;

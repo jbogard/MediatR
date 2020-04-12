@@ -1,4 +1,6 @@
 
+using MediatR.Pipeline;
+
 namespace MediatR
 {
     using System.Threading;

@@ -15,6 +15,7 @@ namespace MediatR.Pipeline
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
+    [PipelinePriority(PipelinePriorityOrder.RequestExceptionProcessor)]
     public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly ServiceFactory _serviceFactory;

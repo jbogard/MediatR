@@ -1,3 +1,5 @@
+using MediatR.Pipeline;
+
 namespace MediatR.Internal
 {
     using System;
@@ -45,14 +47,14 @@ namespace MediatR.Internal
         public override Task<object> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            return Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
+            return Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
                         ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
                     }
-                    return (object)t.Result;
+                    return (object) t.Result;
                 }, cancellationToken);
         }
 
@@ -64,7 +66,11 @@ namespace MediatR.Internal
             return serviceFactory
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
+                .OrderBy(i => i.GetType()
+                                            .GetCustomAttributes(typeof(PipelinePriorityAttribute), true)
+                                            .Cast<PipelinePriorityAttribute>()
+                                            .FirstOrDefault()?.Priority ?? PipelinePriorityOrder.Normal)
+                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, next))();
         }
     }
 }
