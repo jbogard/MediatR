@@ -67,9 +67,9 @@ namespace MediatR.Internal
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
                 .OrderBy(i => i.GetType()
-                                            .GetCustomAttributes(typeof(PipelinePriorityAttribute), true)
-                                            .Cast<PipelinePriorityAttribute>()
-                                            .FirstOrDefault()?.Priority ?? PipelinePriorityOrder.Normal)
+                                  .GetCustomAttributes(typeof(PipelinePriorityAttribute), true)
+                                  .Cast<PipelinePriorityAttribute>()
+                                  .FirstOrDefault()?.Priority ?? PipelinePriorityOrder.Normal)
                 .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, next))();
         }
     }

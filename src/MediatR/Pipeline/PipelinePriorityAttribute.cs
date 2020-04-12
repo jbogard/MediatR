@@ -5,7 +5,7 @@ namespace MediatR.Pipeline
     [AttributeUsage((AttributeTargets.Class | AttributeTargets.Interface), AllowMultiple = false, Inherited = true)]
     public class PipelinePriorityAttribute : Attribute
     {
-        public PipelinePriorityAttribute(int priority = PipelinePriorityOrder.Normal)
+        public PipelinePriorityAttribute(int priority)
         {
             Priority = priority;
         }
