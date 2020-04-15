@@ -7,7 +7,6 @@ namespace MediatR.Pipeline
     /// Defined a request pre-processor for a handler
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
-    [PipelinePriority(PipelinePriorityOrder.RequestPreProcessor)]
     public interface IRequestPreProcessor<in TRequest>
     {
         /// <summary>
