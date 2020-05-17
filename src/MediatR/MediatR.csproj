@@ -3,7 +3,9 @@
   <PropertyGroup>
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <LangVersion>8</LangVersion>
+    <Nullable>enable</Nullable>
     <AssemblyName>MediatR</AssemblyName>
     <PackageId>MediatR</PackageId>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
