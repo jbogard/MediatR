@@ -36,7 +36,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
+		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Directory.Build.props = Directory.Build.props
+		Push.ps1 = Push.ps1
 		README.md = README.md
 	EndProjectSection
 EndProject

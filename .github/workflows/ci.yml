@@ -1,22 +1,33 @@
 name: CI
 
-on: [push]
-
+on:
+  push:
+    branches:
+    - master
+    - release-*
+    tags:
+    - '*.*.*'
+  pull_request:
 jobs:
   build:
-
-    runs-on: [windows-latest]
-
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Checkout
+      uses: actions/checkout@v2
       with:
-        dotnet-version: 2.1.803
-    - name: build
+        fetch-depth: 0
+    - name: Build and Test
       run: ./Build.ps1
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with: 
-        name: NuGet
-        path: artifacts\*.nupkg
+      shell: pwsh
+    - name: Push
+      env:
+        MYGET_MEDIATR_CI_API_KEY: ${{ secrets.MYGET_MEDIATR_CI_API_KEY }}
+      run: ./Push.ps1
+      shell: pwsh
+    - name: Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: artifacts/**/*

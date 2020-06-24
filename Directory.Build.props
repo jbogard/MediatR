@@ -6,5 +6,6 @@
     <NoWarn>$(NoWarn);1701;1702;1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 </Project>
