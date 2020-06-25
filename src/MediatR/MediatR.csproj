@@ -16,7 +16,15 @@
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>gradient_128x128.png</PackageIcon>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
