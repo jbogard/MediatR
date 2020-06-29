@@ -1,0 +1,17 @@
+name: PR
+
+on:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Build and Test
+      run: ./Build.ps1
+      shell: pwsh
