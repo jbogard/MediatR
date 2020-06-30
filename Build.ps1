@@ -45,5 +45,5 @@ foreach ($sample in $samples) {
     }
 }
 
-exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o $artifacts --include-symbols -p:SymbolPackageFormat=snupkg --no-build }
+exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o $artifacts --no-build }
 
