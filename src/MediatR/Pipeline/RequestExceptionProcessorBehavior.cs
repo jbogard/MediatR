@@ -16,6 +16,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
     {
         private readonly ServiceFactory _serviceFactory;
 
@@ -30,7 +31,7 @@ namespace MediatR.Pipeline
             catch (Exception exception)
             {
                 var state = new RequestExceptionHandlerState<TResponse>();
-                Type exceptionType = null;
+                Type? exceptionType = null;
 
                 while (!state.Handled && exceptionType != typeof(Exception))
                 {
@@ -53,7 +54,7 @@ namespace MediatR.Pipeline
                     throw;
                 }
 
-                return state.Response;
+                return state.Response!; //cannot be null if Handled
             }
         }
 

@@ -10,6 +10,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest"></typeparam>
     /// <typeparam name="TResponse"></typeparam>
     public class RequestPreProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
     {
         private readonly IEnumerable<IRequestPreProcessor<TRequest>> _preProcessors;
 
