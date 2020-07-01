@@ -11,6 +11,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TResponse">Response type</typeparam>
     /// <typeparam name="TException">Exception type</typeparam>
     public interface IRequestExceptionHandler<in TRequest, TResponse, TException>
+        where TRequest : notnull
         where TException : Exception
     {
         /// <summary>
@@ -30,6 +31,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     public interface IRequestExceptionHandler<in TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse, Exception>
+        where TRequest : notnull
     {
     }
 
@@ -39,6 +41,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     public abstract class AsyncRequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
+        where TRequest : notnull
     {
         async Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
         {
@@ -62,6 +65,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TResponse">Response type</typeparam>
     /// <typeparam name="TException">Exception type</typeparam>
     public abstract class RequestExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
+        where TRequest : notnull
         where TException : Exception
     {
         Task IRequestExceptionHandler<TRequest, TResponse, TException>.Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
@@ -85,6 +89,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     public abstract class RequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
+        where TRequest : notnull
     {
         Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
         {

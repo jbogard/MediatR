@@ -10,7 +10,7 @@ namespace MediatR.Internal
 
     internal abstract class RequestHandlerBase
     {
-        public abstract Task<object> Handle(object request, CancellationToken cancellationToken,
+        public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
 
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
@@ -44,7 +44,7 @@ namespace MediatR.Internal
     internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
-        public override Task<object> Handle(object request, CancellationToken cancellationToken,
+        public override Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
             return Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory)
@@ -54,7 +54,7 @@ namespace MediatR.Internal
                     {
                         ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
                     }
-                    return (object) t.Result;
+                    return (object?)t.Result;
                 }, cancellationToken);
         }
 

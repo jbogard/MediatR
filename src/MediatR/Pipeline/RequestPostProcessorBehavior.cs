@@ -11,6 +11,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TResponse">Response type</typeparam>
     [PipelinePriority(PipelinePriorityOrder.RequestPostProcessor)]
     public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
     {
         private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
 
