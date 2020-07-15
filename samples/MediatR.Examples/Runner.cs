@@ -209,7 +209,7 @@ namespace MediatR.Examples
         private static bool IsExceptionHandledBy<TException, THandler>(WrappingWriter writer)
             where TException : Exception
         {
-            var messages = writer.Contents.Split(new[] { "\r\n" }, StringSplitOptions.None).ToList();
+            var messages = writer.Contents.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
 
             return messages[messages.Count - 2].Contains(typeof(THandler).FullName)
                 && messages[messages.Count - 3].Contains(typeof(TException).FullName);
