@@ -36,7 +36,7 @@ namespace MediatR.Examples.LightInject
                     typeof(RequestPreProcessorBehavior<,>),
                     typeof(RequestPostProcessorBehavior<,>),
                     typeof(GenericPipelineBehavior<,>)
-                }, type => new PerContainerLifetime());
+                }, type => null);
 
             
             serviceContainer.RegisterOrdered(typeof(IRequestPostProcessor<,>),
@@ -44,7 +44,7 @@ namespace MediatR.Examples.LightInject
                 {
                     typeof(GenericRequestPostProcessor<,>),
                     typeof(ConstrainedRequestPostProcessor<,>)
-                }, type => new PerContainerLifetime());
+                }, type => null);
                    
             serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));            
             
