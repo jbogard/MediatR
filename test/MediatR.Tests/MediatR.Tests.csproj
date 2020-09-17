@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
-    <AssemblyName>MediatR.Tests</AssemblyName>
-    <PackageId>MediatR.Tests</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

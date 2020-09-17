@@ -2,10 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.AspNetCore</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.AspNetCore</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
