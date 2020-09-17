@@ -14,7 +14,7 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
-        private static readonly ConcurrentDictionary<Type, object> _requestHandlers = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new ConcurrentDictionary<Type, RequestHandlerBase>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace MediatR
             var requestType = request.GetType();
 
             var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
-                t => Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+                t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
@@ -62,11 +62,11 @@ namespace MediatR
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
-                    return Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType));
+                    return (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType));
                 });
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
-            return ((RequestHandlerBase) handler).Handle(request, cancellationToken, _serviceFactory);
+            return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
         public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)

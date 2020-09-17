@@ -8,8 +8,6 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
-    <AssemblyName>MediatR</AssemblyName>
-    <PackageId>MediatR</PackageId>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
@@ -18,7 +16,7 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols><MinVerTagPrefix>v</MinVerTagPrefix>
+    <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>

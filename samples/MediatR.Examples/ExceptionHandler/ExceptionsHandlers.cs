@@ -12,7 +12,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public CommonExceptionHandler(TextWriter writer) => _writer = writer;
 
-        protected async override Task Handle(PingResource request,
+        protected override async Task Handle(PingResource request,
             Exception exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public ServerExceptionHandler(TextWriter writer) => _writer = writer;
 
-        public async virtual Task Handle(PingNewResource request,
+        public virtual async Task Handle(PingNewResource request,
             ServerException exception,
             RequestExceptionHandlerState<Pong> state,
             CancellationToken cancellationToken)
