@@ -8,8 +8,6 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
-    <AssemblyName>MediatR</AssemblyName>
-    <PackageId>MediatR</PackageId>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
