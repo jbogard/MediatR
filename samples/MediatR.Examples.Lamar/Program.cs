@@ -27,9 +27,13 @@ namespace MediatR.Examples.Lamar
                     scanner.AssemblyContainingType<Ping>();
                     scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
                     scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<>));
+                    scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionHandler<,,>));
                 });
 
                 //Pipeline
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionActionProcessorBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
                 cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericPipelineBehavior<,>));
