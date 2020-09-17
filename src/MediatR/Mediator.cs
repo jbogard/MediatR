@@ -49,9 +49,9 @@ namespace MediatR
             }
             var requestType = request.GetType();
             var handler = _requestHandlers.GetOrAdd(requestType,
-                t =>
+                requestTypeKey =>
                 {
-                    var requestInterfaceType = requestType
+                    var requestInterfaceType = requestTypeKey
                         .GetInterfaces()
                         .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
                     var isValidRequest = requestInterfaceType != null;
@@ -62,7 +62,7 @@ namespace MediatR
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
-                    return (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType));
+                    return (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType));
                 });
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
