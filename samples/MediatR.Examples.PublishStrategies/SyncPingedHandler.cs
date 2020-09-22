@@ -13,7 +13,7 @@ namespace MediatR.Examples.PublishStrategies
 
         public string Name { get; set; }
 
-        public Task Handle(Pinged notification, CancellationToken cancellationToken)
+        public Task HandleAsync(Pinged notification, CancellationToken cancellationToken)
         {
             if (Name == "2")
             {

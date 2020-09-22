@@ -13,11 +13,11 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             await _writer.WriteLineAsync("-- Handling Request");
             var response = await next();
-            await  _writer.WriteLineAsync("-- Finished Request");
+            await _writer.WriteLineAsync("-- Finished Request");
             return response;
         }
     }

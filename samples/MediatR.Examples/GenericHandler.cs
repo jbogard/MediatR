@@ -13,7 +13,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Handle(INotification notification, CancellationToken cancellationToken)
+        public Task HandleAsync(INotification notification, CancellationToken cancellationToken)
         {
             return _writer.WriteLineAsync("Got notified.");
         }

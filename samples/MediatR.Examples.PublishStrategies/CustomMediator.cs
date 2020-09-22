@@ -14,7 +14,7 @@ namespace MediatR.Examples.PublishStrategies
             _publish = publish;
         }
 
-        protected override Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
+        protected override Task PublishCoreAsync(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
         {
             return _publish(allHandlers, notification, cancellationToken);
         }

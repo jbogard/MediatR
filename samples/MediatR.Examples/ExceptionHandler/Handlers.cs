@@ -10,7 +10,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public PingResourceHandler(TextWriter writer) => _writer = writer;
 
-        public Task<Pong> Handle(PingResource request, CancellationToken cancellationToken)
+        public Task<Pong> HandleAsync(PingResource request, CancellationToken cancellationToken)
         {
             throw new ResourceNotFoundException();
         }
@@ -22,7 +22,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public PingNewResourceHandler(TextWriter writer) => _writer = writer;
 
-        public Task<Pong> Handle(PingNewResource request, CancellationToken cancellationToken)
+        public Task<Pong> HandleAsync(PingNewResource request, CancellationToken cancellationToken)
         {
             throw new ServerException();
         }
@@ -34,7 +34,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public PingResourceTimeoutHandler(TextWriter writer) => _writer = writer;
 
-        public Task<Pong> Handle(PingResourceTimeout request, CancellationToken cancellationToken)
+        public Task<Pong> HandleAsync(PingResourceTimeout request, CancellationToken cancellationToken)
         {
             throw new TaskCanceledException();
         }
@@ -46,7 +46,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public PingResourceTimeoutOverrideHandler(TextWriter writer) => _writer = writer;
 
-        public Task<Pong> Handle(Overrides.PingResourceTimeout request, CancellationToken cancellationToken)
+        public Task<Pong> HandleAsync(Overrides.PingResourceTimeout request, CancellationToken cancellationToken)
         {
             throw new TaskCanceledException();
         }
@@ -58,7 +58,7 @@ namespace MediatR.Examples.ExceptionHandler
 
         public PingProtectedResourceHandler(TextWriter writer) => _writer = writer;
 
-        public Task<Pong> Handle(PingProtectedResource request, CancellationToken cancellationToken)
+        public Task<Pong> HandleAsync(PingProtectedResource request, CancellationToken cancellationToken)
         {
             throw new ForbiddenException();
         }
