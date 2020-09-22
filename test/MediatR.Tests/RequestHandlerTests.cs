@@ -29,7 +29,7 @@ namespace MediatR.Tests
         {
             IRequestHandler<Ping, Pong> handler = new PingHandler();
 
-            var response = await handler.Handle(new Ping() { Message = "Ping" }, default);
+            var response = await handler.HandleAsync(new Ping() { Message = "Ping" }, default);
 
             response.Message.ShouldBe("Ping Pong");
         }

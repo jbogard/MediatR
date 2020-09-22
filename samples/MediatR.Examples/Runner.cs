@@ -18,19 +18,19 @@ namespace MediatR.Examples
             await writer.WriteLineAsync();
 
             await writer.WriteLineAsync("Sending Ping...");
-            var pong = await mediator.Send(new Ping { Message = "Ping" });
+            var pong = await mediator.SendAsync(new Ping { Message = "Ping" });
             await writer.WriteLineAsync("Received: " + pong.Message);
             await writer.WriteLineAsync();
 
             await writer.WriteLineAsync("Publishing Pinged...");
-            await mediator.Publish(new Pinged());
+            await mediator.PublishAsync(new Pinged());
             await writer.WriteLineAsync();
 
             await writer.WriteLineAsync("Publishing Ponged...");
             var failedPong = false;
             try
             {
-                await mediator.Publish(new Ponged());
+                await mediator.PublishAsync(new Ponged());
             }
             catch (Exception e)
             {
@@ -43,7 +43,7 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Sending Jing...");
             try
             {
-                await mediator.Send(new Jing { Message = "Jing" });
+                await mediator.SendAsync(new Jing { Message = "Jing" });
             }
             catch (Exception e)
             {
@@ -116,7 +116,7 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Checking handler to catch exact exception...");
             try
             {
-                await mediator.Send(new PingProtectedResource { Message = "Ping to protected resource" });
+                await mediator.SendAsync(new PingProtectedResource { Message = "Ping to protected resource" });
                 isHandledCorrectly = IsExceptionHandledBy<ForbiddenException, AccessDeniedExceptionHandler>(writer);
             }
             catch (Exception e)
@@ -135,7 +135,7 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Checking shared handler to catch exception by base type...");
             try
             {
-                await mediator.Send(new PingResource { Message = "Ping to missed resource" });
+                await mediator.SendAsync(new PingResource { Message = "Ping to missed resource" });
                 isHandledCorrectly = IsExceptionHandledBy<ResourceNotFoundException, ConnectionExceptionHandler>(writer);
             }
             catch (Exception e)
@@ -154,7 +154,7 @@ namespace MediatR.Examples
             await writer.WriteLineAsync("Checking base handler to catch any exception...");
             try
             {
-                await mediator.Send(new PingResourceTimeout { Message = "Ping to ISS resource" });
+                await mediator.SendAsync(new PingResourceTimeout { Message = "Ping to ISS resource" });
                 isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, CommonExceptionHandler> (writer);
             }
             catch (Exception e)
@@ -174,7 +174,7 @@ namespace MediatR.Examples
 
             try
             {
-                await mediator.Send(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
+                await mediator.SendAsync(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
                 isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
             }
             catch (Exception e)
@@ -194,7 +194,7 @@ namespace MediatR.Examples
 
             try
             {
-                await mediator.Send(new PingNewResource { Message = "Ping to ISS resource (override)" });
+                await mediator.SendAsync(new PingNewResource { Message = "Ping to ISS resource (override)" });
                 isHandledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
             }
             catch (Exception e)

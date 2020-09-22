@@ -29,7 +29,7 @@ namespace MediatR.Tests.Pipeline
 
         public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
+            public Task<Pong> HandleAsync(Ping request, CancellationToken cancellationToken)
             {
                 throw new PingException(request.Message);
             }
@@ -37,7 +37,7 @@ namespace MediatR.Tests.Pipeline
 
         public class PingPongExceptionHandlerForType : IRequestExceptionHandler<Ping, Pong, PingException>
         {
-            public Task Handle(Ping request, PingException exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
+            public Task HandleAsync(Ping request, PingException exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
             {
                 state.SetHandled(new Pong() { Message = exception.Message + " Handled by Type" });
 
@@ -76,7 +76,7 @@ namespace MediatR.Tests.Pipeline
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
 
             response.Message.ShouldBe("Ping Thrown Handled by Type");
         }
@@ -98,7 +98,7 @@ namespace MediatR.Tests.Pipeline
             var request = new Ping { Message = "Ping" };
             await Should.ThrowAsync<PingException>(async () =>
             {
-                await mediator.Send(request);
+                await mediator.SendAsync(request);
             });
 
             request.Message.ShouldBe("Ping Thrown Not Handled");

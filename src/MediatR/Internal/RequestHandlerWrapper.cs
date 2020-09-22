@@ -8,7 +8,7 @@ namespace MediatR.Internal
 
     internal abstract class RequestHandlerBase
     {
-        public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
+        public abstract Task<object?> HandleAsync(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
 
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
@@ -35,17 +35,17 @@ namespace MediatR.Internal
 
     internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
-        public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
+        public abstract Task<TResponse> HandleAsync(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }
 
     internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
-        public override Task<object?> Handle(object request, CancellationToken cancellationToken,
+        public override Task<object?> HandleAsync(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            return Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
+            return HandleAsync((IRequest<TResponse>)request, cancellationToken, serviceFactory)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
@@ -56,15 +56,15 @@ namespace MediatR.Internal
                 }, cancellationToken);
         }
 
-        public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
+        public override Task<TResponse> HandleAsync(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
+            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).HandleAsync((TRequest) request, cancellationToken);
 
             return serviceFactory
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
+                .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.HandleAsync((TRequest)request, cancellationToken, next))();
         }
     }
 }

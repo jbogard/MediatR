@@ -22,7 +22,7 @@ namespace MediatR.Tests
 
         public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
+            public Task<Pong> HandleAsync(Ping request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new Pong { Message = request.Message + " Pong" });
             }
@@ -46,7 +46,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.SendAsync(new Ping { Message = "Ping" });
 
             response.Message.ShouldBe("Ping Pong");
         }
@@ -70,7 +70,7 @@ namespace MediatR.Tests
             var mediator = container.GetInstance<IMediator>();
 
             object request = new Ping { Message = "Ping" };
-            var response = await mediator.Send(request);
+            var response = await mediator.SendAsync(request);
 
             var pong = response.ShouldBeOfType<Pong>();
             pong.Message.ShouldBe("Ping Pong");

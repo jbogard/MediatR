@@ -28,7 +28,7 @@ namespace MediatR.Tests
                 _writer = writer;
             }
 
-            public Task Handle(Ping notification, CancellationToken cancellationToken)
+            public Task HandleAsync(Ping notification, CancellationToken cancellationToken)
             {
                 return _writer.WriteLineAsync(notification.Message + " Pong");
             }
@@ -43,7 +43,7 @@ namespace MediatR.Tests
                 _writer = writer;
             }
 
-            public Task Handle(Ping notification, CancellationToken cancellationToken)
+            public Task HandleAsync(Ping notification, CancellationToken cancellationToken)
             {
                 return _writer.WriteLineAsync(notification.Message + " Pung");
             }
@@ -71,7 +71,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            await mediator.Publish(new Ping { Message = "Ping" });
+            await mediator.PublishAsync(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");
@@ -101,7 +101,7 @@ namespace MediatR.Tests
             var mediator = container.GetInstance<IMediator>();
 
             object message = new Ping { Message = "Ping" };
-            await mediator.Publish(message);
+            await mediator.PublishAsync(message);
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");
@@ -115,7 +115,7 @@ namespace MediatR.Tests
             {
             }
 
-            protected override async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
+            protected override async Task PublishCoreAsync(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
             {
                 foreach (var handler in allHandlers)
                 {
@@ -146,7 +146,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            await mediator.Publish(new Ping { Message = "Ping" });
+            await mediator.PublishAsync(new Ping { Message = "Ping" });
 
             var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");
@@ -176,7 +176,7 @@ namespace MediatR.Tests
             var mediator = container.GetInstance<IMediator>();
 
             INotification notification = new Ping { Message = "Ping" };
-            await mediator.Publish(notification);
+            await mediator.PublishAsync(notification);
 
             var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             result.ShouldContain("Ping Pong");

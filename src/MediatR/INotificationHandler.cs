@@ -15,7 +15,7 @@ namespace MediatR
         /// </summary>
         /// <param name="notification">The notification</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        Task Handle(TNotification notification, CancellationToken cancellationToken);
+        Task HandleAsync(TNotification notification, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -25,7 +25,7 @@ namespace MediatR
     public abstract class NotificationHandler<TNotification> : INotificationHandler<TNotification>
         where TNotification : INotification
     {
-        Task INotificationHandler<TNotification>.Handle(TNotification notification, CancellationToken cancellationToken)
+        Task INotificationHandler<TNotification>.HandleAsync(TNotification notification, CancellationToken cancellationToken)
         {
             Handle(notification);
             return Unit.Task;

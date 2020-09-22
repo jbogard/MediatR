@@ -36,7 +36,7 @@ namespace MediatR.Tests
 
             IRequestHandler<Ping, Unit> handler = new PingHandler(writer);
 
-            await handler.Handle(new Ping() { Message = "Ping" }, default);
+            await handler.HandleAsync(new Ping() { Message = "Ping" }, default);
 
             var result = builder.ToString();
             result.ShouldContain("Ping Pong");

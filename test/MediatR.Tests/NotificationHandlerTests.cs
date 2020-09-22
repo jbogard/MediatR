@@ -36,7 +36,7 @@ namespace MediatR.Tests
 
             INotificationHandler<Ping> handler = new PongChildHandler(writer);
 
-            await handler.Handle(
+            await handler.HandleAsync(
                 new Ping() { Message = "Ping" },
                 default
             );

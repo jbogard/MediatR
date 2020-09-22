@@ -38,13 +38,13 @@ namespace MediatR.Benchmarks
         [Benchmark]
         public Task SendingRequests()
         {
-            return _mediator.Send(_request);
+            return _mediator.SendAsync(_request);
         }
 
         [Benchmark]
         public Task PublishingNotifications()
         {
-            return _mediator.Publish(_notification);
+            return _mediator.PublishAsync(_notification);
         }
     }
 }

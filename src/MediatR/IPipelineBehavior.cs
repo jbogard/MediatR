@@ -26,6 +26,6 @@ namespace MediatR
         /// <param name="cancellationToken">Cancellation token</param>
         /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
         /// <returns>Awaitable task returning the <typeparamref name="TResponse"/></returns>
-        Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next);
+        Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next);
     }
 }

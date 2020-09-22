@@ -22,7 +22,7 @@ namespace MediatR.Tests
 
             public PingHandler(TextWriter writer) => _writer = writer;
 
-            protected override Task Handle(Ping request, CancellationToken cancellationToken)
+            protected override Task HandleAsync(Ping request, CancellationToken cancellationToken)
                 => _writer.WriteAsync(request.Message + " Pong");
         }
 
@@ -49,7 +49,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            await mediator.Send(new Ping { Message = "Ping" });
+            await mediator.SendAsync(new Ping { Message = "Ping" });
 
             builder.ToString().ShouldBe("Ping Pong");
         }

@@ -61,7 +61,7 @@ namespace MediatR.Tests
 
         public class JingHandler : IRequestHandler<Jing, Unit>
         {
-            public Task<Unit> Handle(Jing request, CancellationToken cancellationToken)
+            public Task<Unit> HandleAsync(Jing request, CancellationToken cancellationToken)
             {
                 // empty handle
                 return Unit.Task;
@@ -80,7 +80,7 @@ namespace MediatR.Tests
 
         public class PingHandler : IRequestHandler<Ping, Pong>
         {
-            public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
+            public Task<Pong> HandleAsync(Ping request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new Pong { Message = request.Message + " Pong" });
             }
@@ -114,7 +114,7 @@ namespace MediatR.Tests
             var jing = new Jing { Message = "Jing" };
 
             // Test mediator still works sending request
-            await _mediator.Send(jing);
+            await _mediator.SendAsync(jing);
 
             // Create new instance of type constrained class
             var genericTypeConstraintsVoidReturn = new  GenericTypeConstraintJing();
@@ -141,7 +141,7 @@ namespace MediatR.Tests
             var ping = new Ping { Message = "Ping" };
 
             // Test mediator still works sending request and gets response
-            var pingResponse = await _mediator.Send(ping);
+            var pingResponse = await _mediator.SendAsync(ping);
             pingResponse.Message.ShouldBe("Ping Pong");
 
             // Create new instance of type constrained class

@@ -54,7 +54,7 @@ namespace MediatR.Tests
 
         public class NullPingHandler : IRequestHandler<NullPing, Pong>
         {
-            public Task<Pong> Handle(NullPing request, CancellationToken cancellationToken)
+            public Task<Pong> HandleAsync(NullPing request, CancellationToken cancellationToken)
             {
                 return Task.FromResult(new Pong());
             }
@@ -62,7 +62,7 @@ namespace MediatR.Tests
 
         public class VoidNullPingHandler : IRequestHandler<VoidNullPing, Unit>
         {
-            public Task<Unit> Handle(VoidNullPing request, CancellationToken cancellationToken)
+            public Task<Unit> HandleAsync(VoidNullPing request, CancellationToken cancellationToken)
             {
                 return Unit.Task;
             }
@@ -81,13 +81,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new Ping()));
         }
 
         [Fact]
         public async Task Should_throw_for_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new VoidPing()));
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace MediatR.Tests
             Exception ex = null;
             try
             {
-                await _mediator.Publish(new Pinged());
+                await _mediator.PublishAsync(new Pinged());
             }
             catch (Exception e)
             {
@@ -108,13 +108,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_async_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new AsyncPing()));
         }
 
         [Fact]
         public async Task Should_throw_for_async_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
+            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.SendAsync(new AsyncVoidPing()));
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace MediatR.Tests
             Exception ex = null;
             try
             {
-                await _mediator.Publish(new AsyncPinged());
+                await _mediator.PublishAsync(new AsyncPinged());
             }
             catch (Exception e)
             {
@@ -151,7 +151,7 @@ namespace MediatR.Tests
 
             NullPing request = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.SendAsync(request));
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace MediatR.Tests
 
             VoidNullPing request = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.SendAsync(request));
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace MediatR.Tests
 
             NullPinged notification = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.PublishAsync(notification));
         }
 
         [Fact]
@@ -217,7 +217,7 @@ namespace MediatR.Tests
 
             object notification = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.PublishAsync(notification));
         }
 
         [Fact]
@@ -239,7 +239,7 @@ namespace MediatR.Tests
 
             object notification = "totally not notification";
 
-            await Should.ThrowAsync<ArgumentException>(async () => await mediator.Publish(notification));
+            await Should.ThrowAsync<ArgumentException>(async () => await mediator.PublishAsync(notification));
         }
 
         public class PingException : IRequest
@@ -249,7 +249,7 @@ namespace MediatR.Tests
  
         public class PingExceptionHandler : IRequestHandler<PingException>
         {
-            public Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
+            public Task<Unit> HandleAsync(PingException request, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }
@@ -274,7 +274,7 @@ namespace MediatR.Tests
  
             object pingException = new PingException();
  
-            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.SendAsync(pingException));
         }
  
         [Fact]
@@ -296,7 +296,7 @@ namespace MediatR.Tests
  
             PingException pingException = new PingException();
  
-            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.SendAsync(pingException));
         }
     }
 }

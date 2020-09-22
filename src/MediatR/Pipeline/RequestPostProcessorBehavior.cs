@@ -19,13 +19,13 @@ namespace MediatR.Pipeline
             _postProcessors = postProcessors;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var response = await next().ConfigureAwait(false);
 
             foreach (var processor in _postProcessors)
             {
-                await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
+                await processor.ProcessAsync(request, response, cancellationToken).ConfigureAwait(false);
             }
 
             return response;

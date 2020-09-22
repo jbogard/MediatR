@@ -17,7 +17,7 @@ namespace MediatR
         /// <param name="request">The request</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Response from the request</returns>
-        Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
+        Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -37,9 +37,9 @@ namespace MediatR
     public abstract class AsyncRequestHandler<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
-        async Task<Unit> IRequestHandler<TRequest, Unit>.Handle(TRequest request, CancellationToken cancellationToken)
+        async Task<Unit> IRequestHandler<TRequest, Unit>.HandleAsync(TRequest request, CancellationToken cancellationToken)
         {
-            await Handle(request, cancellationToken).ConfigureAwait(false);
+            await HandleAsync(request, cancellationToken).ConfigureAwait(false);
             return Unit.Value;
         }
 
@@ -49,7 +49,7 @@ namespace MediatR
         /// <param name="request">Request</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Response</returns>
-        protected abstract Task Handle(TRequest request, CancellationToken cancellationToken);
+        protected abstract Task HandleAsync(TRequest request, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ namespace MediatR
     public abstract class RequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
     {
-        Task<TResponse> IRequestHandler<TRequest, TResponse>.Handle(TRequest request, CancellationToken cancellationToken)
+        Task<TResponse> IRequestHandler<TRequest, TResponse>.HandleAsync(TRequest request, CancellationToken cancellationToken)
             => Task.FromResult(Handle(request));
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace MediatR
     public abstract class RequestHandler<TRequest> : IRequestHandler<TRequest>
         where TRequest : IRequest
     {
-        Task<Unit> IRequestHandler<TRequest, Unit>.Handle(TRequest request, CancellationToken cancellationToken)
+        Task<Unit> IRequestHandler<TRequest, Unit>.HandleAsync(TRequest request, CancellationToken cancellationToken)
         {
             Handle(request);
             return Unit.Task;

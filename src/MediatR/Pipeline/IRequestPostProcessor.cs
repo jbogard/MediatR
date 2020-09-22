@@ -17,6 +17,6 @@ namespace MediatR.Pipeline
         /// <param name="response">Response instance</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>An awaitable task</returns>
-        Task Process(TRequest request, TResponse response, CancellationToken cancellationToken);
+        Task ProcessAsync(TRequest request, TResponse response, CancellationToken cancellationToken);
     }
 }

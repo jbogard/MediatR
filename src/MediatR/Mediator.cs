@@ -26,7 +26,7 @@ namespace MediatR
             _serviceFactory = serviceFactory;
         }
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -38,10 +38,10 @@ namespace MediatR
             var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
                 t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return handler.Handle(request, cancellationToken, _serviceFactory);
+            return handler.HandleAsync(request, cancellationToken, _serviceFactory);
         }
 
-        public Task<object?> Send(object request, CancellationToken cancellationToken = default)
+        public Task<object?> SendAsync(object request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -63,10 +63,10 @@ namespace MediatR
                 t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType)));
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
-            return handler.Handle(request, cancellationToken, _serviceFactory);
+            return handler.HandleAsync(request, cancellationToken, _serviceFactory);
         }
 
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+        public Task PublishAsync<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
              where TNotification : INotification
         {
             if (notification == null)
@@ -74,10 +74,10 @@ namespace MediatR
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            return PublishNotification(notification, cancellationToken);
+            return PublishNotificationAsync(notification, cancellationToken);
         }
 
-        public Task Publish(object notification, CancellationToken cancellationToken = default)
+        public Task PublishAsync(object notification, CancellationToken cancellationToken = default)
         {
             if (notification == null)
             {
@@ -85,7 +85,7 @@ namespace MediatR
             }
             if (notification is INotification instance)
             {
-                return PublishNotification(instance, cancellationToken);
+                return PublishNotificationAsync(instance, cancellationToken);
             }
 
             throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}");
@@ -98,7 +98,7 @@ namespace MediatR
         /// <param name="notification">The notification being published</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>A task representing invoking all handlers</returns>
-        protected virtual async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
+        protected virtual async Task PublishCoreAsync(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
         {
             foreach (var handler in allHandlers)
             {
@@ -106,13 +106,14 @@ namespace MediatR
             }
         }
 
-        private Task PublishNotification(INotification notification, CancellationToken cancellationToken = default)
+
+        private Task PublishNotificationAsync(INotification notification, CancellationToken cancellationToken = default)
         {
             var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
                 t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
 
-            return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
+            return handler.HandleAsync(notification, cancellationToken, _serviceFactory, PublishCoreAsync);
         }
     }
 }

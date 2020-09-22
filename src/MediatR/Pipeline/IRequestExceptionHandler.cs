@@ -22,7 +22,7 @@ namespace MediatR.Pipeline
         /// <param name="state">The current state of handling the exception</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>An awaitable task</returns>
-        Task Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken);
+        Task HandleAsync(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -43,9 +43,9 @@ namespace MediatR.Pipeline
     public abstract class AsyncRequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
         where TRequest : notnull
     {
-        async Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
+        async Task IRequestExceptionHandler<TRequest, TResponse, Exception>.HandleAsync(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
         {
-            await Handle(request, exception, state, cancellationToken).ConfigureAwait(false);
+            await HandleAsync(request, exception, state, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace MediatR.Pipeline
         /// <param name="exception">The thrown exception</param>
         /// <param name="state">The current state of handling the exception</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        protected abstract Task Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken);
+        protected abstract Task HandleAsync(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ namespace MediatR.Pipeline
         where TRequest : notnull
         where TException : Exception
     {
-        Task IRequestExceptionHandler<TRequest, TResponse, TException>.Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
+        Task IRequestExceptionHandler<TRequest, TResponse, TException>.HandleAsync(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
         {
             Handle(request, exception, state);
             return Task.CompletedTask;
@@ -91,7 +91,7 @@ namespace MediatR.Pipeline
     public abstract class RequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
         where TRequest : notnull
     {
-        Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
+        Task IRequestExceptionHandler<TRequest, TResponse, Exception>.HandleAsync(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
         {
             Handle(request, exception, state);
             return Task.CompletedTask;

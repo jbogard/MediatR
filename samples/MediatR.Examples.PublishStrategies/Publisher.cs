@@ -47,7 +47,7 @@ namespace MediatR.Examples.PublishStrategies
                 throw new ArgumentException($"Unknown strategy: {strategy}");
             }
 
-            return mediator.Publish(notification, cancellationToken);
+            return mediator.PublishAsync(notification, cancellationToken);
         }
 
         private Task ParallelWhenAll(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)

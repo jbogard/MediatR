@@ -29,7 +29,7 @@ namespace MediatR.Tests
             var mediator = new Mediator(serviceFactory);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => mediator.Send(new Ping())
+                () => mediator.SendAsync(new Ping())
             );
 
             Assert.StartsWith("Handler was not found for request", exception.Message);
