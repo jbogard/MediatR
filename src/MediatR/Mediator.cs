@@ -58,7 +58,7 @@ namespace MediatR
 
                     if (!isValidRequest)
                     {
-                        throw new ArgumentException($"{nameof(request)} does not implement ${nameof(IRequest)}");
+                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}");
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
