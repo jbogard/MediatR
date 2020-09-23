@@ -297,7 +297,7 @@ namespace MediatR.Tests
             object nonRequest = new NonRequest();
 
             var argumentException = await Should.ThrowAsync<ArgumentException>(async () => await mediator.Send(nonRequest));
-            Assert.Equal("NonRequest does not implement IRequest\r\nParameter name: request", argumentException.Message);
+            Assert.StartsWith("NonRequest does not implement IRequest", argumentException.Message);
         }
 
         public class NonRequest
