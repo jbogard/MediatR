@@ -1,0 +1,4 @@
+{
+  Type: 'ArgumentException',
+  Message: 'notification does not implement $INotification'
+}

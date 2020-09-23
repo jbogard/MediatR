@@ -1,0 +1,14 @@
+{
+  response: {
+    Message: 'Ping Pong'
+  },
+  output: {
+    Messages: [
+      'Outer generic before',
+      'Inner generic before',
+      'Handler',
+      'Inner generic after',
+      'Outer generic after'
+    ]
+  }
+}

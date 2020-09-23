@@ -1,0 +1,10 @@
+{
+  genericTypeConstraintsResponseReturn: {
+    IsIRequestT: true,
+    IsIBaseRequest: true
+  },
+  results: [
+    'IRequest<Tests.GenericTypeConstraintsTests.Pong>',
+    'IBaseRequest'
+  ]
+}

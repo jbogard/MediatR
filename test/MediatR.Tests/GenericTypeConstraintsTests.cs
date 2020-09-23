@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Threading;
+using VerifyXunit;
 
 namespace MediatR.Tests
 {
@@ -11,6 +12,7 @@ namespace MediatR.Tests
     using System.Threading.Tasks;
     using Xunit;
 
+    [UsesVerify]
     public class GenericTypeConstraintsTests
     {
         public interface IGenericTypeRequestHandlerTestClass<TRequest> where TRequest : IBaseRequest
@@ -119,19 +121,14 @@ namespace MediatR.Tests
             // Create new instance of type constrained class
             var genericTypeConstraintsVoidReturn = new  GenericTypeConstraintJing();
 
-            // Assert it is of type IRequest and IRequest<T>
-            Assert.True(genericTypeConstraintsVoidReturn.IsIRequest);
-            Assert.True(genericTypeConstraintsVoidReturn.IsIRequestT);
-            Assert.True(genericTypeConstraintsVoidReturn.IsIBaseRequest);
-
-            // Verify it is of IRequest and IBaseRequest and IRequest<Unit>
             var results = genericTypeConstraintsVoidReturn.Handle(jing);
 
-            Assert.Equal(3, results.Length);
-
-            results.ShouldContain(typeof(IRequest<Unit>));
-            results.ShouldContain(typeof(IBaseRequest));
-            results.ShouldContain(typeof(IRequest));
+            await Verifier.Verify(
+                new
+                {
+                    genericTypeConstraintsVoidReturn,
+                    results
+                });
         }
 
         [Fact]
@@ -147,19 +144,14 @@ namespace MediatR.Tests
             // Create new instance of type constrained class
             var genericTypeConstraintsResponseReturn = new GenericTypeConstraintPing();
 
-            // Assert it is of type IRequest<T> but not IRequest
-            Assert.False(genericTypeConstraintsResponseReturn.IsIRequest);
-            Assert.True(genericTypeConstraintsResponseReturn.IsIRequestT);
-            Assert.True(genericTypeConstraintsResponseReturn.IsIBaseRequest);
-
-            // Verify it is of IRequest<Pong> and IBaseRequest, but not IRequest
             var results = genericTypeConstraintsResponseReturn.Handle(ping);
 
-            Assert.Equal(2, results.Length);
-
-            results.ShouldContain(typeof(IRequest<Pong>));
-            results.ShouldContain(typeof(IBaseRequest));
-            results.ShouldNotContain(typeof(IRequest));
+            await Verifier.Verify(
+                new
+                {
+                    genericTypeConstraintsResponseReturn,
+                    results
+                });
         }
     }
 }

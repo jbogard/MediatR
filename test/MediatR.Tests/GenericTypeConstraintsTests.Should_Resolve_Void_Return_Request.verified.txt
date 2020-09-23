@@ -1,0 +1,12 @@
+{
+  genericTypeConstraintsVoidReturn: {
+    IsIRequest: true,
+    IsIRequestT: true,
+    IsIBaseRequest: true
+  },
+  results: [
+    'IRequest',
+    'IRequest<Unit>',
+    'IBaseRequest'
+  ]
+}

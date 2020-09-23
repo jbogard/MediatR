@@ -1,0 +1,14 @@
+{
+  response: {
+    Message: 'Ping Pong'
+  },
+  output: {
+    Messages: [
+      'Outer before',
+      'Inner before',
+      'Handler',
+      'Inner after',
+      'Outer after'
+    ]
+  }
+}

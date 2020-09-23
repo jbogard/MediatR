@@ -1,4 +1,5 @@
 using System.Threading;
+using VerifyXunit;
 
 namespace MediatR.Tests
 {
@@ -8,6 +9,7 @@ namespace MediatR.Tests
     using StructureMap;
     using Xunit;
 
+    [UsesVerify]
     public class ExceptionTests
     {
         private readonly IMediator _mediator;
@@ -81,13 +83,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new Ping()));
+            await Verifier.ThrowsAsync(() => _mediator.Send(new Ping()));
         }
 
         [Fact]
         public async Task Should_throw_for_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new VoidPing()));
+            await Verifier.ThrowsAsync(() => _mediator.Send(new VoidPing()));
         }
 
         [Fact]
@@ -108,13 +110,13 @@ namespace MediatR.Tests
         [Fact]
         public async Task Should_throw_for_async_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncPing()));
+            await Verifier.ThrowsAsync(() => _mediator.Send(new AsyncPing()));
         }
 
         [Fact]
         public async Task Should_throw_for_async_void_send()
         {
-            await Should.ThrowAsync<InvalidOperationException>(async () => await _mediator.Send(new AsyncVoidPing()));
+            await Verifier.ThrowsAsync(() => _mediator.Send(new AsyncVoidPing()));
         }
 
         [Fact]
@@ -151,7 +153,7 @@ namespace MediatR.Tests
 
             NullPing request = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
+            await Verifier.ThrowsAsync(() => mediator.Send(request));
         }
 
         [Fact]
@@ -173,7 +175,7 @@ namespace MediatR.Tests
 
             VoidNullPing request = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
+            await Verifier.ThrowsAsync(() => mediator.Send(request));
         }
 
         [Fact]
@@ -195,7 +197,7 @@ namespace MediatR.Tests
 
             NullPinged notification = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
+            await Verifier.ThrowsAsync(() => mediator.Publish(notification));
         }
 
         [Fact]
@@ -217,7 +219,7 @@ namespace MediatR.Tests
 
             object notification = null;
 
-            await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
+            await Verifier.ThrowsAsync(() => mediator.Publish(notification));
         }
 
         [Fact]
@@ -239,14 +241,14 @@ namespace MediatR.Tests
 
             object notification = "totally not notification";
 
-            await Should.ThrowAsync<ArgumentException>(async () => await mediator.Publish(notification));
+            await Verifier.ThrowsAsync(() => mediator.Publish(notification));
         }
 
         public class PingException : IRequest
         {
- 
+
         }
- 
+
         public class PingExceptionHandler : IRequestHandler<PingException>
         {
             public Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
@@ -254,7 +256,7 @@ namespace MediatR.Tests
                 throw new NotImplementedException();
             }
         }
- 
+
         [Fact]
         public async Task Should_throw_exception_for_non_generic_send_when_exception_occurs()
         {
@@ -271,12 +273,12 @@ namespace MediatR.Tests
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
- 
+
             object pingException = new PingException();
- 
-            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+
+            await Verifier.ThrowsAsync(() => mediator.Send(pingException));
         }
- 
+
         [Fact]
         public async Task Should_throw_exception_for_generic_send_when_exception_occurs()
         {
@@ -293,10 +295,10 @@ namespace MediatR.Tests
                 cfg.For<IMediator>().Use<Mediator>();
             });
             var mediator = container.GetInstance<IMediator>();
- 
+
             PingException pingException = new PingException();
- 
-            await Should.ThrowAsync<NotImplementedException>(async () => await mediator.Send(pingException));
+
+            await Verifier.ThrowsAsync(() => mediator.Send(pingException));
         }
     }
 }

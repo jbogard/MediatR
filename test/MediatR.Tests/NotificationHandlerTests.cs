@@ -1,11 +1,12 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Shouldly;
+using VerifyXunit;
 using Xunit;
 
 namespace MediatR.Tests
 {
+    [UsesVerify]
     public class NotificationHandlerTests
     {
         public class Ping : INotification
@@ -42,7 +43,7 @@ namespace MediatR.Tests
             );
 
             var result = builder.ToString();
-            result.ShouldContain("Ping Pong");
+            await Verifier.Verify(result);
         }
     }
 }

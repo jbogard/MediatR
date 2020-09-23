@@ -1,0 +1,4 @@
+{
+  Type: 'NotImplementedException',
+  Message: 'The method or operation is not implemented.'
+}

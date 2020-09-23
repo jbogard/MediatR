@@ -1,0 +1,4 @@
+{
+  Type: 'InvalidOperationException',
+  Message: 'Error constructing handler for request of type MediatR.IRequestHandler`2[MediatR.Tests.ExceptionTests+AsyncVoidPing,MediatR.Unit]. Register your handlers with the container. See the samples in GitHub for examples.'
+}

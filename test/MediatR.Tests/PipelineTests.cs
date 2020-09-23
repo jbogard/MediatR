@@ -1,4 +1,5 @@
 using System.Threading;
+using VerifyXunit;
 
 namespace MediatR.Tests
 {
@@ -9,6 +10,7 @@ namespace MediatR.Tests
     using StructureMap;
     using Xunit;
 
+    [UsesVerify]
     public class PipelineTests
     {
         public class Ping : IRequest<Pong>
@@ -204,18 +206,9 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping {Message = "Ping"});
 
-            response.Message.ShouldBe("Ping Pong");
-
-            output.Messages.ShouldBe(new []
-            {
-                "Outer before",
-                "Inner before",
-                "Handler",
-                "Inner after",
-                "Outer after"
-            });
+            await Verifier.Verify(new {response, output});
         }
 
         [Fact]
@@ -246,16 +239,7 @@ namespace MediatR.Tests
 
             var response = await mediator.Send(new Ping { Message = "Ping" });
 
-            response.Message.ShouldBe("Ping Pong");
-
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Handler",
-                "Inner generic after",
-                "Outer generic after",
-            });
+            await Verifier.Verify(new {response, output});
         }
 
         [Fact]
