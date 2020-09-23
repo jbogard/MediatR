@@ -2,10 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.StructureMap</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.StructureMap</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
