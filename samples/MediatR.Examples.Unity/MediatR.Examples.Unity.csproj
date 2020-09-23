@@ -2,10 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.Unity</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.Unity</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

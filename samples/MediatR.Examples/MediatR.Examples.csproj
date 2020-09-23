@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AssemblyName>MediatR.Examples</AssemblyName>
-    <PackageId>MediatR.Examples</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
