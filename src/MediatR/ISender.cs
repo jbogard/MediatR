@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace MediatR
 {
+    /// <summary>
+    /// Send a request through the mediator pipeline to be handled by a single handler.
+    /// </summary>
     public interface ISender
     {
         /// <summary>

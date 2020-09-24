@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace MediatR
 {
+    /// <summary>
+    /// Publish a notification or event through the mediator pipeline to be handled by multiple handlers.
+    /// </summary>
     public interface IPublisher
     {
         /// <summary>
