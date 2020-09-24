@@ -1,14 +1,12 @@
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Shouldly;
+using StructureMap;
+using Xunit;
 
 namespace MediatR.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Shouldly;
-    using StructureMap;
-    using Xunit;
-
     public class PipelineTests
     {
         public class Ping : IRequest<Pong>
@@ -39,10 +37,11 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
+
             public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
-                return Task.FromResult(new Pong { Message = request.Message + " Pong" });
+                return Task.FromResult(new Pong {Message = request.Message + " Pong"});
             }
         }
 
@@ -54,10 +53,11 @@ namespace MediatR.Tests
             {
                 _output = output;
             }
+
             public Task<Zong> Handle(Zing request, CancellationToken cancellationToken)
             {
                 _output.Messages.Add("Handler");
-                return Task.FromResult(new Zong { Message = request.Message + " Zong" });
+                return Task.FromResult(new Zong {Message = request.Message + " Zong"});
             }
         }
 
@@ -70,7 +70,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request,
+                                           CancellationToken cancellationToken,
+                                           RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Outer before");
                 var response = await next();
@@ -89,7 +91,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request,
+                                           CancellationToken cancellationToken,
+                                           RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Inner before");
                 var response = await next();
@@ -108,7 +112,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request,
+                                                CancellationToken cancellationToken,
+                                                RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Inner generic before");
                 var response = await next();
@@ -127,7 +133,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request,
+                                                CancellationToken cancellationToken,
+                                                RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Outer generic before");
                 var response = await next();
@@ -138,8 +146,7 @@ namespace MediatR.Tests
         }
 
         public class ConstrainedBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-            where TRequest : Ping
-            where TResponse : Pong
+            where TRequest : Ping where TResponse : Pong
         {
             private readonly Logger _output;
 
@@ -148,7 +155,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+            public async Task<TResponse> Handle(TRequest request,
+                                                CancellationToken cancellationToken,
+                                                RequestHandlerDelegate<TResponse> next)
             {
                 _output.Messages.Add("Constrained before");
                 var response = await next();
@@ -167,7 +176,9 @@ namespace MediatR.Tests
                 _output = output;
             }
 
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+            public async Task<Pong> Handle(Ping request,
+                                           CancellationToken cancellationToken,
+                                           RequestHandlerDelegate<Pong> next)
             {
                 _output.Messages.Add("Concrete before");
                 var response = await next();
@@ -204,11 +215,11 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping {Message = "Ping"});
 
             response.Message.ShouldBe("Ping Pong");
 
-            output.Messages.ShouldBe(new []
+            output.Messages.ShouldBe(new[]
             {
                 "Outer before",
                 "Inner before",
@@ -244,7 +255,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping {Message = "Ping"});
 
             response.Message.ShouldBe("Ping Pong");
 
@@ -285,7 +296,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping {Message = "Ping"});
 
             response.Message.ShouldBe("Ping Pong");
 
@@ -302,7 +313,7 @@ namespace MediatR.Tests
 
             output.Messages.Clear();
 
-            var zingResponse = await mediator.Send(new Zing { Message = "Zing" });
+            var zingResponse = await mediator.Send(new Zing {Message = "Zing"});
 
             zingResponse.Message.ShouldBe("Zing Zong");
 
@@ -343,7 +354,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+            var response = await mediator.Send(new Ping {Message = "Ping"});
 
             response.Message.ShouldBe("Ping Pong");
 
@@ -360,7 +371,7 @@ namespace MediatR.Tests
 
             output.Messages.Clear();
 
-            var zingResponse = await mediator.Send(new Zing { Message = "Zing" });
+            var zingResponse = await mediator.Send(new Zing {Message = "Zing"});
 
             zingResponse.Message.ShouldBe("Zing Zong");
 
