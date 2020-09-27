@@ -1,12 +1,13 @@
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using Shouldly;
-using StructureMap;
-using Xunit;
 
 namespace MediatR.Tests
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Shouldly;
+    using StructureMap;
+    using Xunit;
+
     public class PipelineTests
     {
         public class Ping : IRequest<Pong>
