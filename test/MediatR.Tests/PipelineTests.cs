@@ -2,7 +2,6 @@ using System.Threading;
 
 namespace MediatR.Tests
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Shouldly;

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Unity;
 using Unity.Lifetime;
-using Unity.Registration;
 
 namespace MediatR.Examples.Unity
 {
