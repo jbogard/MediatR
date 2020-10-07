@@ -20,7 +20,7 @@ namespace MediatR.Benchmarks
         public DotTraceDiagnoserAttribute()
         {
             var manualConfig = ManualConfig.CreateEmpty();
-            manualConfig.Add(new DotTraceDiagnoser());
+            manualConfig.AddDiagnoser(new DotTraceDiagnoser());
             Config = manualConfig;
         }
 
