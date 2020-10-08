@@ -17,11 +17,11 @@ namespace MediatR.Examples.DryIoc
 
         private static IMediator BuildMediator(WrappingWriter writer)
         {
-            var container = new Container();
+            var container = new Container(rules => rules.WithoutThrowOnRegisteringDisposableTransient());
 
             container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
-            container.UseInstance<TextWriter>(writer);
-
+            container.RegisterInstance<TextWriter>(writer);
+            
             //Pipeline works out of the box here
 
             container.RegisterMany(new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() }, Registrator.Interfaces);
