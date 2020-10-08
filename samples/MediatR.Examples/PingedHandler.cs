@@ -36,7 +36,7 @@ namespace MediatR.Examples
     }
 
     public class ConstrainedPingedHandler<TNotification> : INotificationHandler<TNotification>
-        where TNotification : Pinged
+        where TNotification : INotification
     {
         private readonly TextWriter _writer;
 

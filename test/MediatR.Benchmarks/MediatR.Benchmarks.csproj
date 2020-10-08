@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
     <!-- BenchmarkDotNet 0.12.1 has an issue and doesn't support latest value. To remove for the next version. -->
     <LangVersion>7.3</LangVersion>
