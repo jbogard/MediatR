@@ -34,7 +34,7 @@ namespace MediatR.Pipeline
 
                 foreach (var actionForException in actionsForException)
                 {
-                    await ((Task)actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                    await ((Task)actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })!).ConfigureAwait(false);
                 }
 
                 throw;
@@ -45,7 +45,7 @@ namespace MediatR.Pipeline
         {
             var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
             var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
-            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IRequestExceptionAction<TRequest, Exception>.Execute));
+            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IRequestExceptionAction<TRequest, Exception>.Execute))!;
 
             var actionsForException = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionActionInterfaceType);
 

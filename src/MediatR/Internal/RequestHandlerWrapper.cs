@@ -48,7 +48,7 @@ namespace MediatR.Internal
             return Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
                 .ContinueWith(t =>
                 {
-                    if (t.IsFaulted)
+                    if (t.IsFaulted && t.Exception?.InnerException is not null)
                     {
                         ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
                     }

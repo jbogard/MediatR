@@ -51,15 +51,15 @@ namespace MediatR.Internal
 
     internal class ObjectDetails : IComparer<ObjectDetails>
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public string AssemblyName { get; private set; }
+        public string AssemblyName { get; }
 
-        public string Location { get; private set; }
+        public string Location { get; }
 
-        public object Value { get; private set; }
+        public object Value { get; }
 
-        public Type Type { get; private set; }
+        public Type Type { get; }
 
         public bool IsOverridden { get; set; }
 
@@ -70,12 +70,22 @@ namespace MediatR.Internal
             var exceptionHandlerType = value.GetType();
 
             Name = exceptionHandlerType.Name;
-            AssemblyName = exceptionHandlerType.Assembly.GetName().Name;
-            Location = exceptionHandlerType.Namespace.Replace($"{AssemblyName}.", string.Empty);
+            AssemblyName = exceptionHandlerType.Assembly.GetName().Name!;
+            Location = exceptionHandlerType.Namespace!.Replace($"{AssemblyName}.", string.Empty);
         }
 
-        public int Compare(ObjectDetails x, ObjectDetails y)
+        public int Compare(ObjectDetails? x, ObjectDetails? y)
         {
+            if (x == null)
+            {
+                return 1;
+            }
+
+            if (y == null)
+            {
+                return -1;
+            }
+
             var compareByAssemblyResult = CompareByAssembly(x, y);
             if (compareByAssemblyResult != null)
             {
@@ -107,11 +117,12 @@ namespace MediatR.Internal
             {
                 return -1;
             }
-            else if (x.AssemblyName != AssemblyName && y.AssemblyName == AssemblyName)
+
+            if (x.AssemblyName != AssemblyName && y.AssemblyName == AssemblyName)
             {
                 return 1;
             }
-            else if (x.AssemblyName != AssemblyName && y.AssemblyName != AssemblyName)
+            if (x.AssemblyName != AssemblyName && y.AssemblyName != AssemblyName)
             {
                 return 0;
             }
@@ -135,11 +146,12 @@ namespace MediatR.Internal
             {
                 return -1;
             }
-            else if (!x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
+
+            if (!x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
             {
                 return 1;
             }
-            else if (x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
+            if (x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
             {
                 return 0;
             }
@@ -163,22 +175,20 @@ namespace MediatR.Internal
             {
                 return -1;
             }
-            else if (!Location.StartsWith(x.Location) && Location.StartsWith(y.Location))
+
+            if (!Location.StartsWith(x.Location) && Location.StartsWith(y.Location))
             {
                 return 1;
             }
-            else if (x.Location.Length > y.Location.Length)
+            if (x.Location.Length > y.Location.Length)
             {
                 return -1;
             }
-            else if (x.Location.Length < y.Location.Length)
+            if (x.Location.Length < y.Location.Length)
             {
                 return 1;
             }
-            else
-            {
-                return 0;
-            }
+            return 0;
         }
     }
 }

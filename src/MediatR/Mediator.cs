@@ -14,17 +14,15 @@ namespace MediatR
     public class Mediator : IMediator
     {
         private readonly ServiceFactory _serviceFactory;
-        private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new ConcurrentDictionary<Type, RequestHandlerBase>();
-        private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
+        private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
+        private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
         /// <param name="serviceFactory">The single instance factory.</param>
-        public Mediator(ServiceFactory serviceFactory)
-        {
-            _serviceFactory = serviceFactory;
-        }
+        public Mediator(ServiceFactory serviceFactory) 
+            => _serviceFactory = serviceFactory;
 
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
@@ -36,7 +34,7 @@ namespace MediatR
             var requestType = request.GetType();
 
             var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
-                t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+                static t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse)))!);
 
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
@@ -49,20 +47,20 @@ namespace MediatR
             }
             var requestType = request.GetType();
             var handler = _requestHandlers.GetOrAdd(requestType,
-                requestTypeKey =>
+                static requestTypeKey =>
                 {
                     var requestInterfaceType = requestTypeKey
                         .GetInterfaces()
-                        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+                        .FirstOrDefault(static i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
                     var isValidRequest = requestInterfaceType != null;
 
                     if (!isValidRequest)
                     {
-                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(request));
+                        throw new ArgumentException($"{requestTypeKey.Name} does not implement {nameof(IRequest)}", nameof(request));
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
-                    return (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType));
+                    return (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType))!;
                 });
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
@@ -82,16 +80,12 @@ namespace MediatR
 
         public Task Publish(object notification, CancellationToken cancellationToken = default)
         {
-            if (notification == null)
+            return notification switch
             {
-                throw new ArgumentNullException(nameof(notification));
-            }
-            if (notification is INotification instance)
-            {
-                return PublishNotification(instance, cancellationToken);
-            }
-
-            throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}");
+                null => throw new ArgumentNullException(nameof(notification)),
+                INotification instance => PublishNotification(instance, cancellationToken),
+                _ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
+            };
         }
 
         /// <summary>
@@ -113,7 +107,7 @@ namespace MediatR
         {
             var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
+                static t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(t))!);
 
             return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
