@@ -137,7 +137,7 @@ namespace MediatR
             var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(requestType,
                 t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return streamHandler.HandleAsync(request, cancellationToken, _serviceFactory);
+            return streamHandler.Handle(request, cancellationToken, _serviceFactory);
         }
 
 
@@ -168,7 +168,7 @@ namespace MediatR
                 });
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
-            return handler.HandleAsync(request, cancellationToken, _serviceFactory);
+            return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 #endif
     }

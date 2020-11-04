@@ -19,7 +19,7 @@ namespace MediatR
         /// <param name="request">The request</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Response from the request</returns>
-        IAsyncEnumerable<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken);
+        IAsyncEnumerable<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
     }
 
 
@@ -31,9 +31,9 @@ namespace MediatR
     public abstract class StreamRequestHandler<TRequest, TResponse> : IStreamRequestHandler<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
     {
-        async IAsyncEnumerable<TResponse> IStreamRequestHandler<TRequest, TResponse>.HandleAsync(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
+        async IAsyncEnumerable<TResponse> IStreamRequestHandler<TRequest, TResponse>.Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            yield return await HandleAsync(request);
+            yield return await Handle(request);
         }
         
         /// <summary>
@@ -41,7 +41,7 @@ namespace MediatR
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Response</returns>
-        protected abstract Task<TResponse> HandleAsync(TRequest request);
+        protected abstract Task<TResponse> Handle(TRequest request);
     }
 
 }

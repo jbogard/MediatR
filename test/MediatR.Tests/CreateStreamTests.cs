@@ -24,7 +24,7 @@ namespace MediatR.Tests
 
         public class PingStreamHandler : IStreamRequestHandler<Ping, Pong>
         {
-            public async IAsyncEnumerable<Pong> HandleAsync(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
+            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
             {
                 yield return await Task<Pong>.Run(() => new Pong { Message = request.Message + " Pang" });
             }

@@ -18,7 +18,7 @@ namespace MediatR.Tests
 
         public class PingHandler : StreamRequestHandler<Ping, Pong>
         {
-            protected override async Task<Pong> HandleAsync(Ping request)
+            protected override async Task<Pong> Handle(Ping request)
             {
                 return await Task<Pong>.Run(() => new Pong { Message = request.Message + " Pang" });
             }
@@ -30,7 +30,7 @@ namespace MediatR.Tests
             IStreamRequestHandler<Ping, Pong> handler = new PingHandler();
 
             int i = 0;
-            await foreach (Pong result in handler.HandleAsync(new Ping() { Message = "Ping" }, default))
+            await foreach (Pong result in handler.Handle(new Ping() { Message = "Ping" }, default))
             {
                 if (i == 0)
                 {
