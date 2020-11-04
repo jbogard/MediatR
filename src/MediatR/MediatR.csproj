@@ -4,7 +4,7 @@
     <Authors>Jimmy Bogard</Authors>
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net461;netstandard2.0;</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
@@ -26,6 +26,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Compile Remove="IStreamRequestHandler.cs" />
+    <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Remove="IStreamRequestHandler.cs" />
+    <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net461;netcoreapp2.1;</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
+      <Targets>net461</Targets>
+    </ProjectReference>
+    <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamRequestHandlerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
+      <Targets>netstandard2.0</Targets>
+    </ProjectReference>
+    <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamRequestHandlerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
+      <Targets>netstandard2.1</Targets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

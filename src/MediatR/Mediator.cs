@@ -5,6 +5,7 @@ namespace MediatR
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -16,6 +17,10 @@ namespace MediatR
         private readonly ServiceFactory _serviceFactory;
         private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new ConcurrentDictionary<Type, RequestHandlerBase>();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new ConcurrentDictionary<Type, NotificationHandlerWrapper>();
+
+#if NETSTANDARD2_1
+        private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new ConcurrentDictionary<Type, StreamRequestHandlerBase>();
+#endif 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -58,7 +63,7 @@ namespace MediatR
 
                     if (!isValidRequest)
                     {
-                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(request));
+                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(requestTypeKey));
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
@@ -117,5 +122,55 @@ namespace MediatR
 
             return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
+
+
+#if NETSTANDARD2_1
+        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var requestType = request.GetType();
+
+            var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(requestType,
+                t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+
+            return streamHandler.HandleAsync(request, cancellationToken, _serviceFactory);
+        }
+
+
+        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var requestType = request.GetType();
+
+            var handler = _streamRequestHandlers.GetOrAdd(requestType,
+                requestTypeKey =>
+                {
+                    var requestInterfaceType = requestTypeKey
+                        .GetInterfaces()
+                        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+                    var isValidRequest = requestInterfaceType != null;
+
+                    if (!isValidRequest)
+                    {
+                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(requestTypeKey));
+                    }
+
+                    var responseType = requestInterfaceType!.GetGenericArguments()[0];
+                    return (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType));
+                });
+
+            // call via dynamic dispatch to avoid calling through reflection for performance reasons
+            return handler.HandleAsync(request, cancellationToken, _serviceFactory);
+        }
+#endif
     }
+
 }
