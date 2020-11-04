@@ -5,25 +5,19 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
-      <Targets>net461</Targets>
-    </ProjectReference>
+    <ProjectReference Properties="TargetFramework=net461" Include="..\..\src\MediatR\MediatR.csproj"/>
     <Compile Remove="CreateStreamTests.cs" />
     <Compile Remove="StreamRequestHandlerTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
-      <Targets>netstandard2.0</Targets>
-    </ProjectReference>
+    <ProjectReference Properties="TargetFramework=netstandard2.0" Include="..\..\src\MediatR\MediatR.csproj"/>
     <Compile Remove="CreateStreamTests.cs" />
     <Compile Remove="StreamRequestHandlerTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj">
-      <Targets>netstandard2.1</Targets>
-    </ProjectReference>
+    <ProjectReference Properties="TargetFramework=netstandard2.1" Include="..\..\src\MediatR\MediatR.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
