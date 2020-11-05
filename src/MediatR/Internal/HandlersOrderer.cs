@@ -53,9 +53,9 @@ namespace MediatR.Internal
     {
         public string Name { get; }
 
-        public string AssemblyName { get; }
+        public string? AssemblyName { get; }
 
-        public string Location { get; }
+        public string? Location { get; }
 
         public object Value { get; }
 
@@ -70,8 +70,8 @@ namespace MediatR.Internal
             var exceptionHandlerType = value.GetType();
 
             Name = exceptionHandlerType.Name;
-            AssemblyName = exceptionHandlerType.Assembly.GetName().Name!;
-            Location = exceptionHandlerType.Namespace!.Replace($"{AssemblyName}.", string.Empty);
+            AssemblyName = exceptionHandlerType.Assembly.GetName().Name;
+            Location = exceptionHandlerType.Namespace?.Replace($"{AssemblyName}.", string.Empty);
         }
 
         public int Compare(ObjectDetails? x, ObjectDetails? y)
@@ -142,16 +142,21 @@ namespace MediatR.Internal
         /// </returns>
         private int? CompareByNamespace(ObjectDetails x, ObjectDetails y)
         {
-            if (x.Location.StartsWith(Location) && !y.Location.StartsWith(Location))
+            if (Location is null || x.Location is null || y.Location is null)
+            {
+                return 0;
+            }
+
+            if (x.Location.StartsWith(Location, StringComparison.Ordinal) && !y.Location.StartsWith(Location, StringComparison.Ordinal))
             {
                 return -1;
             }
 
-            if (!x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
+            if (!x.Location.StartsWith(Location, StringComparison.Ordinal) && y.Location.StartsWith(Location, StringComparison.Ordinal))
             {
                 return 1;
             }
-            if (x.Location.StartsWith(Location) && y.Location.StartsWith(Location))
+            if (x.Location.StartsWith(Location, StringComparison.Ordinal) && y.Location.StartsWith(Location, StringComparison.Ordinal))
             {
                 return 0;
             }
@@ -171,12 +176,17 @@ namespace MediatR.Internal
         /// </returns>
         private int CompareByLocation(ObjectDetails x, ObjectDetails y)
         {
-            if (Location.StartsWith(x.Location) && !Location.StartsWith(y.Location))
+            if (Location is null || x.Location is null || y.Location is null)
+            {
+                return 0;
+            }
+
+            if (Location.StartsWith(x.Location, StringComparison.Ordinal) && !Location.StartsWith(y.Location, StringComparison.Ordinal))
             {
                 return -1;
             }
 
-            if (!Location.StartsWith(x.Location) && Location.StartsWith(y.Location))
+            if (!Location.StartsWith(x.Location, StringComparison.Ordinal) && Location.StartsWith(y.Location, StringComparison.Ordinal))
             {
                 return 1;
             }
