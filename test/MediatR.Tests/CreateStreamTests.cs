@@ -26,7 +26,7 @@ namespace MediatR.Tests
         {
             public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
             {
-                yield return await Task<Pong>.Run(() => new Pong { Message = request.Message + " Pang" });
+                yield return await Task.Run(() => new Pong { Message = request.Message + " Pang" });
             }
         }
 

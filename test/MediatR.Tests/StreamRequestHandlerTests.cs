@@ -20,7 +20,7 @@ namespace MediatR.Tests
         {
             protected override async Task<Pong> Handle(Ping request)
             {
-                return await Task<Pong>.Run(() => new Pong { Message = request.Message + " Pang" });
+                return await Task.Run(() => new Pong { Message = request.Message + " Pang" });
             }
         }
 

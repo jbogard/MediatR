@@ -7,12 +7,14 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <ProjectReference Properties="TargetFramework=net461" Include="..\..\src\MediatR\MediatR.csproj"/>
     <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamPipelineTests.cs" />
     <Compile Remove="StreamRequestHandlerTests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <ProjectReference Properties="TargetFramework=netstandard2.0" Include="..\..\src\MediatR\MediatR.csproj"/>
     <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamPipelineTests.cs" />
     <Compile Remove="StreamRequestHandlerTests.cs" />
   </ItemGroup>
 

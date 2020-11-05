@@ -6,11 +6,8 @@ namespace MediatR.Internal
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal abstract class RequestHandlerBase
+    internal abstract class HandlerBase
     {
-        public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
-            ServiceFactory serviceFactory);
-
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
         {
             THandler handler;
@@ -31,6 +28,12 @@ namespace MediatR.Internal
 
             return handler;
         }
+    }
+
+    internal abstract class RequestHandlerBase : HandlerBase
+    {
+        public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
+            ServiceFactory serviceFactory);
     }
 
     internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
