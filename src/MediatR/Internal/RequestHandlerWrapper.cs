@@ -30,14 +30,11 @@ namespace MediatR.Internal
         }
     }
 
-    internal abstract class RequestHandlerBase : HandlerBase
+    internal abstract class RequestHandlerWrapper<TResponse> : HandlerBase
     {
         public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
-    }
 
-    internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
-    {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }

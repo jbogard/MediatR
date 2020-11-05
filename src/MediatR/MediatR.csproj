@@ -26,11 +26,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Compile Remove="IStreamPipelineBehavior.cs" />
     <Compile Remove="IStreamRequestHandler.cs" />
     <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Remove="IStreamPipelineBehavior.cs" />
     <Compile Remove="IStreamRequestHandler.cs" />
     <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
   </ItemGroup>
