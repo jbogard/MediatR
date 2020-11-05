@@ -6,10 +6,13 @@ namespace MediatR.Internal
     using System.Runtime.CompilerServices;
     using System.Threading;
 
-    internal abstract class StreamRequestHandlerWrapper<TResponse> : HandlerBase
+    internal abstract class StreamRequestHandlerBase : HandlerBase
     {
         public abstract IAsyncEnumerable<object?> Handle(object request, CancellationToken cancellationToken, ServiceFactory serviceFactory);
+    }
 
+    internal abstract class StreamRequestHandlerWrapper<TResponse> : StreamRequestHandlerBase
+    {
         public abstract IAsyncEnumerable<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }
