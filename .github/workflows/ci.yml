@@ -9,8 +9,6 @@ on:
       - master
 jobs:
   build:
-    strategy:
-      fail-fast: false
     runs-on: windows-latest
     steps:
     - name: Checkout
