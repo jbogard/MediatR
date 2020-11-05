@@ -23,6 +23,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
+    - name: Setup dotnet 2.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.1.x'
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
