@@ -9,7 +9,7 @@ namespace MediatR
     /// </summary>
     /// <typeparam name="TResponse">Response type</typeparam>
     /// <returns>Async Enumerable returning a <typeparamref name="TResponse"/></returns>
-    public delegate IAsyncEnumerable<TResponse> StreamHandlerDelegate<TResponse>();
+    public delegate IAsyncEnumerable<TResponse> StreamHandlerDelegate<out TResponse>();
 
     /// <summary>
     /// Stream Pipeline behavior to surround the inner handler.
