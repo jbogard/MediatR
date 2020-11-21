@@ -13,9 +13,9 @@ namespace MediatR.Pipeline.Streams
     public class StreamRequestPostProcessorBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
         where TRequest : notnull
     {
-        private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
+        private readonly IEnumerable<IStreamRequestPostProcessor<TRequest, TResponse>> _postProcessors;
 
-        public StreamRequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors)
+        public StreamRequestPostProcessorBehavior(IEnumerable<IStreamRequestPostProcessor<TRequest, TResponse>> postProcessors)
         {
             _postProcessors = postProcessors;
         }
@@ -25,11 +25,11 @@ namespace MediatR.Pipeline.Streams
             await foreach (var response in next().WithCancellation(cancellationToken).ConfigureAwait(false))
             {
                 foreach (var processor in _postProcessors)
-                { 
+                {
                     await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
-
-                    yield return response;
                 }
+
+                yield return response;
             }
         }
     }

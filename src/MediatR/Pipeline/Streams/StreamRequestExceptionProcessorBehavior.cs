@@ -5,66 +5,85 @@ namespace MediatR.Pipeline.Streams
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/>
-    ///     or <see cref="RequestExceptionHandler{TRequest,TResponse}"/> instances
+    /// Behavior for executing all <see cref="IStreamRequestExceptionHandler{TRequest,TResponse,TException}"/>
+    ///     or <see cref="StreamRequestExceptionHandler{TRequest,TResponse}"/> instances
     ///     after an exception is thrown by the following pipeline steps
     /// </summary>
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
-    public class StreamRequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    public class StreamRequestExceptionProcessorBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
         where TRequest : notnull
     {
         private readonly ServiceFactory _serviceFactory;
 
         public StreamRequestExceptionProcessorBehavior(ServiceFactory serviceFactory) => _serviceFactory = serviceFactory;
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
         {
-            try
-            {
-                return await next().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                var state = new RequestExceptionHandlerState<TResponse>();
-                Type? exceptionType = null;
+            var asyncEnum = next().WithCancellation(cancellationToken).ConfigureAwait(false).GetAsyncEnumerator();
 
-                while (!state.Handled && exceptionType != typeof(Exception))
+            bool thrown = false;
+            StreamRequestExceptionHandlerState<TResponse> state = new StreamRequestExceptionHandlerState<TResponse>();
+
+            bool stop = false;
+            while (!stop)
+            {
+                try
                 {
-                    exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType;
-                    var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
+                    stop = !(await asyncEnum.MoveNextAsync());
+                }
+                catch (Exception exception)
+                {
+                    thrown = true;
+                    Type? exceptionType = null;
 
-                    foreach (var exceptionHandler in exceptionHandlers)
+                    while (!state.Handled && exceptionType != typeof(Exception))
                     {
-                        await ((Task)handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })).ConfigureAwait(false);
+                        exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType;
+                        var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
 
-                        if (state.Handled)
+                        foreach (var exceptionHandler in exceptionHandlers)
                         {
-                            break;
+                            await ((Task) handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })).ConfigureAwait(false);
+
+                            if (state.Handled)
+                            {
+                                break;
+                            }
                         }
+                    }
+
+                    if (!state.Handled)
+                    {
+                        throw;
                     }
                 }
 
-                if (!state.Handled)
+                if (thrown && state.Response != null)
                 {
-                    throw;
+                    yield return state.Response;
+                    yield break;
                 }
-
-                return state.Response!; //cannot be null if Handled
+                else
+                {
+                    yield return asyncEnum.Current;
+                }
             }
+
         }
 
         private IList<object> GetExceptionHandlers(TRequest request, Type exceptionType, out MethodInfo handleMethodInfo)
         {
-            var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
+            var exceptionHandlerInterfaceType = typeof(IStreamRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
             var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-            handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle));
+            handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IStreamRequestExceptionHandler<TRequest, TResponse, Exception>.Handle));
 
-            var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
+            var exceptionHandlers = (IEnumerable<object>) _serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
 
             return HandlersOrderer.Prioritize(exceptionHandlers.ToList(), request);
         }

@@ -7,6 +7,7 @@ namespace MediatR.Pipeline.Streams
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Behavior for executing all <see cref="IStreamRequestExceptionHandler{TRequest,TResponse,TException}"/>
@@ -22,23 +23,40 @@ namespace MediatR.Pipeline.Streams
 
         public StreamRequestExceptionActionProcessorBehavior(ServiceFactory serviceFactory) => _serviceFactory = serviceFactory;
 
-        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation]CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
         {
-            // Bumping into Error	CS1626	Cannot yield a value in the body of a try block with a catch clause
-            // See https://stackoverflow.com/questions/346365/why-cant-yield-return-appear-inside-a-try-block-with-a-catch
-            await foreach (var result in next())
+            var asyncEnum = next().WithCancellation(cancellationToken).ConfigureAwait(false).GetAsyncEnumerator();
+
+            bool stop = false;
+            while (!stop)
+            {
+                try
                 {
-                    yield return result;
+                    stop = !(await asyncEnum.MoveNextAsync());
                 }
+                catch (Exception exception)
+                {
+                    var actionsForException = GetActionsForException(exception.GetType(), request, out MethodInfo actionMethod);
+
+                    foreach (var actionForException in actionsForException)
+                    {
+                        await ((Task) actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                    }
+
+                    throw;
+                }
+
+                yield return asyncEnum.Current;
+            }
         }
 
         private IList<object> GetActionsForException(Type exceptionType, TRequest request, out MethodInfo actionMethodInfo)
         {
-            var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
+            var exceptionActionInterfaceType = typeof(IStreamRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
             var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
-            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IRequestExceptionAction<TRequest, Exception>.Execute));
+            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IStreamRequestExceptionAction<TRequest, Exception>.Execute));
 
-            var actionsForException = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionActionInterfaceType);
+            var actionsForException = (IEnumerable<object>) _serviceFactory.Invoke(enumerableExceptionActionInterfaceType);
 
             return HandlersOrderer.Prioritize(actionsForException.ToList(), request);
         }

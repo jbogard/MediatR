@@ -10,7 +10,7 @@ namespace MediatR.Examples.SimpleInjector
     using System.Reflection;
     using global::SimpleInjector;
 
-    internal class Program
+    internal static class Program
     {
         private static Task Main(string[] args)
         {

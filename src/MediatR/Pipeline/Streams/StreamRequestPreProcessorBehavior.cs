@@ -13,9 +13,9 @@ namespace MediatR.Pipeline.Streams
     public class StreamRequestPreProcessorBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
         where TRequest : notnull
     {
-        private readonly IEnumerable<IRequestPreProcessor<TRequest>> _preProcessors;
+        private readonly IEnumerable<IStreamRequestPreProcessor<TRequest>> _preProcessors;
 
-        public StreamRequestPreProcessorBehavior(IEnumerable<IRequestPreProcessor<TRequest>> preProcessors)
+        public StreamRequestPreProcessorBehavior(IEnumerable<IStreamRequestPreProcessor<TRequest>> preProcessors)
         {
             _preProcessors = preProcessors;
         }
