@@ -9,6 +9,9 @@ namespace MediatR.Examples.SimpleInjector
     using System.Linq;
     using System.Reflection;
     using global::SimpleInjector;
+#if NETCOREAPP3_1
+    using MediatR.Pipeline.Streams;
+#endif
 
     internal static class Program
     {
@@ -17,7 +20,7 @@ namespace MediatR.Examples.SimpleInjector
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, writer, "SimpleInjector");
+            return Runner.Run(mediator, writer, "SimpleInjector", true);
         }
 
         private static IMediator BuildMediator(WrappingWriter writer)
@@ -30,6 +33,13 @@ namespace MediatR.Examples.SimpleInjector
             RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
+
+#if NETCOREAPP3_1
+            container.Register(typeof(IStreamRequestHandler<,>), assemblies);
+
+            RegisterHandlers(container, typeof(IStreamRequestExceptionAction<,>), assemblies);
+            RegisterHandlers(container, typeof(IStreamRequestExceptionHandler<,,>), assemblies);
+#endif
 
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
@@ -44,6 +54,21 @@ namespace MediatR.Examples.SimpleInjector
             });
             container.Collection.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
             container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
+
+
+#if NETCOREAPP3_1
+            //Pipeline.Streams
+            container.Collection.Register(typeof(IStreamPipelineBehavior<,>), new[]
+            {
+                typeof(StreamRequestExceptionProcessorBehavior<,>),
+                typeof(StreamRequestExceptionActionProcessorBehavior<,>),
+                typeof(StreamRequestPreProcessorBehavior<,>),
+                typeof(StreamRequestPostProcessorBehavior<,>),
+                typeof(GenericStreamPipelineBehavior<,>)
+            });
+            container.Collection.Register(typeof(IStreamRequestPreProcessor<>), new[] { typeof(GenericStreamRequestPreProcessor<>) });
+            container.Collection.Register(typeof(IStreamRequestPostProcessor<,>), new[] { typeof(GenericStreamRequestPostProcessor<,>), typeof(ConstrainedStreamRequestPostProcessor<,>) });
+#endif
 
             container.Register(() => new ServiceFactory(container.GetInstance), Lifestyle.Singleton);
 

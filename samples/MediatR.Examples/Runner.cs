@@ -10,7 +10,7 @@ namespace MediatR.Examples
 
     public static class Runner
     {
-        public static async Task Run(IMediator mediator, WrappingWriter writer, string projectName)
+        public static async Task Run(IMediator mediator, WrappingWriter writer, string projectName, bool testStreams = false)
         {
             await writer.WriteLineAsync("===============");
             await writer.WriteLineAsync(projectName);
@@ -52,6 +52,40 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
+            bool failedSing = false;
+#if NETSTANDARD2_1
+            if (testStreams)
+            {
+                await writer.WriteLineAsync("Sending Sing...");
+                try
+                {
+                    int i = 0;
+                    await foreach (Song s in mediator.CreateStream(new Sing { Message = "Sing" }))
+                    {
+                        if (i == 0) {
+                            failedSing = !(s.Message.Contains("Singing do re mi"));
+                        }
+                        else if (i == 1)
+                        {
+                            failedSing = !(s.Message.Contains("Singing fa so la"));
+                        }
+                        else if (i == 2)
+                        {
+                            failedSing = !(s.Message.Contains("Singing ti do"));
+                        }
+
+                        failedSing = failedSing || (++i) > 5;
+                    }
+                }
+                catch (Exception e)
+                {
+                    failedSing = true;
+                    await writer.WriteLineAsync(e.ToString());
+                }
+                await writer.WriteLineAsync();
+            }
+#endif
+
             var isHandlerForSameExceptionWorks = await IsHandlerForSameExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForBaseExceptionWorks = await IsHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForLessSpecificExceptionWorks = await IsHandlerForLessSpecificExceptionWorks(mediator, writer).ConfigureAwait(false);
@@ -67,6 +101,15 @@ namespace MediatR.Examples
                 contents.IndexOf("-- Finished Request", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("- All Done", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("- All Done with Ping", StringComparison.OrdinalIgnoreCase),
+            };
+
+            var streamOrder = new[] {
+                contents.IndexOf("- Stream Starting Up", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("-- Handling StreamRequest", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("--- Handled Sing: Sing, Song", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("- All Streaming Done", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("- All Streaming Done with Sing", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("-- Finished StreamRequest", StringComparison.OrdinalIgnoreCase),
             };
 
             var results = new RunResults
@@ -87,6 +130,14 @@ namespace MediatR.Examples
                 HandlerForLessSpecificException = isHandlerForLessSpecificExceptionWorks,
                 PreferredHandlerForBaseException = isPreferredHandlerForBaseExceptionWorks,
                 OverriddenHandlerForBaseException = isOverriddenHandlerForBaseExceptionWorks,
+
+                // Streams
+                StreamRequestHandlers = contents.Contains("--- Handled Sing:") && !failedSing,
+                StreamPipelineBehaviors = contents.Contains("-- Handling StreamRequest"),
+                StreamRequestPreProcessors = contents.Contains("- Stream Starting Up"),
+                StreamRequestPostProcessors = contents.Contains("- All Streaming Done"),
+                StreamConstrainedGenericBehaviors = contents.Contains("- All Streaming Done with Sing") && !failedSing,
+                StreamOrderedPipelineBehaviors = streamOrder.SequenceEqual(streamOrder.OrderBy(i => i))
             };
 
             await writer.WriteLineAsync($"Request Handler....................................................{(results.RequestHandlers ? "Y" : "N")}");
@@ -105,6 +156,16 @@ namespace MediatR.Examples
             await writer.WriteLineAsync($"Handler for request with less specific exception used by priority..{(results.HandlerForLessSpecificException ? "Y" : "N")}");
             await writer.WriteLineAsync($"Preferred handler for inherited request with base exception used...{(results.PreferredHandlerForBaseException ? "Y" : "N")}");
             await writer.WriteLineAsync($"Overridden handler for inherited request with same exception used..{(results.OverriddenHandlerForBaseException ? "Y" : "N")}");
+
+            if (testStreams)
+            {
+                await writer.WriteLineAsync($"Stream Request Handler.............................................{(results.StreamRequestHandlers ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Pipeline Behavior...........................................{(results.StreamPipelineBehaviors ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Pre-Processor...............................................{(results.StreamRequestPreProcessors ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Post-Processor..............................................{(results.StreamRequestPostProcessors ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Constrained Post-Processor..................................{(results.StreamConstrainedGenericBehaviors ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Ordered Behaviors...........................................{(results.StreamOrderedPipelineBehaviors ? "Y" : "N")}");
+            }
 
             await writer.WriteLineAsync();
         }
@@ -234,6 +295,14 @@ namespace MediatR.Examples
         public bool HandlerForLessSpecificException { get; set; }
         public bool PreferredHandlerForBaseException { get; set; }
         public bool OverriddenHandlerForBaseException { get; set; }
+
+        // Stream results
+        public bool StreamRequestHandlers { get; set; }
+        public bool StreamPipelineBehaviors { get; set; }
+        public bool StreamRequestPreProcessors { get; set; }
+        public bool StreamRequestPostProcessors { get; set; }
+        public bool StreamConstrainedGenericBehaviors { get; set; }
+        public bool StreamOrderedPipelineBehaviors { get; set; }
     }
 
     public class WrappingWriter : TextWriter

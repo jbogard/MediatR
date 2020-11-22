@@ -8,6 +8,8 @@ namespace MediatR.Internal
 
     internal abstract class HandlerBase
     {
+        protected HandlerBase() {}
+
         protected static THandler GetHandler<THandler>(ServiceFactory factory)
         {
             THandler handler;
