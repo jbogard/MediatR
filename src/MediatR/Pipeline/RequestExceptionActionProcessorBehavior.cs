@@ -5,6 +5,7 @@ namespace MediatR.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -34,7 +35,15 @@ namespace MediatR.Pipeline
 
                 foreach (var actionForException in actionsForException)
                 {
-                    await ((Task)actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                    try
+                    {
+                        await ((Task)actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                    }
+                    catch (TargetInvocationException invocationException) when (invocationException.InnerException != null)
+                    {
+                        // Unwrap invocation exception to throw the actual error
+                        ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
+                    }
                 }
 
                 throw;
