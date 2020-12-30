@@ -36,7 +36,7 @@ namespace MediatR
             var requestType = request.GetType();
 
             var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(requestType,
-                t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
+                t => (RequestHandlerBase)Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse))));
 
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
@@ -58,7 +58,7 @@ namespace MediatR
 
                     if (!isValidRequest)
                     {
-                        throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(request));
+                        throw new ArgumentException($"{requestTypeKey.Name} does not implement {nameof(IRequest)}", nameof(request));
                     }
 
                     var responseType = requestInterfaceType!.GetGenericArguments()[0];
@@ -113,7 +113,7 @@ namespace MediatR
         {
             var notificationType = notification.GetType();
             var handler = _notificationHandlers.GetOrAdd(notificationType,
-                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType)));
+                t => (NotificationHandlerWrapper)Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(t)));
 
             return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
         }
