@@ -86,19 +86,7 @@ namespace MediatR.Internal
                 return -1;
             }
 
-            var compareByAssemblyResult = CompareByAssembly(x, y);
-            if (compareByAssemblyResult != null)
-            {
-                return compareByAssemblyResult.Value;
-            }
-
-            var compareByNamespaceResult = CompareByNamespace(x, y);
-            if (compareByNamespaceResult != null)
-            {
-                return compareByNamespaceResult.Value;
-            }
-
-            return CompareByLocation(x, y);
+            return CompareByAssembly(x, y) ?? CompareByNamespace(x, y) ?? CompareByLocation(x, y);
         }
 
         /// <summary>
