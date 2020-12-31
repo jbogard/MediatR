@@ -81,15 +81,13 @@ namespace MediatR
             return PublishNotification(notification, cancellationToken);
         }
 
-        public Task Publish(object notification, CancellationToken cancellationToken = default)
-        {
-            return notification switch
+        public Task Publish(object notification, CancellationToken cancellationToken = default) =>
+            notification switch
             {
                 null => throw new ArgumentNullException(nameof(notification)),
                 INotification instance => PublishNotification(instance, cancellationToken),
                 _ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
             };
-        }
 
         /// <summary>
         /// Override in a derived class to control how the tasks are awaited. By default the implementation is a foreach and await of each handler

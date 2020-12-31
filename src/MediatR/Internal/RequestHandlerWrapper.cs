@@ -43,9 +43,8 @@ namespace MediatR.Internal
         where TRequest : IRequest<TResponse>
     {
         public override Task<object?> Handle(object request, CancellationToken cancellationToken,
-            ServiceFactory serviceFactory)
-        {
-            return Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
+            ServiceFactory serviceFactory) =>
+            Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted && t.Exception?.InnerException is not null)
@@ -54,7 +53,6 @@ namespace MediatR.Internal
                     }
                     return (object?)t.Result;
                 }, cancellationToken);
-        }
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
