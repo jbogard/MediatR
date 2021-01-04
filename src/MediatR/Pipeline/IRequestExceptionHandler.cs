@@ -10,7 +10,7 @@ namespace MediatR.Pipeline
     /// <typeparam name="TRequest">Request type</typeparam>
     /// <typeparam name="TResponse">Response type</typeparam>
     /// <typeparam name="TException">Exception type</typeparam>
-    public interface IRequestExceptionHandler<in TRequest, TResponse, TException>
+    public interface IRequestExceptionHandler<in TRequest, TResponse, in TException>
         where TRequest : notnull
         where TException : Exception
     {

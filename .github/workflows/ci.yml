@@ -9,14 +9,24 @@ on:
       - master
 jobs:
   build:
-    strategy:
-      fail-fast: false
     runs-on: windows-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Setup dotnet 5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.100-rc.2.20479.15'
+    - name: Setup dotnet 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Setup dotnet 2.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.1.x'
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
