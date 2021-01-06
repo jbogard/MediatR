@@ -1,4 +1,4 @@
-namespace MediatR.Internal
+namespace MediatR.Wrappers
 {
     using System;
     using System.Linq;
@@ -6,7 +6,7 @@ namespace MediatR.Internal
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal abstract class RequestHandlerBase
+    public abstract class RequestHandlerBase
     {
         public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
@@ -33,13 +33,13 @@ namespace MediatR.Internal
         }
     }
 
-    internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
+    public abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }
 
-    internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
+    public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
         public override Task<object?> Handle(object request, CancellationToken cancellationToken,

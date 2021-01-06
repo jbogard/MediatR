@@ -1,6 +1,6 @@
 namespace MediatR
 {
-    using Internal;
+    using Wrappers;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
