@@ -17,13 +17,11 @@ namespace MediatR.Examples.Stashbox
 
         private static IMediator BuildMediator(WrappingWriter writer)
         {
-            var container = new StashboxContainer();
-
-            container.RegisterInstance<TextWriter>(writer);
-            container.Register<ServiceFactory>(c => c.WithFactory(r => r.Resolve));
-
-            container.RegisterAssemblies(new[] { typeof(Mediator).Assembly, typeof(Ping).Assembly }, 
-                serviceTypeSelector: Rules.ServiceRegistrationFilters.Interfaces, registerSelf: false);
+            var container = new StashboxContainer()
+                .RegisterInstance<TextWriter>(writer)
+                .Register<ServiceFactory>(c => c.WithFactory(r => r.Resolve))
+                .RegisterAssemblies(new[] { typeof(Mediator).Assembly, typeof(Ping).Assembly }, 
+                    serviceTypeSelector: Rules.ServiceRegistrationFilters.Interfaces, registerSelf: false);
 
             return container.Resolve<IMediator>();
         }
