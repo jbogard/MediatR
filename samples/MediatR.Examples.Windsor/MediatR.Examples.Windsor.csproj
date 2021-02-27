@@ -2,10 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.Windsor</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.Windsor</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Windsor" Version="4.1.0" />
+    <PackageReference Include="Castle.Windsor" Version="5.0.1" />
   </ItemGroup>
 
 </Project>

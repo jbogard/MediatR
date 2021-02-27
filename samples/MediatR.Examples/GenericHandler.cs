@@ -1,10 +1,9 @@
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MediatR.Examples
 {
-    using System.IO;
-
     public class GenericHandler : INotificationHandler<INotification>
     {
         private readonly TextWriter _writer;

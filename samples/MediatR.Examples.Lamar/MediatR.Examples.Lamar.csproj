@@ -3,16 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="0.9.9" />
+    <PackageReference Include="Lamar" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
   </ItemGroup>
-
 
 </Project>

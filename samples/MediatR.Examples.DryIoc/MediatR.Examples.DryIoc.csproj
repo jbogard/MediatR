@@ -1,11 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.DryIoc</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.DryIoc</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc" Version="3.0.0-preview-09" />
+    <PackageReference Include="DryIoc" Version="4.4.1" />
   </ItemGroup>
 
 </Project>

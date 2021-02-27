@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Setup dotnet 5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.100-rc.2.20479.15'
+    - name: Setup dotnet 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Setup dotnet 2.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.1.x'
+    - name: Build and Test
+      run: ./Build.ps1
+      shell: pwsh
+    - name: Push to MyGet
+      env:
+        NUGET_URL: https://www.myget.org/F/mediatr-ci/api/v3/index.json
+        NUGET_API_KEY: ${{ secrets.MYGET_MEDIATR_CI_API_KEY }}
+      run: ./Push.ps1
+      shell: pwsh
+    - name: Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: artifacts/**/*

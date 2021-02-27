@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <Authors>Jimmy Bogard</Authors>
-    <LangVersion>latest</LangVersion>
-    <VersionPrefix>5.0.1</VersionPrefix>
+    <LangVersion>preview</LangVersion>
+    <NoWarn>$(NoWarn);CS1701;CS1702;CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 </Project>

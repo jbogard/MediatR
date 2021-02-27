@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 
@@ -15,7 +16,7 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Process(TRequest request, TResponse response)
+        public Task Process(TRequest request, TResponse response, CancellationToken cancellationToken)
         {
             return _writer.WriteLineAsync("- All Done with Ping");
         }

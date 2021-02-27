@@ -27,6 +27,9 @@ namespace MediatR.Examples.Windsor
             container.Kernel.Resolver.AddSubResolver(new CollectionResolver(container.Kernel));
             container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
+            // *** The default lifestyle for Windsor is Singleton
+            // *** If you are using ASP.net, it's better to register your services with 'Per Web Request LifeStyle'.
+            
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces());
             container.Register(Classes.FromAssemblyContaining<Ping>().BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces());
 
