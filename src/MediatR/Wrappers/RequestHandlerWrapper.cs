@@ -35,7 +35,7 @@ namespace MediatR.Wrappers
 
     public abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
-        public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
+        public abstract Task<TResponse?> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }
 
@@ -54,10 +54,10 @@ namespace MediatR.Wrappers
                     return (object?)t.Result;
                 }, cancellationToken);
 
-        public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
+        public override Task<TResponse?> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
         {
-            Task<TResponse> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
+            Task<TResponse?> Handler() => GetHandler<IRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
 
             return serviceFactory
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()

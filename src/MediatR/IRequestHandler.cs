@@ -17,7 +17,7 @@ namespace MediatR
         /// <param name="request">The request</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Response from the request</returns>
-        Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
+        Task<TResponse?> Handle(TRequest request, CancellationToken cancellationToken);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ namespace MediatR
     public abstract class RequestHandler<TRequest, TResponse> : IRequestHandler<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
     {
-        Task<TResponse> IRequestHandler<TRequest, TResponse>.Handle(TRequest request, CancellationToken cancellationToken)
+        Task<TResponse?> IRequestHandler<TRequest, TResponse>.Handle(TRequest request, CancellationToken cancellationToken)
             => Task.FromResult(Handle(request));
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace MediatR
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Response</returns>
-        protected abstract TResponse Handle(TRequest request);
+        protected abstract TResponse? Handle(TRequest request);
     }
 
     /// <summary>
