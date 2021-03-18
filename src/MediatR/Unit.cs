@@ -6,17 +6,19 @@
     /// <summary>
     /// Represents a void type, since <see cref="System.Void"/> is not a valid return type in C#.
     /// </summary>
-    public struct Unit : IEquatable<Unit>, IComparable<Unit>, IComparable
+    public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>, IComparable
     {
+        private static readonly Unit _value = new();
+
         /// <summary>
         /// Default and only value of the <see cref="Unit"/> type.
         /// </summary>
-        public static readonly Unit Value = new();
+        public static ref readonly Unit Value => ref _value;
 
         /// <summary>
         /// Task from a <see cref="Unit"/> type.
         /// </summary>
-        public static readonly Task<Unit> Task = System.Threading.Tasks.Task.FromResult(Value);
+        public static Task<Unit> Task { get; } = System.Threading.Tasks.Task.FromResult(_value);
 
         /// <summary>
         /// Compares the current object with another object of the same type.
