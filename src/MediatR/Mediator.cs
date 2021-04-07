@@ -24,7 +24,7 @@ namespace MediatR
         public Mediator(ServiceFactory serviceFactory) 
             => _serviceFactory = serviceFactory;
 
-        public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        public Task<TResponse?> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
