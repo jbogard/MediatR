@@ -42,17 +42,9 @@ namespace MediatR.Wrappers
     public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
-        public override Task<object?> Handle(object request, CancellationToken cancellationToken,
+        public override async Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory) =>
-            Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory)
-                .ContinueWith(t =>
-                {
-                    if (t.IsFaulted && t.Exception?.InnerException is not null)
-                    {
-                        ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
-                    }
-                    return (object?)t.Result;
-                }, cancellationToken);
+            await Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory);
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
