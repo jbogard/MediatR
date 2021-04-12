@@ -24,7 +24,13 @@ namespace MediatR.Examples.SimpleInjector
         {
             var container = new Container();
             var assemblies = GetAssemblies().ToArray();
+            
+            // the three interfaces will be resolved as the same singleton instance
+            // see https://simpleinjector.readthedocs.io/en/latest/howto.html#register-multiple-interfaces-with-the-same-implementation
             container.RegisterSingleton<IMediator, Mediator>();
+            container.RegisterSingleton<ISender, Mediator>();
+            container.RegisterSingleton<IPublisher, Mediator>();
+            
             container.Register(typeof(IRequestHandler<,>), assemblies);
 
             RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
