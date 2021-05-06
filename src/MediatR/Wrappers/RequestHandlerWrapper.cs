@@ -44,7 +44,7 @@ namespace MediatR.Wrappers
     {
         public override async Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory) =>
-            await Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory);
+            await Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory).ConfigureAwait(false);
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
