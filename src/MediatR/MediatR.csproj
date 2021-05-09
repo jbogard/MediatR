@@ -28,7 +28,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Compile Remove="IStreamPipelineBehavior.cs" />
     <Compile Remove="IStreamRequestHandler.cs" />
-    <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
+    <Compile Remove="Wrappers\StreamRequestHandlerWrapper.cs" />
     <Compile Remove="Pipeline\Streams\**" />
     <EmbeddedResource Remove="Pipeline\Streams\**" />
     <None Remove="Pipeline\Streams\**" />
@@ -37,7 +37,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <Compile Remove="IStreamPipelineBehavior.cs" />
     <Compile Remove="IStreamRequestHandler.cs" />
-    <Compile Remove="Internal\StreamRequestHandlerWrapper.cs" />
+    <Compile Remove="Wrappers\StreamRequestHandlerWrapper.cs" />
     <Compile Remove="Pipeline\Streams\**" />
     <EmbeddedResource Remove="Pipeline\Streams\**" />
     <None Remove="Pipeline\Streams\**" />
