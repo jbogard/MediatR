@@ -5,7 +5,7 @@ namespace MediatR.Wrappers
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
-    
+    using System.Threading.Tasks;
 
     internal abstract class StreamRequestHandlerBase : HandlerBase
     {
@@ -36,7 +36,12 @@ namespace MediatR.Wrappers
             return serviceFactory
                 .GetInstances<IStreamPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((StreamHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, next))();
+                .Aggregate((StreamHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, new StreamHandlerDelegate<TResponse>(() =>
+                {
+                    var result = next();
+                    result.WithCancellation(cancellationToken).ConfigureAwait(false);
+                    return result;
+                })))();
         }
     }
 }

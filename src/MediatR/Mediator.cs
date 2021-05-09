@@ -1,13 +1,13 @@
 namespace MediatR
 {
-    using Wrappers;
+    using MediatR.Internal;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Wrappers;
 
     /// <summary>
     /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
