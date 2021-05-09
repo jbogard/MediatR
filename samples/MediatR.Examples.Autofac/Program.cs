@@ -2,6 +2,7 @@ namespace MediatR.Examples.Autofac
 {
     using global::Autofac;
     using MediatR.Pipeline;
+    using MediatR.Pipeline.Streams;
     using System;
     using System.IO;
     using System.Reflection;
@@ -14,7 +15,7 @@ namespace MediatR.Examples.Autofac
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, writer, "Autofac");
+            return Runner.Run(mediator, writer, "Autofac", testStreams: true);
         }
 
         private static IMediator BuildMediator(WrappingWriter writer)
@@ -28,6 +29,11 @@ namespace MediatR.Examples.Autofac
                 typeof(IRequestExceptionHandler<,,>),
                 typeof(IRequestExceptionAction<,>),
                 typeof(INotificationHandler<>),
+#if NETCOREAPP3_1_OR_GREATER
+                typeof(IStreamRequestHandler<,>),
+                typeof(IStreamRequestExceptionHandler<,>),
+                typeof(IRequestExceptionAction<,>),
+#endif
             };
 
             foreach (var mediatrOpenType in mediatrOpenTypes)
@@ -46,6 +52,11 @@ namespace MediatR.Examples.Autofac
             builder.RegisterInstance(writer).As<TextWriter>();
 
             // It appears Autofac returns the last registered types first
+            builder.RegisterGeneric(typeof(ConstrainedStreamRequestPostProcessor<,>)).As(typeof(IStreamRequestPostProcessor<,>));
+            builder.RegisterGeneric(typeof(GenericStreamRequestPreProcessor<>)).As(typeof(IStreamRequestPreProcessor<>));
+            builder.RegisterGeneric(typeof(GenericStreamRequestPostProcessor<,>)).As(typeof(IStreamRequestPostProcessor<,>));
+            builder.RegisterGeneric(typeof(GenericStreamPipelineBehavior<,>)).As(typeof(IStreamPipelineBehavior<,>));
+
             builder.RegisterGeneric(typeof(RequestPostProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(RequestPreProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
             builder.RegisterGeneric(typeof(RequestExceptionActionProcessorBehavior<,>)).As(typeof(IPipelineBehavior<,>));
@@ -68,6 +79,7 @@ namespace MediatR.Examples.Autofac
             //  - RequestPreProcessorBehavior
             //  - RequestPostProcessorBehavior
             //  - GenericPipelineBehavior
+            //  - GenericStreamPipelineBehavior
             //  - RequestExceptionActionProcessorBehavior
             //  - RequestExceptionProcessorBehavior
 

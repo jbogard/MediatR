@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Remove="Stream**" />
     <Compile Remove="Streams\**" />
     <EmbeddedResource Remove="Streams\**" />
     <None Remove="Streams\**" />

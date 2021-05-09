@@ -34,7 +34,7 @@ namespace MediatR.Examples.SimpleInjector
             RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
 
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1_OR_GREATER
             container.Register(typeof(IStreamRequestHandler<,>), assemblies);
 
             RegisterHandlers(container, typeof(IStreamRequestExceptionAction<,>), assemblies);
@@ -56,8 +56,8 @@ namespace MediatR.Examples.SimpleInjector
             container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
 
 
-#if NETCOREAPP3_1
-            //Pipeline.Streams
+#if NETCOREAPP3_1_OR_GREATER
+            // Pipeline.Streams
             container.Collection.Register(typeof(IStreamPipelineBehavior<,>), new[]
             {
                 typeof(StreamRequestExceptionProcessorBehavior<,>),
