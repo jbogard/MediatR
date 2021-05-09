@@ -27,26 +27,33 @@ namespace MediatR.Pipeline.Streams
         {
             var asyncEnum = next().WithCancellation(cancellationToken).ConfigureAwait(false).GetAsyncEnumerator();
 
-            bool stop = false;
-            while (!stop)
+            try
             {
-                try
+                bool stop = false;
+                while (!stop)
                 {
-                    stop = !(await asyncEnum.MoveNextAsync());
-                }
-                catch (Exception exception)
-                {
-                    var actionsForException = GetActionsForException(exception.GetType(), request, out MethodInfo actionMethod);
-
-                    foreach (var actionForException in actionsForException)
+                    try
                     {
-                        await ((Task) actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                        stop = !(await asyncEnum.MoveNextAsync());
+                    }
+                    catch (Exception exception)
+                    {
+                        var actionsForException = GetActionsForException(exception.GetType(), request, out MethodInfo actionMethod);
+
+                        foreach (var actionForException in actionsForException)
+                        {
+                            await ((Task) actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                        }
+
+                        throw;
                     }
 
-                    throw;
+                    yield return asyncEnum.Current;
                 }
-
-                yield return asyncEnum.Current;
+            }
+            finally
+            {
+                await asyncEnum.DisposeAsync();
             }
         }
 

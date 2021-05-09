@@ -27,55 +27,61 @@ namespace MediatR.Pipeline.Streams
         {
             var asyncEnum = next().WithCancellation(cancellationToken).ConfigureAwait(false).GetAsyncEnumerator();
 
-            bool thrown = false;
-            StreamRequestExceptionHandlerState<TResponse> state = new StreamRequestExceptionHandlerState<TResponse>();
+            StreamRequestExceptionHandlerState<TResponse>? state = null;
 
-            bool stop = false;
-            while (!stop)
+            try
             {
-                try
+                bool stop = false;
+                while (!stop)
                 {
-                    stop = !(await asyncEnum.MoveNextAsync());
-                }
-                catch (Exception exception)
-                {
-                    thrown = true;
-                    Type? exceptionType = null;
-
-                    while (!state.Handled && exceptionType != typeof(Exception))
+                    try
                     {
-                        exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType;
-                        var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
+                        stop = !(await asyncEnum.MoveNextAsync());
+                    }
+                    catch (Exception exception)
+                    {
+                        state = new StreamRequestExceptionHandlerState<TResponse>();
+                        Type? exceptionType = null;
 
-                        foreach (var exceptionHandler in exceptionHandlers)
+                        while (!state.Handled && exceptionType != typeof(Exception))
                         {
-                            await ((Task) handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })).ConfigureAwait(false);
+                            exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType;
+                            var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
 
-                            if (state.Handled)
+                            foreach (var exceptionHandler in exceptionHandlers)
                             {
-                                break;
+                                await ((Task) handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })).ConfigureAwait(false);
+
+                                if (state.Handled)
+                                {
+                                    break;
+                                }
                             }
+                        }
+
+                        if (!state.Handled)
+                        {
+                            throw;
                         }
                     }
 
-                    if (!state.Handled)
+                    if (state != null && state.Response != null)
                     {
-                        throw;
+                        yield return state.Response;
+                        yield break;
+                    }
+                    else
+                    {
+                        yield return asyncEnum.Current;
                     }
                 }
-
-                if (thrown && state.Response != null)
-                {
-                    yield return state.Response;
-                    yield break;
-                }
-                else
-                {
-                    yield return asyncEnum.Current;
-                }
             }
-
+            finally
+            {
+                await asyncEnum.DisposeAsync();
+            }
         }
+
 
         private IList<object> GetExceptionHandlers(TRequest request, Type exceptionType, out MethodInfo handleMethodInfo)
         {
