@@ -10,7 +10,7 @@ namespace MediatR.Examples
 
     public static class Runner
     {
-        public static async Task Run(IMediator mediator, WrappingWriter writer, string projectName)
+        public static async Task Run(IMediator mediator, WrappingWriter writer, string projectName, bool testStreams = false)
         {
             await writer.WriteLineAsync("===============");
             await writer.WriteLineAsync(projectName);
@@ -52,6 +52,60 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
+            bool failedSing = false;
+#if NETSTANDARD2_1
+            if (testStreams)
+            {
+                await writer.WriteLineAsync("Sending Sing...");
+                try
+                {
+                    int i = 0;
+                    await foreach (Song s in mediator.CreateStream(new Sing { Message = "Sing" }))
+                    {
+                        if (i == 0) {
+                            failedSing = !(s.Message.Contains("Singing do"));
+                        }
+                        else if (i == 1)
+                        {
+                            failedSing = !(s.Message.Contains("Singing re"));
+                        }
+                        else if (i == 2)
+                        {
+                            failedSing = !(s.Message.Contains("Singing mi"));
+                        }
+                        else if (i == 3)
+                        {
+                            failedSing = !(s.Message.Contains("Singing fa"));
+                        }
+                        else if (i == 4)
+                        {
+                            failedSing = !(s.Message.Contains("Singing so"));
+                        }
+                        else if (i == 5)
+                        {
+                            failedSing = !(s.Message.Contains("Singing la"));
+                        }
+                        else if (i == 6)
+                        {
+                            failedSing = !(s.Message.Contains("Singing ti"));
+                        }
+                        else if (i == 7)
+                        {
+                            failedSing = !(s.Message.Contains("Singing do"));
+                        }
+
+                        failedSing = failedSing || (++i) > 10;
+                    }
+                }
+                catch (Exception e)
+                {
+                    failedSing = true;
+                    await writer.WriteLineAsync(e.ToString());
+                }
+                await writer.WriteLineAsync();
+            }
+#endif
+
             var isHandlerForSameExceptionWorks = await IsHandlerForSameExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForBaseExceptionWorks = await IsHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForLessSpecificExceptionWorks = await IsHandlerForLessSpecificExceptionWorks(mediator, writer).ConfigureAwait(false);
@@ -67,6 +121,12 @@ namespace MediatR.Examples
                 contents.IndexOf("-- Finished Request", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("- All Done", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("- All Done with Ping", StringComparison.OrdinalIgnoreCase),
+            };
+
+            var streamOrder = new[] {
+                contents.IndexOf("-- Handling StreamRequest", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("--- Handled Sing: Sing, Song", StringComparison.OrdinalIgnoreCase),
+                contents.IndexOf("-- Finished StreamRequest", StringComparison.OrdinalIgnoreCase),
             };
 
             var results = new RunResults
@@ -87,6 +147,11 @@ namespace MediatR.Examples
                 HandlerForLessSpecificException = isHandlerForLessSpecificExceptionWorks,
                 PreferredHandlerForBaseException = isPreferredHandlerForBaseExceptionWorks,
                 OverriddenHandlerForBaseException = isOverriddenHandlerForBaseExceptionWorks,
+
+                // Streams
+                StreamRequestHandlers = contents.Contains("--- Handled Sing: Sing, Song") && !failedSing,
+                StreamPipelineBehaviors = contents.Contains("-- Handling StreamRequest"),
+                StreamOrderedPipelineBehaviors = streamOrder.SequenceEqual(streamOrder.OrderBy(i => i))
             };
 
             await writer.WriteLineAsync($"Request Handler....................................................{(results.RequestHandlers ? "Y" : "N")}");
@@ -105,6 +170,13 @@ namespace MediatR.Examples
             await writer.WriteLineAsync($"Handler for request with less specific exception used by priority..{(results.HandlerForLessSpecificException ? "Y" : "N")}");
             await writer.WriteLineAsync($"Preferred handler for inherited request with base exception used...{(results.PreferredHandlerForBaseException ? "Y" : "N")}");
             await writer.WriteLineAsync($"Overridden handler for inherited request with same exception used..{(results.OverriddenHandlerForBaseException ? "Y" : "N")}");
+
+            if (testStreams)
+            {
+                await writer.WriteLineAsync($"Stream Request Handler.............................................{(results.StreamRequestHandlers ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Pipeline Behavior...........................................{(results.StreamPipelineBehaviors ? "Y" : "N")}");
+                await writer.WriteLineAsync($"Stream Ordered Behaviors...........................................{(results.StreamOrderedPipelineBehaviors ? "Y" : "N")}");
+            }
 
             await writer.WriteLineAsync();
         }
@@ -234,6 +306,11 @@ namespace MediatR.Examples
         public bool HandlerForLessSpecificException { get; set; }
         public bool PreferredHandlerForBaseException { get; set; }
         public bool OverriddenHandlerForBaseException { get; set; }
+
+        // Stream results
+        public bool StreamRequestHandlers { get; set; }
+        public bool StreamPipelineBehaviors { get; set; }
+        public bool StreamOrderedPipelineBehaviors { get; set; }
     }
 
     public class WrappingWriter : TextWriter

@@ -12,7 +12,7 @@ namespace MediatR.Examples.Stashbox
         {
             var writer = new WrappingWriter(Console.Out);
             var mediator = BuildMediator(writer);
-            return Runner.Run(mediator, writer, "Stashbox");
+            return Runner.Run(mediator, writer, "Stashbox", testStreams: true);
         }
 
         private static IMediator BuildMediator(WrappingWriter writer)
