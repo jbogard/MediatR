@@ -124,11 +124,8 @@ namespace MediatR.Examples
             };
 
             var streamOrder = new[] {
-                contents.IndexOf("- Stream Starting Up", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("-- Handling StreamRequest", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("--- Handled Sing: Sing, Song", StringComparison.OrdinalIgnoreCase),
-                contents.IndexOf("- All Streaming Done", StringComparison.OrdinalIgnoreCase),
-                contents.IndexOf("- All Streaming Done with Sing", StringComparison.OrdinalIgnoreCase),
                 contents.IndexOf("-- Finished StreamRequest", StringComparison.OrdinalIgnoreCase),
             };
 
@@ -154,9 +151,6 @@ namespace MediatR.Examples
                 // Streams
                 StreamRequestHandlers = contents.Contains("--- Handled Sing: Sing, Song") && !failedSing,
                 StreamPipelineBehaviors = contents.Contains("-- Handling StreamRequest"),
-                StreamRequestPreProcessors = contents.Contains("- Stream PreProcessing"),
-                StreamRequestPostProcessors = contents.Contains("- Stream PostProcessing"),
-                StreamConstrainedGenericBehaviors = contents.Contains("- All Streaming Done with Sing") && !failedSing,
                 StreamOrderedPipelineBehaviors = streamOrder.SequenceEqual(streamOrder.OrderBy(i => i))
             };
 
@@ -181,9 +175,6 @@ namespace MediatR.Examples
             {
                 await writer.WriteLineAsync($"Stream Request Handler.............................................{(results.StreamRequestHandlers ? "Y" : "N")}");
                 await writer.WriteLineAsync($"Stream Pipeline Behavior...........................................{(results.StreamPipelineBehaviors ? "Y" : "N")}");
-                await writer.WriteLineAsync($"Stream Pre-Processor...............................................{(results.StreamRequestPreProcessors ? "Y" : "N")}");
-                await writer.WriteLineAsync($"Stream Post-Processor..............................................{(results.StreamRequestPostProcessors ? "Y" : "N")}");
-                await writer.WriteLineAsync($"Stream Constrained Post-Processor..................................{(results.StreamConstrainedGenericBehaviors ? "Y" : "N")}");
                 await writer.WriteLineAsync($"Stream Ordered Behaviors...........................................{(results.StreamOrderedPipelineBehaviors ? "Y" : "N")}");
             }
 
@@ -319,9 +310,6 @@ namespace MediatR.Examples
         // Stream results
         public bool StreamRequestHandlers { get; set; }
         public bool StreamPipelineBehaviors { get; set; }
-        public bool StreamRequestPreProcessors { get; set; }
-        public bool StreamRequestPostProcessors { get; set; }
-        public bool StreamConstrainedGenericBehaviors { get; set; }
         public bool StreamOrderedPipelineBehaviors { get; set; }
     }
 

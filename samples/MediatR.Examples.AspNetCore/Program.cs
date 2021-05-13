@@ -2,12 +2,9 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
-
-#if NETCOREAPP3_1_OR_GREATER
-using MediatR.Pipeline.Streams;
-#endif 
-
 using Microsoft.Extensions.DependencyInjection;
+
+
 namespace MediatR.Examples.AspNetCore
 {
     public static class Program
@@ -39,8 +36,6 @@ namespace MediatR.Examples.AspNetCore
 
 #if NETCOREAPP3_1_OR_GREATER
             services.AddScoped(typeof(IStreamPipelineBehavior<,>), typeof(GenericStreamPipelineBehavior<,>));
-            services.AddScoped(typeof(IStreamRequestPreProcessor<>), typeof(GenericStreamRequestPreProcessor<>));
-            services.AddScoped(typeof(IStreamRequestPostProcessor<,>), typeof(GenericStreamRequestPostProcessor<,>));
 #endif
             var provider = services.BuildServiceProvider();
 
