@@ -5,6 +5,7 @@ namespace MediatR
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Wrappers;
@@ -121,7 +122,7 @@ namespace MediatR
 
 
 #if NETSTANDARD2_1
-        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -133,11 +134,15 @@ namespace MediatR
             var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(requestType,
                 t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-            return streamHandler.Handle(request, cancellationToken, _serviceFactory);
+            var items = streamHandler.Handle(request, cancellationToken, _serviceFactory);
+            await foreach (var item in items)
+            {
+                yield return item;
+            }
         }
 
 
-        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<object?> CreateStream(object request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -164,7 +169,12 @@ namespace MediatR
                 });
 
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
-            return handler.Handle(request, cancellationToken, _serviceFactory);
+            var items = handler.Handle(request, cancellationToken, _serviceFactory);
+
+            await foreach(var item in items)
+            {
+                yield return item;
+            }
         }
 #endif
     }

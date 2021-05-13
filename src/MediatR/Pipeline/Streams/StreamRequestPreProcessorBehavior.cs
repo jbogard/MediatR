@@ -1,5 +1,6 @@
 namespace MediatR.Pipeline.Streams
 {
+    using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -20,17 +21,20 @@ namespace MediatR.Pipeline.Streams
             _preProcessors = preProcessors;
         }
 
-        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation]CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
         {
+            // Only preprocess once at the beginning of the stream...
             foreach (var processor in _preProcessors)
             {
-                await processor.Process(request, cancellationToken).ConfigureAwait(false);
+                await processor.Process(request, cancellationToken);
             }
 
+            // Pass stream items forwards...
             await foreach (var item in next().WithCancellation(cancellationToken).ConfigureAwait(false))
             {
                 yield return item;
             }
         }
+
     }
 }

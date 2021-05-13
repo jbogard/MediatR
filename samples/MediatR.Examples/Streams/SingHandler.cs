@@ -18,9 +18,14 @@ namespace MediatR.Examples
         public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation]CancellationToken cancellationToken)
         {
             await _writer.WriteLineAsync($"--- Handled Sing: {request.Message}, Song");
-            yield return await Task.Run(() => new Song { Message = request.Message + "ing do re mi" });
-            yield return await Task.Run(() => new Song { Message = request.Message + "ing fa so la" });
-            yield return await Task.Run(() => new Song { Message = request.Message + "ing ti do" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing do" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing re" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing mi" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing fa" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing so" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing la" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing ti" });
+            yield return await Task.Run(() => new Song { Message = request.Message + "ing do" });
         }
     }
 }

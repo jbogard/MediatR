@@ -10,7 +10,7 @@ namespace MediatR.Tests.Pipeline.Streams
     using StructureMap;
     using Xunit;
 
-    public class StreamRequestPreProcessorTests
+    public class StreamRequestCombinePreAndPostProcessorTests
     {
         public class Sing : IRequest<Song>
         {
@@ -22,7 +22,7 @@ namespace MediatR.Tests.Pipeline.Streams
             public string Message { get; set; }
         }
 
-        public class StreamSingHandler : IStreamRequestHandler<Sing, Song>
+        public class SingHandler : IStreamRequestHandler<Sing, Song>
         {
             public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation]CancellationToken cancellationToken)
             {
@@ -44,8 +44,21 @@ namespace MediatR.Tests.Pipeline.Streams
             }
         }
 
+
+        public class SingSongPostProcessor : IStreamRequestPostProcessor<Sing, Song>
+        {
+            static int postCounter = 0;
+
+            public Task Process(Sing request, Song response, CancellationToken cancellationToken)
+            {
+                response.Message += $" Post {++postCounter}";
+
+                return Task.FromResult(0);
+            }
+        }
+
         [Fact]
-        public async Task Should_run_preprocessors()
+        public async Task Should_run_processors()
         {
             var container = new Container(cfg =>
             {
@@ -56,9 +69,11 @@ namespace MediatR.Tests.Pipeline.Streams
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
                     scanner.AddAllTypesOf(typeof(IStreamRequestPreProcessor<>));
+                    scanner.AddAllTypesOf(typeof(IStreamRequestPostProcessor<,>));
                 });
                 cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(StreamRequestPreProcessorBehavior<,>));
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(StreamRequestPostProcessorBehavior<,>));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
             });
 
@@ -71,15 +86,15 @@ namespace MediatR.Tests.Pipeline.Streams
             {
                 if (i == 0)
                 {
-                    response.Message.ShouldBe("Pre 1 Sing Song");
+                    response.Message.ShouldBe("Pre 1 Sing Song Post 1");
                 }
-                else if ( i == 1)
+                else if (i == 1)
                 {
-                    response.Message.ShouldBe("Pre 1 Sing Sang");
+                    response.Message.ShouldBe("Pre 1 Sing Sang Post 2");
                 }
-                else if ( i == 2 )
+                else if (i == 2)
                 {
-                    response.Message.ShouldBe("Pre 1 Sing Seng");
+                    response.Message.ShouldBe("Pre 1 Sing Seng Post 3");
                 }
 
                 (++i).ShouldBeLessThanOrEqualTo(3);

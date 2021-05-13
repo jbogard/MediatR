@@ -63,18 +63,38 @@ namespace MediatR.Examples
                     await foreach (Song s in mediator.CreateStream(new Sing { Message = "Sing" }))
                     {
                         if (i == 0) {
-                            failedSing = !(s.Message.Contains("Singing do re mi"));
+                            failedSing = !(s.Message.Contains("Singing do"));
                         }
                         else if (i == 1)
                         {
-                            failedSing = !(s.Message.Contains("Singing fa so la"));
+                            failedSing = !(s.Message.Contains("Singing re"));
                         }
                         else if (i == 2)
                         {
-                            failedSing = !(s.Message.Contains("Singing ti do"));
+                            failedSing = !(s.Message.Contains("Singing mi"));
+                        }
+                        else if (i == 3)
+                        {
+                            failedSing = !(s.Message.Contains("Singing fa"));
+                        }
+                        else if (i == 4)
+                        {
+                            failedSing = !(s.Message.Contains("Singing so"));
+                        }
+                        else if (i == 5)
+                        {
+                            failedSing = !(s.Message.Contains("Singing la"));
+                        }
+                        else if (i == 6)
+                        {
+                            failedSing = !(s.Message.Contains("Singing ti"));
+                        }
+                        else if (i == 7)
+                        {
+                            failedSing = !(s.Message.Contains("Singing do"));
                         }
 
-                        failedSing = failedSing || (++i) > 5;
+                        failedSing = failedSing || (++i) > 10;
                     }
                 }
                 catch (Exception e)
@@ -132,10 +152,10 @@ namespace MediatR.Examples
                 OverriddenHandlerForBaseException = isOverriddenHandlerForBaseExceptionWorks,
 
                 // Streams
-                StreamRequestHandlers = contents.Contains("--- Handled Sing:") && !failedSing,
+                StreamRequestHandlers = contents.Contains("--- Handled Sing: Sing, Song") && !failedSing,
                 StreamPipelineBehaviors = contents.Contains("-- Handling StreamRequest"),
-                StreamRequestPreProcessors = contents.Contains("- Stream Starting Up"),
-                StreamRequestPostProcessors = contents.Contains("- All Streaming Done"),
+                StreamRequestPreProcessors = contents.Contains("- Stream PreProcessing"),
+                StreamRequestPostProcessors = contents.Contains("- Stream PostProcessing"),
                 StreamConstrainedGenericBehaviors = contents.Contains("- All Streaming Done with Sing") && !failedSing,
                 StreamOrderedPipelineBehaviors = streamOrder.SequenceEqual(streamOrder.OrderBy(i => i))
             };

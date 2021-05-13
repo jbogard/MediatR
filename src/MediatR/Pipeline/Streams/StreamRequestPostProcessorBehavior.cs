@@ -24,11 +24,13 @@ namespace MediatR.Pipeline.Streams
         {
             await foreach (var response in next().WithCancellation(cancellationToken).ConfigureAwait(false))
             {
+                // Run postprocessing for each item in stream...
                 foreach (var processor in _postProcessors)
                 {
                     await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
                 }
 
+                // Pass stream results forwards...
                 yield return response;
             }
         }

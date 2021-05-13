@@ -12,31 +12,31 @@ namespace MediatR.Tests.Pipeline.Streams
 
     public class StreamRequestPostProcessorTests
     {
-        public class Ping : IRequest<Pong>
+        public class Sing : IRequest<Song>
         {
             public string Message { get; set; }
         }
 
-        public class Pong
+        public class Song
         {
             public string Message { get; set; }
         }
 
-        public class PingHandler : IStreamRequestHandler<Ping, Pong>
+        public class SingHandler : IStreamRequestHandler<Sing, Song>
         {
-            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
+            public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation]CancellationToken cancellationToken)
             {
-                yield return await Task.Run(() => new Pong { Message = request.Message + " Pong" });
-                yield return await Task.Run(() => new Pong { Message = request.Message + " Pang" });
-                yield return await Task.Run(() => new Pong { Message = request.Message + " Peng" });
+                yield return await Task.Run(() => new Song { Message = request.Message + " Song" });
+                yield return await Task.Run(() => new Song { Message = request.Message + " Sang" });
+                yield return await Task.Run(() => new Song { Message = request.Message + " Seng" });
             }
         }
 
-        public class PingPongPostProcessor : IStreamRequestPostProcessor<Ping, Pong>
+        public class SingSongPostProcessor : IStreamRequestPostProcessor<Sing, Song>
         {
-            public Task Process(Ping request, Pong response, CancellationToken cancellationToken)
+            public Task Process(Sing request, Song response, CancellationToken cancellationToken)
             {
-                response.Message = response.Message + " PostPing";
+                response.Message += " Post";
 
                 return Task.FromResult(0);
             }
@@ -50,7 +50,7 @@ namespace MediatR.Tests.Pipeline.Streams
                 cfg.Scan(scanner =>
                 {
                     scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.IncludeNamespaceContainingType<Sing>();
                     scanner.WithDefaultConventions();
                     scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
                     scanner.AddAllTypesOf(typeof(IStreamRequestPostProcessor<,>));
@@ -62,22 +62,22 @@ namespace MediatR.Tests.Pipeline.Streams
 
             var mediator = container.GetInstance<IMediator>();
 
-            var responses = mediator.CreateStream(new Ping { Message = "Ping" });
+            var responses = mediator.CreateStream(new Sing { Message = "Sing" });
 
             int i = 0;
             await foreach (var response in responses)
             {
                 if (i == 0)
                 {
-                    response.Message.ShouldBe("Ping Pong PostPing");
+                    response.Message.ShouldBe("Sing Song Post");
                 }
                 else if (i == 1)
                 {
-                    response.Message.ShouldBe("Ping Pang PostPing");
+                    response.Message.ShouldBe("Sing Sang Post");
                 }
                 else if (i == 2)
                 {
-                    response.Message.ShouldBe("Ping Peng PostPing");
+                    response.Message.ShouldBe("Sing Seng Post");
                 }
 
                 (++i).ShouldBeLessThanOrEqualTo(3);

@@ -29,19 +29,42 @@ namespace MediatR.Wrappers
             }
         }
 
-        public override IAsyncEnumerable<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken, ServiceFactory serviceFactory)
+        public override async IAsyncEnumerable<TResponse> Handle(IRequest<TResponse> request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
         {
             IAsyncEnumerable<TResponse> Handler() => GetHandler<IStreamRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
 
-            return serviceFactory
+            var items = serviceFactory
                 .GetInstances<IStreamPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .Aggregate((StreamHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, new StreamHandlerDelegate<TResponse>(() =>
-                {
-                    var result = next();
-                    result.WithCancellation(cancellationToken).ConfigureAwait(false);
-                    return result;
-                })))();
+                .Aggregate(
+                    (StreamHandlerDelegate<TResponse>) Handler, 
+                    (next, pipeline) => () => pipeline.Handle(
+                                                        (TRequest) request, 
+                                                        cancellationToken, 
+                                                        new StreamHandlerDelegate<TResponse>(
+                                                            () => NextWrapper(next(), cancellationToken))
+                                )
+                           )();
+
+            await foreach ( var item in items )
+            {
+                yield return item;
+            }
         }
+
+
+        private static async IAsyncEnumerable<T> NextWrapper<T>(
+            IAsyncEnumerable<T> items,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var cancellable = items
+                .WithCancellation(cancellationToken)
+                .ConfigureAwait(false);
+            await foreach (var item in cancellable)
+            {
+                yield return item;
+            }
+        }
+
     }
 }

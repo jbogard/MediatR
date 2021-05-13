@@ -14,9 +14,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Process(TRequest request, TResponse response, CancellationToken cancellationToken)
+        public async Task Process(TRequest request, TResponse response, CancellationToken cancellationToken)
         {
-            return _writer.WriteLineAsync("- All Streaming Done");
+            await Task.Run(() => _writer.WriteLineAsync("- Stream PostProcessing"));
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Pipeline.Streams;
@@ -14,9 +15,9 @@ namespace MediatR.Examples
             _writer = writer;
         }
 
-        public Task Process(TRequest request, CancellationToken cancellationToken)
+        public async Task Process(TRequest request, CancellationToken cancellationToken)
         {
-            return _writer.WriteLineAsync("- Stream Starting Up");
+            await Task.Run(() => { _writer.WriteLineAsync("- Stream PreProcessing"); });
         }
     }
 }
