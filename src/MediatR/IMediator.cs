@@ -5,5 +5,6 @@ namespace MediatR
     /// </summary>
     public interface IMediator : ISender, IPublisher
     {
+        ServiceFactory ServiceFactory { get; }
     }
 }

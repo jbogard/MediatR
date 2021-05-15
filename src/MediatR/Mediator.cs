@@ -17,6 +17,10 @@ namespace MediatR
         private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
 
+
+        public ServiceFactory ServiceFactory => _serviceFactory;
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
         /// </summary>
