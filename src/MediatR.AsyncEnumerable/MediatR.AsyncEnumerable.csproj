@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\MediatR\MediatR.csproj" />
+    <ProjectReference Include="..\MediatR\MediatR.csproj" />
   </ItemGroup>
 
 </Project>

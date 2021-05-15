@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
+    <ProjectReference Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
   </ItemGroup>
 
 </Project>
