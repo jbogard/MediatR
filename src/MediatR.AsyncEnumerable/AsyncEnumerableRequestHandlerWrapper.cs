@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace MediatR.AsyncEnumerable
+﻿namespace MediatR.AsyncEnumerable
 {
     using MediatR.Wrappers;
     using System;

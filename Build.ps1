@@ -46,4 +46,5 @@ foreach ($sample in $samples) {
 }
 
 exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o $artifacts --no-build }
+exec { & dotnet pack .\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj -c Release -o $artifacts --no-build }
 

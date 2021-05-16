@@ -8,6 +8,7 @@ namespace MediatR.AsyncEnumerable.Tests
     using Xunit;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Linq;
 
     public class ToAsyncEnumerableTests
     {
@@ -37,9 +38,12 @@ namespace MediatR.AsyncEnumerable.Tests
             }
         }
 
+
+
         [Fact]
         public async Task Should_resolve_main_handler()
         {
+            // Arrange
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
@@ -55,52 +59,24 @@ namespace MediatR.AsyncEnumerable.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            var response = mediator.ToAsyncEnumerable(new Sing { Message = "Sing" });
+            // Act
+            var items = mediator.ToAsyncEnumerable(new Sing { Message = "Sing" });
 
-            int i = 0;
-            await foreach (Song result in response)
-            {
-                if (i == 0)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                else if (i == 1)
-                {
-                    result.Message.ShouldBe("Sing re");
-                }
-                else if (i == 2)
-                {
-                    result.Message.ShouldBe("Sing mi");
-                }
-                else if (i == 3)
-                {
-                    result.Message.ShouldBe("Sing fa");
-                }
-                else if (i == 4)
-                {
-                    result.Message.ShouldBe("Sing so");
-                }
-                else if (i == 5)
-                {
-                    result.Message.ShouldBe("Sing la");
-                }
-                else if (i == 6)
-                {
-                    result.Message.ShouldBe("Sing ti");
-                }
-                else if (i == 7)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                i++;
-            }
-
-            i.ShouldBe(8);
+            // Assert
+            (await items.ElementAtAsync(0)).Message.ShouldBe("Sing do");
+            (await items.ElementAtAsync(1)).Message.ShouldBe("Sing re");
+            (await items.ElementAtAsync(2)).Message.ShouldBe("Sing mi");
+            (await items.ElementAtAsync(3)).Message.ShouldBe("Sing fa");
+            (await items.ElementAtAsync(4)).Message.ShouldBe("Sing so");
+            (await items.ElementAtAsync(5)).Message.ShouldBe("Sing la");
+            (await items.ElementAtAsync(6)).Message.ShouldBe("Sing ti");
+            (await items.ElementAtAsync(7)).Message.ShouldBe("Sing do");
         }
 
         [Fact]
         public async Task Should_resolve_main_handler_via_dynamic_dispatch()
         {
+            // Arrange
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
@@ -117,52 +93,25 @@ namespace MediatR.AsyncEnumerable.Tests
             var mediator = container.GetInstance<IMediator>();
 
             object request = new Sing { Message = "Sing" };
-            var response = mediator.ToAsyncEnumerable(request);
 
-            int i = 0;
-            await foreach (Song result in response)
-            {
-                if (i == 0)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                else if (i == 1)
-                {
-                    result.Message.ShouldBe("Sing re");
-                }
-                else if (i == 2)
-                {
-                    result.Message.ShouldBe("Sing mi");
-                }
-                else if (i == 3)
-                {
-                    result.Message.ShouldBe("Sing fa");
-                }
-                else if (i == 4)
-                {
-                    result.Message.ShouldBe("Sing so");
-                }
-                else if (i == 5)
-                {
-                    result.Message.ShouldBe("Sing la");
-                }
-                else if (i == 6)
-                {
-                    result.Message.ShouldBe("Sing ti");
-                }
-                else if (i == 7)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                i++;
-            }
+            // Act
+            var items = mediator.ToAsyncEnumerable(request);
 
-            i.ShouldBe(8);
+            // Assert
+            ((await items.ElementAtAsync(0)) as Song).Message.ShouldBe("Sing do");
+            ((await items.ElementAtAsync(1)) as Song).Message.ShouldBe("Sing re");
+            ((await items.ElementAtAsync(2)) as Song).Message.ShouldBe("Sing mi");
+            ((await items.ElementAtAsync(3)) as Song).Message.ShouldBe("Sing fa");
+            ((await items.ElementAtAsync(4)) as Song).Message.ShouldBe("Sing so");
+            ((await items.ElementAtAsync(5)) as Song).Message.ShouldBe("Sing la");
+            ((await items.ElementAtAsync(6)) as Song).Message.ShouldBe("Sing ti");
+            ((await items.ElementAtAsync(7)) as Song).Message.ShouldBe("Sing do");
         }
 
         [Fact]
         public async Task Should_resolve_main_handler_by_specific_interface()
         {
+            // Arrange
             var container = new Container(cfg =>
             {
                 cfg.Scan(scanner =>
@@ -178,45 +127,18 @@ namespace MediatR.AsyncEnumerable.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            int i = 0;
-            await foreach (Song result in mediator.ToAsyncEnumerable(new Sing { Message = "Sing" }))
-            {
-                if (i == 0)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                else if (i == 1)
-                {
-                    result.Message.ShouldBe("Sing re");
-                }
-                else if (i == 2)
-                {
-                    result.Message.ShouldBe("Sing mi");
-                }
-                else if (i == 3)
-                {
-                    result.Message.ShouldBe("Sing fa");
-                }
-                else if (i == 4)
-                {
-                    result.Message.ShouldBe("Sing so");
-                }
-                else if (i == 5)
-                {
-                    result.Message.ShouldBe("Sing la");
-                }
-                else if (i == 6)
-                {
-                    result.Message.ShouldBe("Sing ti");
-                }
-                else if (i == 7)
-                {
-                    result.Message.ShouldBe("Sing do");
-                }
-                i++;
-            }
+            // Act
+            var items = mediator.ToAsyncEnumerable(new Sing { Message = "Sing" });
 
-            i.ShouldBe(8);
+            // Assert
+            (await items.ElementAtAsync(0)).Message.ShouldBe("Sing do");
+            (await items.ElementAtAsync(1)).Message.ShouldBe("Sing re");
+            (await items.ElementAtAsync(2)).Message.ShouldBe("Sing mi");
+            (await items.ElementAtAsync(3)).Message.ShouldBe("Sing fa");
+            (await items.ElementAtAsync(4)).Message.ShouldBe("Sing so");
+            (await items.ElementAtAsync(5)).Message.ShouldBe("Sing la");
+            (await items.ElementAtAsync(6)).Message.ShouldBe("Sing ti");
+            (await items.ElementAtAsync(7)).Message.ShouldBe("Sing do");
 
         }
     }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1;net5.0;</TargetFrameworks>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="StructureMap" Version="4.7.1" />
+    <PackageReference Include="System.Linq.Async" Version="4.1.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,8 +22,21 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.0" Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.0" Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.1" Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.1" Include="..\..\src\MediatR.AsyncEnumerable\MediatR.AsyncEnumerable.csproj" />
+  </ItemGroup>
+
+  
 </Project>
