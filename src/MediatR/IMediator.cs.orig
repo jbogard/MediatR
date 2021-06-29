@@ -1,0 +1,15 @@
+<<<<<<< HEAD
+using System.Threading;
+using System.Threading.Tasks;
+
+=======
+>>>>>>> 211dd8b244a9dd2d793a25d23884b697849632c2
+namespace MediatR
+{
+    /// <summary>
+    /// Defines a mediator to encapsulate request/response and publishing interaction patterns
+    /// </summary>
+    public interface IMediator : ISender, IPublisher
+    {
+    }
+}

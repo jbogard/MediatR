@@ -1,4 +1,10 @@
+<<<<<<< HEAD:src/MediatR/Internal/RequestHandlerWrapper.cs
+using MediatR.Pipeline;
+
+namespace MediatR.Internal
+=======
 namespace MediatR.Wrappers
+>>>>>>> 211dd8b244a9dd2d793a25d23884b697849632c2:src/MediatR/Wrappers/RequestHandlerWrapper.cs
 {
     using System;
     using System.Linq;
@@ -42,9 +48,25 @@ namespace MediatR.Wrappers
     public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
+<<<<<<< HEAD:src/MediatR/Internal/RequestHandlerWrapper.cs
+        public override Task<object?> Handle(object request, CancellationToken cancellationToken,
+            ServiceFactory serviceFactory)
+        {
+            return Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory)
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
+                    }
+                    return (object?)t.Result;
+                }, cancellationToken);
+        }
+=======
         public override async Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory) =>
             await Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory);
+>>>>>>> 211dd8b244a9dd2d793a25d23884b697849632c2:src/MediatR/Wrappers/RequestHandlerWrapper.cs
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
