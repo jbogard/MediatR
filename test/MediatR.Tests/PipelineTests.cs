@@ -273,12 +273,16 @@ namespace MediatR.Tests
                 });
                 cfg.For<Logger>().Singleton().Use(output);
 
-                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
-                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
-                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
-
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
                 cfg.For<IMediator>().Use<Mediator>();
+
+                var x = BehaviorOrderBuilder
+                    .Create(t => cfg.For(typeof(IPipelineBehavior<,>)).Add(t))
+                    .RegisterBehaviour(typeof(OuterBehavior<,>))
+                    .RegisterBehaviour(typeof(InnerBehavior<,>))
+                    .RegisterBehaviour(typeof(ConstrainedBehavior<,>));
+                
+                cfg.For<IBehaviorOrder>().Add(x);
             });
 
             container.GetAllInstances<IPipelineBehavior<Ping, Pong>>();

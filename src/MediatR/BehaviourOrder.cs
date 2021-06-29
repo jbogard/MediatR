@@ -40,12 +40,23 @@ namespace MediatR
                     typeof(IEnumerable<IPipelineBehavior<TRequest, TResponse>>));
 
             var constructedTypes = _registeredTypes
-                .Select(t => t.MakeGenericType(typeof(TRequest), typeof(TResponse)))
+                .Select(t =>
+                {
+                    try
+                    {
+                        return t.MakeGenericType(typeof(TRequest), typeof(TResponse));
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
+                })
+                .Where(t => t != null)
                 .ToList();
 
             int OrderFunc(Type t)
             {
-                var matchedType = constructedTypes.FirstOrDefault(x => x.IsAssignableFrom(t));
+                var matchedType = constructedTypes.FirstOrDefault(x => x!.IsAssignableFrom(t));
                 if (matchedType != null)
                 {
                     return constructedTypes.IndexOf(matchedType);
@@ -55,7 +66,7 @@ namespace MediatR
             }
 
             return allMatchingTypes
-                .OrderBy(t => (Func<Type, int>) OrderFunc)
+                .OrderBy(t => OrderFunc(t.GetType()))
                 .ToList();
         }
     }
