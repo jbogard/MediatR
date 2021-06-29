@@ -5,10 +5,8 @@
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>8</LangVersion>
     <Nullable>enable</Nullable>
-    <AssemblyName>MediatR</AssemblyName>
-    <PackageId>MediatR</PackageId>
+    <Features>strict</Features>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
@@ -17,7 +15,7 @@
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols><MinVerTagPrefix>v</MinVerTagPrefix>
+    <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
@@ -35,6 +33,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.3.0" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="2.3.1" PrivateAssets="All" />
   </ItemGroup>
 </Project>

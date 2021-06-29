@@ -28,7 +28,8 @@ namespace MediatR
         Task INotificationHandler<TNotification>.Handle(TNotification notification, CancellationToken cancellationToken)
         {
             Handle(notification);
-            return Unit.Task;
+
+            return Task.CompletedTask;
         }
 
         /// <summary>

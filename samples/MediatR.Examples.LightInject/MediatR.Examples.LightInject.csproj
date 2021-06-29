@@ -2,10 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AssemblyName>MediatR.Examples.LightInject</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>MediatR.Examples.LightInject</PackageId>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="5.3.0" />
+    <PackageReference Include="LightInject" Version="6.3.5" />
   </ItemGroup>
 
 </Project>

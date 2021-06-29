@@ -6,7 +6,6 @@ using System.Linq;
 using BenchmarkDotNet.Analysers;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Loggers;
@@ -21,7 +20,7 @@ namespace MediatR.Benchmarks
         public DotTraceDiagnoserAttribute()
         {
             var manualConfig = ManualConfig.CreateEmpty();
-            manualConfig.Add(new DotTraceDiagnoser());
+            manualConfig.AddDiagnoser(new DotTraceDiagnoser());
             Config = manualConfig;
         }
 

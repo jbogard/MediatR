@@ -15,10 +15,8 @@ namespace MediatR.Pipeline
     {
         private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
 
-        public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors)
-        {
-            _postProcessors = postProcessors;
-        }
+        public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors) 
+            => _postProcessors = postProcessors;
 
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {

@@ -5,6 +5,7 @@ namespace MediatR.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -35,7 +36,16 @@ namespace MediatR.Pipeline
 
                 foreach (var actionForException in actionsForException)
                 {
-                    await ((Task)actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })).ConfigureAwait(false);
+                    try
+                    {
+                        await ((Task)(actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })
+                            ?? throw new InvalidOperationException($"Could not create task for action method {actionMethod}."))).ConfigureAwait(false);
+                    }
+                    catch (TargetInvocationException invocationException) when (invocationException.InnerException != null)
+                    {
+                        // Unwrap invocation exception to throw the actual error
+                        ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
+                    }
                 }
 
                 throw;
@@ -46,9 +56,10 @@ namespace MediatR.Pipeline
         {
             var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
             var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
-            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IRequestExceptionAction<TRequest, Exception>.Execute));
+            actionMethodInfo = exceptionActionInterfaceType.GetMethod(nameof(IRequestExceptionAction<TRequest, Exception>.Execute))
+                ?? throw new InvalidOperationException($"Could not find method {nameof(IRequestExceptionAction<TRequest, Exception>.Execute)} on type {exceptionActionInterfaceType}");
 
-            var actionsForException = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionActionInterfaceType);
+            var actionsForException = (IEnumerable<object>)_serviceFactory(enumerableExceptionActionInterfaceType);
 
             return HandlersOrderer.Prioritize(actionsForException.ToList(), request);
         }

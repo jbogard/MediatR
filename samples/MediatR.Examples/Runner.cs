@@ -111,13 +111,13 @@ namespace MediatR.Examples
 
         private static async Task<bool> IsHandlerForSameExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
-            var isHanledCorrectly = false;
+            var isHandledCorrectly = false;
 
             await writer.WriteLineAsync("Checking handler to catch exact exception...");
             try
             {
                 await mediator.Send(new PingProtectedResource { Message = "Ping to protected resource" });
-                isHanledCorrectly = IsExceptionHandledBy<ForbiddenException, AccessDeniedExceptionHandler>(writer);
+                isHandledCorrectly = IsExceptionHandledBy<ForbiddenException, AccessDeniedExceptionHandler>(writer);
             }
             catch (Exception e)
             {
@@ -125,18 +125,18 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
-            return isHanledCorrectly;
+            return isHandledCorrectly;
         }
 
         private static async Task<bool> IsHandlerForBaseExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
-            var isHanledCorrectly = false;
+            var isHandledCorrectly = false;
 
             await writer.WriteLineAsync("Checking shared handler to catch exception by base type...");
             try
             {
                 await mediator.Send(new PingResource { Message = "Ping to missed resource" });
-                isHanledCorrectly = IsExceptionHandledBy<ResourceNotFoundException, ConnectionExceptionHandler>(writer);
+                isHandledCorrectly = IsExceptionHandledBy<ResourceNotFoundException, ConnectionExceptionHandler>(writer);
             }
             catch (Exception e)
             {
@@ -144,18 +144,18 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
-            return isHanledCorrectly;
+            return isHandledCorrectly;
         }
         
         private static async Task<bool> IsHandlerForLessSpecificExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
-            var isHanledCorrectly = false;
+            var isHandledCorrectly = false;
 
             await writer.WriteLineAsync("Checking base handler to catch any exception...");
             try
             {
                 await mediator.Send(new PingResourceTimeout { Message = "Ping to ISS resource" });
-                isHanledCorrectly = IsExceptionHandledBy<TaskCanceledException, CommonExceptionHandler> (writer);
+                isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, CommonExceptionHandler> (writer);
             }
             catch (Exception e)
             {
@@ -163,19 +163,19 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
-            return isHanledCorrectly;
+            return isHandledCorrectly;
         }
 
         private static async Task<bool> IsPreferredHandlerForBaseExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
-            var isHanledCorrectly = false;
+            var isHandledCorrectly = false;
 
             await writer.WriteLineAsync("Selecting preferred handler to handle exception...");
 
             try
             {
                 await mediator.Send(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
-                isHanledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
+                isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
             }
             catch (Exception e)
             {
@@ -183,19 +183,19 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
-            return isHanledCorrectly;
+            return isHandledCorrectly;
         }
 
         private static async Task<bool> IsOverriddenHandlerForBaseExceptionWorks(IMediator mediator, WrappingWriter writer)
         {
-            var isHanledCorrectly = false;
+            var isHandledCorrectly = false;
 
             await writer.WriteLineAsync("Selecting new handler to handle exception...");
 
             try
             {
                 await mediator.Send(new PingNewResource { Message = "Ping to ISS resource (override)" });
-                isHanledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
+                isHandledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
             }
             catch (Exception e)
             {
@@ -203,13 +203,13 @@ namespace MediatR.Examples
             }
             await writer.WriteLineAsync();
 
-            return isHanledCorrectly;
+            return isHandledCorrectly;
         }
 
         private static bool IsExceptionHandledBy<TException, THandler>(WrappingWriter writer)
             where TException : Exception
         {
-            var messages = writer.Contents.Split(new[] { "\r\n" }, StringSplitOptions.None).ToList();
+            var messages = writer.Contents.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
 
             return messages[messages.Count - 2].Contains(typeof(THandler).FullName)
                 && messages[messages.Count - 3].Contains(typeof(TException).FullName);

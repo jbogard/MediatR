@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Unity;
 using Unity.Lifetime;
-using Unity.Registration;
 
 namespace MediatR.Examples.Unity
 {
@@ -48,7 +47,7 @@ namespace MediatR.Examples.Unity
     // ReSharper disable once InconsistentNaming
     public static class IUnityContainerExtensions
     {
-        public static IUnityContainer RegisterMediator(this IUnityContainer container, LifetimeManager lifetimeManager)
+        public static IUnityContainer RegisterMediator(this IUnityContainer container, ITypeLifetimeManager lifetimeManager)
         {
             return container.RegisterType<IMediator, Mediator>(lifetimeManager)
                 .RegisterInstance<ServiceFactory>(type =>

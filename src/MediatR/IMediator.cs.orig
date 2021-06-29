@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+using System.Threading;
+using System.Threading.Tasks;
+
+=======
+>>>>>>> 211dd8b244a9dd2d793a25d23884b697849632c2
 namespace MediatR
 {
     /// <summary>
