@@ -1,16 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Unity.Container" Version="5.11.8" />
+    <PackageReference Include="Stashbox" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
   </ItemGroup>
-
 </Project>

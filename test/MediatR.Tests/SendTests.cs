@@ -75,5 +75,28 @@ namespace MediatR.Tests
             var pong = response.ShouldBeOfType<Pong>();
             pong.Message.ShouldBe("Ping Pong");
         }
+
+        [Fact]
+        public async Task Should_resolve_main_handler_by_specific_interface()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.Scan(scanner =>
+                {
+                    scanner.AssemblyContainingType(typeof(PublishTests));
+                    scanner.IncludeNamespaceContainingType<Ping>();
+                    scanner.WithDefaultConventions();
+                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                });
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<ISender>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<ISender>();
+
+            var response = await mediator.Send(new Ping { Message = "Ping" });
+
+            response.Message.ShouldBe("Ping Pong");
+        }
     }
 }

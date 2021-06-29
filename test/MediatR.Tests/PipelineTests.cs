@@ -3,7 +3,6 @@ using MediatR.Pipeline;
 
 namespace MediatR.Tests
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Shouldly;
@@ -173,66 +172,6 @@ namespace MediatR.Tests
                 _output.Messages.Add("Concrete before");
                 var response = await next();
                 _output.Messages.Add("Concrete after");
-
-                return response;
-            }
-        }
-
-        [PipelinePriority(PipelinePriorityOrder.High)]
-        public class HighPriorityBehavior : IPipelineBehavior<Ping, Pong>
-        {
-            private readonly Logger _output;
-
-            public HighPriorityBehavior(Logger output)
-            {
-                _output = output;
-            }
-
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
-            {
-                _output.Messages.Add("High Priority before");
-                var response = await next();
-                _output.Messages.Add("High Priority after");
-
-                return response;
-            }
-        }
-
-        [PipelinePriority(PipelinePriorityOrder.Low)]
-        public class LowPriorityBehavior : IPipelineBehavior<Ping, Pong>
-        {
-            private readonly Logger _output;
-
-            public LowPriorityBehavior(Logger output)
-            {
-                _output = output;
-            }
-
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
-            {
-                _output.Messages.Add("Low Priority before");
-                var response = await next();
-                _output.Messages.Add("Low Priority after");
-
-                return response;
-            }
-        }
-
-        [PipelinePriority(PipelinePriorityOrder.Normal)]
-        public class NormalPriorityBehavior : IPipelineBehavior<Ping, Pong>
-        {
-            private readonly Logger _output;
-
-            public NormalPriorityBehavior(Logger output)
-            {
-                _output = output;
-            }
-
-            public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
-            {
-                _output.Messages.Add("Normal Priority before");
-                var response = await next();
-                _output.Messages.Add("Normal Priority after");
 
                 return response;
             }
@@ -432,51 +371,6 @@ namespace MediatR.Tests
                 "Handler",
                 "Inner generic after",
                 "Outer generic after",
-            });
-        }
-
-        [Fact]
-        public async Task Should_wrap_with_behavior_with_priority()
-        {
-            var output = new Logger();
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<Logger>().Singleton().Use(output);
-                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
-                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<NormalPriorityBehavior>();
-                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<HighPriorityBehavior>();
-                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<LowPriorityBehavior>();
-                cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
-            });
-
-            var mediator = container.GetInstance<IMediator>();
-
-            var response = await mediator.Send(new Ping { Message = "Ping" });
-
-            response.Message.ShouldBe("Ping Pong");
-
-            output.Messages.ShouldBe(new[]
-            {
-                "High Priority before",
-                "Outer before",
-                "Normal Priority before",
-                "Inner before",
-                "Low Priority before",
-                "Handler",
-                "Low Priority after",
-                "Inner after",
-                "Normal Priority after",
-                "Outer after",
-                "High Priority after"
             });
         }
     }

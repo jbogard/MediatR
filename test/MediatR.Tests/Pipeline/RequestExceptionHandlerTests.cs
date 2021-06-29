@@ -61,6 +61,14 @@ namespace MediatR.Tests.Pipeline
             }
         }
 
+        public class PingPongThrowingExceptionHandler : RequestExceptionHandler<Ping, Pong>
+        {
+            protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
+            {
+                throw new ApplicationException("Surprise!");
+            }
+        }
+
         [Fact]
         public async Task Should_run_exception_handler_and_allow_for_exception_not_to_throw()
         {
@@ -102,6 +110,27 @@ namespace MediatR.Tests.Pipeline
             });
 
             request.Message.ShouldBe("Ping Thrown Not Handled");
+        }
+
+        [Fact]
+        public async Task Should_run_exception_handler_and_unwrap_expections_thrown_in_the_handler()
+        {
+            var container = new Container(cfg =>
+            {
+                cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
+                cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongThrowingExceptionHandler>();
+                cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
+                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+                cfg.For<IMediator>().Use<Mediator>();
+            });
+
+            var mediator = container.GetInstance<IMediator>();
+
+            var request = new Ping { Message = "Ping" };
+            await Should.ThrowAsync<ApplicationException>(async () =>
+            {
+                await mediator.Send(request);
+            });
         }
 
     }

@@ -1,6 +1,4 @@
-using MediatR.Pipeline;
-
-namespace MediatR.Internal
+namespace MediatR.Wrappers
 {
     using System;
     using System.Linq;
@@ -8,7 +6,7 @@ namespace MediatR.Internal
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal abstract class RequestHandlerBase
+    public abstract class RequestHandlerBase
     {
         public abstract Task<object?> Handle(object request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
@@ -35,28 +33,18 @@ namespace MediatR.Internal
         }
     }
 
-    internal abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
+    public abstract class RequestHandlerWrapper<TResponse> : RequestHandlerBase
     {
         public abstract Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory);
     }
 
-    internal class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
+    public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrapper<TResponse>
         where TRequest : IRequest<TResponse>
     {
-        public override Task<object?> Handle(object request, CancellationToken cancellationToken,
-            ServiceFactory serviceFactory)
-        {
-            return Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory)
-                .ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        ExceptionDispatchInfo.Capture(t.Exception.InnerException).Throw();
-                    }
-                    return (object?)t.Result;
-                }, cancellationToken);
-        }
+        public override async Task<object?> Handle(object request, CancellationToken cancellationToken,
+            ServiceFactory serviceFactory) =>
+            await Handle((IRequest<TResponse>)request, cancellationToken, serviceFactory);
 
         public override Task<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
             ServiceFactory serviceFactory)
@@ -66,10 +54,6 @@ namespace MediatR.Internal
             return serviceFactory
                 .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
                 .Reverse()
-                .OrderBy(i => i.GetType()
-                                  .GetCustomAttributes(typeof(PipelinePriorityAttribute), true)
-                                  .Cast<PipelinePriorityAttribute>()
-                                  .FirstOrDefault()?.Priority ?? PipelinePriorityOrder.Normal)
                 .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest) request, cancellationToken, next))();
         }
     }

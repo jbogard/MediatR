@@ -1,8 +1,5 @@
-using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using BenchmarkDotNet;
 using BenchmarkDotNet.Attributes;
 using MediatR.Examples;
 using MediatR.Pipeline;

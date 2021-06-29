@@ -4,7 +4,6 @@ using System.Threading;
 namespace MediatR.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Shouldly;
     using StructureMap;

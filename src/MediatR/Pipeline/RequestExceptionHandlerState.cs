@@ -16,8 +16,7 @@ namespace MediatR.Pipeline
         /// <summary>
         /// The response that is returned if <see cref="Handled"/> is  <code>true</code>.
         /// </summary>
-        [MaybeNull]
-        public TResponse Response { get; private set; } = default!;
+        public TResponse? Response { get; private set; }
 
         /// <summary>
         /// Call to indicate whether the current exception should be considered handled and the specified response should be returned.
