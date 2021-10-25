@@ -20,10 +20,9 @@
             {
                 var genericType = service.GetGenericTypeDefinition();
                 var genericArguments = genericType.GetGenericArguments();
-                if (genericArguments.Count() == 1
-                 && genericArguments.Single().GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
+                if (IsContravariant(genericArguments))
                 {
-                    var argument = service.GetGenericArguments().Single();
+                    var argument = genericArguments.Single();
                     var matches = bindings.Where(kvp => kvp.Key.IsGenericType
                                                            && kvp.Key.GetGenericTypeDefinition().Equals(genericType)
                                                            && kvp.Key.GetGenericArguments().Single() != argument
@@ -34,6 +33,10 @@
             }
 
             return Enumerable.Empty<IBinding>();
+            
+            bool IsContravariant(Type[] arguments) 
+                => arguments.Count() == 1
+                && arguments.Single().GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant)
         }
     }
 }
