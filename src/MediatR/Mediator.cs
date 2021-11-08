@@ -86,7 +86,6 @@ namespace MediatR
             {
                 null => throw new ArgumentNullException(nameof(notification)),
                 INotification instance => PublishNotification(instance, cancellationToken),
-                //_ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
             };
 
         /// <summary>
