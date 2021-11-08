@@ -99,7 +99,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            object message = new Ping { Message = "Ping" };
+            var message = new Ping { Message = "Ping" };
             await mediator.Publish(message);
 
             var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);

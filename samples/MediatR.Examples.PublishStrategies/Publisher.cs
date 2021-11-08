@@ -25,22 +25,22 @@ namespace MediatR.Examples.PublishStrategies
         public IDictionary<PublishStrategy, IMediator> PublishStrategies = new Dictionary<PublishStrategy, IMediator>();
         public PublishStrategy DefaultStrategy { get; set; } = PublishStrategy.SyncContinueOnException;
 
-        public Task Publish<TNotification>(TNotification notification)
+        public Task Publish<TNotification>(TNotification notification) where TNotification : INotification
         {
             return Publish(notification, DefaultStrategy, default(CancellationToken));
         }
 
-        public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy)
+        public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy) where TNotification : INotification
         {
             return Publish(notification, strategy, default(CancellationToken));
         }
 
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken)
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken) where TNotification : INotification
         {
             return Publish(notification, DefaultStrategy, cancellationToken);
         }
 
-        public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy, CancellationToken cancellationToken)
+        public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy, CancellationToken cancellationToken) where TNotification : INotification
         {
             if (!PublishStrategies.TryGetValue(strategy, out var mediator))
             {

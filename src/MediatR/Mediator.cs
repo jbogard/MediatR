@@ -81,12 +81,12 @@ namespace MediatR
             return PublishNotification(notification, cancellationToken);
         }
 
-        public Task Publish(object notification, CancellationToken cancellationToken = default) =>
+        public Task Publish(INotification notification, CancellationToken cancellationToken = default) =>
             notification switch
             {
                 null => throw new ArgumentNullException(nameof(notification)),
                 INotification instance => PublishNotification(instance, cancellationToken),
-                _ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
+                //_ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
             };
 
         /// <summary>
