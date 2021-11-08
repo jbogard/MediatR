@@ -69,7 +69,7 @@ namespace MediatR.Tests
 
             var mediator = container.GetInstance<IMediator>();
 
-            object request = new Ping { Message = "Ping" };
+            var request = new Ping { Message = "Ping" };
             var response = await mediator.Send(request);
 
             var pong = response.ShouldBeOfType<Pong>();

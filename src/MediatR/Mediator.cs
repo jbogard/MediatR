@@ -40,7 +40,7 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
-        public Task<object?> Send(object request, CancellationToken cancellationToken = default)
+        public Task<object?> Send(IRequest request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
