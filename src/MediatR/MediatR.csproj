@@ -4,7 +4,7 @@
     <Authors>Jimmy Bogard</Authors>
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
@@ -21,11 +21,6 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\assets\logo\gradient_128x128.png" Pack="true" PackagePath="" />
