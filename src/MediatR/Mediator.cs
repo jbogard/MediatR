@@ -40,6 +40,21 @@ namespace MediatR
             return handler.Handle(request, cancellationToken, _serviceFactory);
         }
 
+        public Task<TResponse> Send<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
+            where TRequest : IRequest<TResponse>
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var handler = (RequestHandlerWrapper<TResponse>) _requestHandlers.GetOrAdd(typeof(TRequest),
+                static t => (RequestHandlerBase) (Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse)))
+                ?? throw new InvalidOperationException($"Could not create wrapper type for {t}")));
+
+            return handler.Handle(request, cancellationToken, _serviceFactory);
+        }
+
         public Task<object?> Send(object request, CancellationToken cancellationToken = default)
         {
             if (request == null)
