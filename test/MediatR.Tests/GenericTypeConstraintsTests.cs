@@ -67,12 +67,12 @@ namespace MediatR.Tests
             }
         }
 
-        public class Ping : IRequest<Pong>, IPingPong
+        public class Ping : IRequest<Pong>
         {
             public string Message { get; set; }
         }
 
-        public class Pong : IPingPong
+        public class Pong
         {
             public string Message { get; set; }
         }
@@ -101,8 +101,8 @@ namespace MediatR.Tests
                 });
                 cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
                 cfg.For<IMediator>().Use<Mediator>();
-                cfg.For<IGenericRequest<Ping, Pong>>().Use<GenericRequest>();
-                cfg.For<IRequestHandler<IGenericRequest<Ping, Pong>, Pong>>().Use<GenericHandler<Ping, Pong>>();
+                cfg.For<IGenericRequest<GenericPing, GenericPong>>().Use<GenericRequest>();
+                cfg.For<IRequestHandler<IGenericRequest<GenericPing, GenericPong>, GenericPong>>().Use<GenericHandler<GenericPing, GenericPong>>();
             });
 
             _mediator = container.GetInstance<IMediator>();
@@ -163,9 +163,19 @@ namespace MediatR.Tests
             results.ShouldNotContain(typeof(IRequest));
         }
 
-        public class GenericRequest : IGenericRequest<Ping, Pong>
+        public class GenericPing : IRequest<GenericPong>, IPingPong
         {
-            public Ping Payload { get; set; }
+            public string Message { get; set; }
+        }
+
+        public class GenericPong : IPingPong
+        {
+            public string Message { get; set; }
+        }
+
+        public class GenericRequest : IGenericRequest<GenericPing, GenericPong>
+        {
+            public GenericPing Payload { get; set; }
         }
 
         public interface IPingPong { 
@@ -200,11 +210,16 @@ namespace MediatR.Tests
             }
         }
 
+        public class GenericTypeConstraintGenericPing : GenericTypeRequestHandlerTestClass<GenericPing>
+        {
+
+        }
+
         [Fact]
         public async Task Should_Not_Resolve_Multiple_GenericTypes_Handler()
         {
             // Create Request
-            var request = new GenericRequest { Payload = new Ping { Message = "Ping" } };
+            var request = new GenericRequest { Payload = new GenericPing { Message = "Ping" } };
 
             // Test will fail as the IOC container can not find implementation of the handler which is a
             // interface based generic class, this works on some containers such as Lamar, but did not
@@ -216,16 +231,16 @@ namespace MediatR.Tests
         public async Task Should_Resolve_Multiple_GenericTypes_Handler()
         {
             // Create Request
-            var request = new GenericRequest { Payload = new Ping { Message = "Ping" } };
+            var request = new GenericRequest { Payload = new GenericPing { Message = "Ping" } };
 
             // Test mediator still works sending request and gets response when told
             // what the interface for the request is
-            var response = await _mediator.Send<IGenericRequest<Ping, Pong>, Pong>(request);
+            var response = await _mediator.Send<IGenericRequest<GenericPing, GenericPong>, GenericPong>(request);
 
             response.Message.ShouldBe("Ping Pong");
 
             // Create new instance of type constrained class
-            var genericTypeConstraintsResponseReturn = new GenericTypeConstraintPing();
+            var genericTypeConstraintsResponseReturn = new GenericTypeConstraintGenericPing();
 
             // Assert it is of type IRequest<T> but not IRequest
             Assert.False(genericTypeConstraintsResponseReturn.IsIRequest);
@@ -237,7 +252,7 @@ namespace MediatR.Tests
 
             Assert.Equal(3, results.Length);
 
-            results.ShouldContain(typeof(IRequest<Pong>));
+            results.ShouldContain(typeof(IRequest<GenericPong>));
             results.ShouldContain(typeof(IBaseRequest));
             results.ShouldNotContain(typeof(IRequest));
         }
