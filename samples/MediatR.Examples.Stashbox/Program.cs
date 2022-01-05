@@ -19,7 +19,7 @@ namespace MediatR.Examples.Stashbox
         {
             var container = new StashboxContainer()
                 .RegisterInstance<TextWriter>(writer)
-                .Register<ServiceFactory>(c => c.WithFactory(r => r.Resolve))
+                .Register<ServiceFactory>(c => c.WithFactory(r => type => r.Resolve(type)))
                 .RegisterAssemblies(new[] { typeof(Mediator).Assembly, typeof(Ping).Assembly }, 
                     serviceTypeSelector: Rules.ServiceRegistrationFilters.Interfaces, registerSelf: false);
 

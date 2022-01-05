@@ -1,11 +1,9 @@
 namespace MediatR
 {
-    using MediatR.Internal;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Wrappers;
@@ -18,10 +16,7 @@ namespace MediatR
         private readonly ServiceFactory _serviceFactory;
         private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
         private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
-
-#if NETSTANDARD2_1
-        private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new ConcurrentDictionary<Type, StreamRequestHandlerBase>();
-#endif 
+        private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mediator"/> class.
@@ -121,8 +116,7 @@ namespace MediatR
         }
 
 
-#if NETSTANDARD2_1
-        public async IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -135,14 +129,12 @@ namespace MediatR
                 t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
             var items = streamHandler.Handle(request, cancellationToken, _serviceFactory);
-            await foreach (var item in items)
-            {
-                yield return item;
-            }
+
+            return items;
         }
 
 
-        public async IAsyncEnumerable<object?> CreateStream(object request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -171,12 +163,8 @@ namespace MediatR
             // call via dynamic dispatch to avoid calling through reflection for performance reasons
             var items = handler.Handle(request, cancellationToken, _serviceFactory);
 
-            await foreach(var item in items)
-            {
-                yield return item;
-            }
+            return items;
         }
-#endif
     }
 
 }

@@ -30,10 +30,7 @@ namespace MediatR.Examples.SimpleInjector
             RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
             RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
-
-#if NETCOREAPP3_1_OR_GREATER
-            container.Register(typeof(IStreamRequestHandler<,>), assemblies);
-#endif
+            RegisterHandlers(container, typeof(StreamRequestHandler<,>), assemblies);
 
             container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
@@ -48,15 +45,10 @@ namespace MediatR.Examples.SimpleInjector
             });
             container.Collection.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
             container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
-
-
-#if NETCOREAPP3_1_OR_GREATER
-            // Pipeline.Streams
             container.Collection.Register(typeof(IStreamPipelineBehavior<,>), new[]
             {
                 typeof(GenericStreamPipelineBehavior<,>)
             });
-#endif
 
             container.Register(() => new ServiceFactory(container.GetInstance), Lifestyle.Singleton);
 

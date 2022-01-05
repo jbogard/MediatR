@@ -5,7 +5,6 @@
     <Description>Simple, unambitious mediator implementation in .NET</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
-    <TargetFrameworks>netstandard2.1;net461;netstandard2.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
@@ -24,41 +23,12 @@
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-    <Compile Remove="IStreamPipelineBehavior.cs" />
-    <Compile Remove="IStreamRequestHandler.cs" />
-    <Compile Remove="Wrappers\StreamRequestHandlerWrapper.cs" />
-    <Compile Remove="Pipeline\Streams\**" />
-    <EmbeddedResource Remove="Pipeline\Streams\**" />
-    <None Remove="Pipeline\Streams\**" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <Compile Remove="IStreamPipelineBehavior.cs" />
-    <Compile Remove="IStreamRequestHandler.cs" />
-    <Compile Remove="Wrappers\StreamRequestHandlerWrapper.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Pipeline\Streams\IStreamRequestExceptionAction.cs" />
-    <Compile Remove="Pipeline\Streams\IStreamRequestExceptionHandler.cs" />
-    <Compile Remove="Pipeline\Streams\IStreamRequestPostProcessor.cs" />
-    <Compile Remove="Pipeline\Streams\IStreamRequestPreProcessor.cs" />
-    <Compile Remove="Pipeline\Streams\StreamRequestExceptionActionProcessorBehavior.cs" />
-    <Compile Remove="Pipeline\Streams\StreamRequestExceptionHandlerState.cs" />
-    <Compile Remove="Pipeline\Streams\StreamRequestExceptionProcessorBehavior.cs" />
-    <Compile Remove="Pipeline\Streams\StreamRequestPostProcessorBehavior.cs" />
-    <Compile Remove="Pipeline\Streams\StreamRequestPreProcessorBehavior.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="..\..\assets\logo\gradient_128x128.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.3.1" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="2.5.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>

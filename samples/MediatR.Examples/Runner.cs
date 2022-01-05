@@ -53,7 +53,6 @@ namespace MediatR.Examples
             await writer.WriteLineAsync();
 
             bool failedSing = false;
-#if NETSTANDARD2_1
             if (testStreams)
             {
                 await writer.WriteLineAsync("Sending Sing...");
@@ -104,7 +103,6 @@ namespace MediatR.Examples
                 }
                 await writer.WriteLineAsync();
             }
-#endif
 
             var isHandlerForSameExceptionWorks = await IsHandlerForSameExceptionWorks(mediator, writer).ConfigureAwait(false);
             var isHandlerForBaseExceptionWorks = await IsHandlerForBaseExceptionWorks(mediator, writer).ConfigureAwait(false);
