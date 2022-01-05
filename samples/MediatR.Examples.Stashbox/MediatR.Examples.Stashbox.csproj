@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Stashbox" Version="3.5.0" />
+    <PackageReference Include="Stashbox" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>

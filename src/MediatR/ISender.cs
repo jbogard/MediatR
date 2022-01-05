@@ -1,6 +1,4 @@
-﻿#if NETSTANDARD2_1
-using System.Collections.Generic;
-#endif
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +26,6 @@ namespace MediatR
         /// <returns>A task that represents the send operation. The task result contains the type erased handler response</returns>
         Task<object?> Send(object request, CancellationToken cancellationToken = default);
 
-#if NETSTANDARD2_1
         /// <summary>
         /// Create a stream via a single stream handler
         /// </summary>
@@ -46,7 +43,6 @@ namespace MediatR
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default);
-#endif
 
     }
 }

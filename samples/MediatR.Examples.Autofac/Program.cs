@@ -28,9 +28,7 @@ namespace MediatR.Examples.Autofac
                 typeof(IRequestExceptionHandler<,,>),
                 typeof(IRequestExceptionAction<,>),
                 typeof(INotificationHandler<>),
-#if NETCOREAPP3_1_OR_GREATER
                 typeof(IStreamRequestHandler<,>)
-#endif
             };
 
             foreach (var mediatrOpenType in mediatrOpenTypes)
