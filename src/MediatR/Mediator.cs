@@ -116,7 +116,7 @@ public class Mediator : IMediator
     }
 
 
-    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         if (request == null)
         {
@@ -148,12 +148,12 @@ public class Mediator : IMediator
             {
                 var requestInterfaceType = requestTypeKey
                     .GetInterfaces()
-                    .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+                    .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStreamRequest<>));
                 var isValidRequest = requestInterfaceType != null;
 
                 if (!isValidRequest)
                 {
-                    throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(requestTypeKey));
+                    throw new ArgumentException($"{requestType.Name} does not implement IStreamRequest<TResponse>", nameof(requestTypeKey));
                 }
 
                 var responseType = requestInterfaceType!.GetGenericArguments()[0];

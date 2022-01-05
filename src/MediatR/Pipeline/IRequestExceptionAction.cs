@@ -42,10 +42,8 @@ public interface IRequestExceptionAction<in TRequest> : IRequestExceptionAction<
 public abstract class AsyncRequestExceptionAction<TRequest> : IRequestExceptionAction<TRequest>
     where TRequest : IRequest
 {
-    async Task IRequestExceptionAction<TRequest, Exception>.Execute(TRequest request, Exception exception, CancellationToken cancellationToken)
-    {
-        await Execute(request, exception, cancellationToken).ConfigureAwait(false);
-    }
+    async Task IRequestExceptionAction<TRequest, Exception>.Execute(TRequest request, Exception exception, CancellationToken cancellationToken) 
+        => await Execute(request, exception, cancellationToken).ConfigureAwait(false);
 
     /// <summary>
     /// Override in a derived class for the action logic

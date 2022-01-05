@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 /// <typeparam name="TRequest"></typeparam>
 /// <typeparam name="TResponse"></typeparam>
 public class RequestPreProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : IRequest<TResponse>
 {
     private readonly IEnumerable<IRequestPreProcessor<TRequest>> _preProcessors;
 

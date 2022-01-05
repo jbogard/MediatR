@@ -33,8 +33,7 @@ public interface ISender
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    IAsyncEnumerable<TResponse> CreateStream<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
-
+    IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Create a stream via an object request to a stream handler
@@ -43,5 +42,4 @@ public interface ISender
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default);
-
 }

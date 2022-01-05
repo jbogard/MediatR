@@ -11,7 +11,7 @@ using Xunit;
 
 public class StreamPipelineTests
 {
-    public class Ping : IRequest<Pong>
+    public class Ping : IStreamRequest<Pong>
     {
         public string Message { get; set; }
     }
@@ -21,7 +21,7 @@ public class StreamPipelineTests
         public string Message { get; set; }
     }
 
-    public class Zing : IRequest<Zong>
+    public class Zing : IStreamRequest<Zong>
     {
         public string Message { get; set; }
     }
@@ -104,6 +104,7 @@ public class StreamPipelineTests
     }
 
     public class InnerBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+        where TRequest : IStreamRequest<TResponse>
     {
         private readonly Logger _output;
 
@@ -124,6 +125,7 @@ public class StreamPipelineTests
     }
 
     public class OuterBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+        where TRequest : IStreamRequest<TResponse>
     {
         private readonly Logger _output;
 
@@ -144,7 +146,7 @@ public class StreamPipelineTests
     }
 
     public class ConstrainedBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
-        where TRequest : Ping
+        where TRequest : Ping, IStreamRequest<TResponse>
         where TResponse : Pong
     {
         private readonly Logger _output;

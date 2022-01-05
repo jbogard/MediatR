@@ -13,22 +13,22 @@ internal abstract class StreamRequestHandlerBase : HandlerBase
 
 internal abstract class StreamRequestHandlerWrapper<TResponse> : StreamRequestHandlerBase
 {
-    public abstract IAsyncEnumerable<TResponse> Handle(IRequest<TResponse> request, CancellationToken cancellationToken,
+    public abstract IAsyncEnumerable<TResponse> Handle(IStreamRequest<TResponse> request, CancellationToken cancellationToken,
         ServiceFactory serviceFactory);
 }
 
 internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> : StreamRequestHandlerWrapper<TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : IStreamRequest<TResponse>
 {
     public override async IAsyncEnumerable<object?> Handle(object request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
     {
-        await foreach (var item in Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory))
+        await foreach (var item in Handle((IStreamRequest<TResponse>) request, cancellationToken, serviceFactory))
         {
             yield return item;
         }
     }
 
-    public override async IAsyncEnumerable<TResponse> Handle(IRequest<TResponse> request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
+    public override async IAsyncEnumerable<TResponse> Handle(IStreamRequest<TResponse> request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
     {
         IAsyncEnumerable<TResponse> Handler() => GetHandler<IStreamRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
 

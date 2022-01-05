@@ -17,7 +17,8 @@ public delegate IAsyncEnumerable<TResponse> StreamHandlerDelegate<out TResponse>
 /// </summary>
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
-public interface IStreamPipelineBehavior<in TRequest, TResponse> where TRequest : notnull
+public interface IStreamPipelineBehavior<in TRequest, TResponse>
+    where TRequest : IStreamRequest<TResponse>
 {
     /// <summary>
     /// Stream Pipeline handler. Perform any additional behavior and iterate the <paramref name="next"/> delegate as necessary

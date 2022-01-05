@@ -6,6 +6,7 @@ using MediatR.Pipeline;
 namespace MediatR.Examples;
 
 public class GenericRequestPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
     private readonly TextWriter _writer;
 

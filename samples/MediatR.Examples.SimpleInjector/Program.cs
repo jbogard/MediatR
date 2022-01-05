@@ -30,7 +30,7 @@ internal static class Program
         RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
         RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
         RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
-        RegisterHandlers(container, typeof(StreamRequestHandler<,>), assemblies);
+        RegisterHandlers(container, typeof(IStreamRequestHandler<,>), assemblies);
 
         container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
 
