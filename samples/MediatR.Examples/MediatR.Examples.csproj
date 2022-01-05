@@ -2,7 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Remove="Stream**" />
+    <Compile Remove="Streams\**" />
+    <EmbeddedResource Remove="Streams\**" />
+    <None Remove="Streams\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />

@@ -4,10 +4,34 @@
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <ProjectReference Properties="TargetFramework=net461" Include="..\..\src\MediatR\MediatR.csproj" />
+    <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamPipelineTests.cs" />
+    <Compile Remove="StreamRequestHandlerTests.cs" />
+    <Compile Remove="Pipeline\Streams\**" />
+    <EmbeddedResource Remove="Pipeline\Streams\**" />
+    <None Remove="Pipeline\Streams\**" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.0" Include="..\..\src\MediatR\MediatR.csproj" />
+    <Compile Remove="CreateStreamTests.cs" />
+    <Compile Remove="StreamPipelineTests.cs" />
+    <Compile Remove="StreamRequestHandlerTests.cs" />
+    <Compile Remove="Pipeline\Streams\**" />
+    <EmbeddedResource Remove="Pipeline\Streams\**" />
+    <None Remove="Pipeline\Streams\**" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.1" Include="..\..\src\MediatR\MediatR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <ProjectReference Properties="TargetFramework=netstandard2.1" Include="..\..\src\MediatR\MediatR.csproj" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />

@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{962C5ACA-A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR", "src\MediatR\MediatR.csproj", "{12DA3F16-060B-467A-993F-2DF25EE6E6A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "src\MediatR\MediatR.csproj", "{12DA3F16-060B-467A-993F-2DF25EE6E6A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Tests", "test\MediatR.Tests\MediatR.Tests.csproj", "{4FB0CFC4-90E3-467F-9704-6FBF637F9B4B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Tests", "test\MediatR.Tests\MediatR.Tests.csproj", "{4FB0CFC4-90E3-467F-9704-6FBF637F9B4B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples", "samples\MediatR.Examples\MediatR.Examples.csproj", "{18AB74EF-6E32-42C5-B6C4-159624CEDC5D}"
 EndProject
