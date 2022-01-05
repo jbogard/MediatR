@@ -1,68 +1,67 @@
 using System.Threading;
 
-namespace MediatR.Examples
+namespace MediatR.Examples;
+
+using System.IO;
+using System.Threading.Tasks;
+
+public class PingedHandler : INotificationHandler<Pinged>
 {
-    using System.IO;
-    using System.Threading.Tasks;
+    private readonly TextWriter _writer;
 
-    public class PingedHandler : INotificationHandler<Pinged>
+    public PingedHandler(TextWriter writer)
     {
-        private readonly TextWriter _writer;
-
-        public PingedHandler(TextWriter writer)
-        {
-            _writer = writer;
-        }
-
-        public Task Handle(Pinged notification, CancellationToken cancellationToken)
-        {
-            return _writer.WriteLineAsync("Got pinged async.");
-        }
+        _writer = writer;
     }
 
-    public class PongedHandler : INotificationHandler<Ponged>
+    public Task Handle(Pinged notification, CancellationToken cancellationToken)
     {
-        private readonly TextWriter _writer;
+        return _writer.WriteLineAsync("Got pinged async.");
+    }
+}
 
-        public PongedHandler(TextWriter writer)
-        {
-            _writer = writer;
-        }
+public class PongedHandler : INotificationHandler<Ponged>
+{
+    private readonly TextWriter _writer;
 
-        public Task Handle(Ponged notification, CancellationToken cancellationToken)
-        {
-            return _writer.WriteLineAsync("Got ponged async.");
-        }
+    public PongedHandler(TextWriter writer)
+    {
+        _writer = writer;
     }
 
-    public class ConstrainedPingedHandler<TNotification> : INotificationHandler<TNotification>
-        where TNotification : Pinged
+    public Task Handle(Ponged notification, CancellationToken cancellationToken)
     {
-        private readonly TextWriter _writer;
+        return _writer.WriteLineAsync("Got ponged async.");
+    }
+}
 
-        public ConstrainedPingedHandler(TextWriter writer)
-        {
-            _writer = writer;
-        }
+public class ConstrainedPingedHandler<TNotification> : INotificationHandler<TNotification>
+    where TNotification : Pinged
+{
+    private readonly TextWriter _writer;
 
-        public Task Handle(TNotification notification, CancellationToken cancellationToken)
-        {
-            return _writer.WriteLineAsync("Got pinged constrained async.");
-        }
+    public ConstrainedPingedHandler(TextWriter writer)
+    {
+        _writer = writer;
     }
 
-    public class PingedAlsoHandler : INotificationHandler<Pinged>
+    public Task Handle(TNotification notification, CancellationToken cancellationToken)
     {
-        private readonly TextWriter _writer;
+        return _writer.WriteLineAsync("Got pinged constrained async.");
+    }
+}
 
-        public PingedAlsoHandler(TextWriter writer)
-        {
-            _writer = writer;
-        }
+public class PingedAlsoHandler : INotificationHandler<Pinged>
+{
+    private readonly TextWriter _writer;
 
-        public Task Handle(Pinged notification, CancellationToken cancellationToken)
-        {
-            return _writer.WriteLineAsync("Got pinged also async.");
-        }
+    public PingedAlsoHandler(TextWriter writer)
+    {
+        _writer = writer;
+    }
+
+    public Task Handle(Pinged notification, CancellationToken cancellationToken)
+    {
+        return _writer.WriteLineAsync("Got pinged also async.");
     }
 }

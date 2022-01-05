@@ -1,102 +1,101 @@
 using System.Threading;
 
-namespace MediatR.Tests
+namespace MediatR.Tests;
+
+using System.Threading.Tasks;
+using Shouldly;
+using StructureMap;
+using Xunit;
+
+public class SendTests
 {
-    using System.Threading.Tasks;
-    using Shouldly;
-    using StructureMap;
-    using Xunit;
 
-    public class SendTests
+    public class Ping : IRequest<Pong>
     {
+        public string Message { get; set; }
+    }
 
-        public class Ping : IRequest<Pong>
+    public class Pong
+    {
+        public string Message { get; set; }
+    }
+
+    public class PingHandler : IRequestHandler<Ping, Pong>
+    {
+        public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
         {
-            public string Message { get; set; }
+            return Task.FromResult(new Pong { Message = request.Message + " Pong" });
         }
+    }
 
-        public class Pong
+    [Fact]
+    public async Task Should_resolve_main_handler()
+    {
+        var container = new Container(cfg =>
         {
-            public string Message { get; set; }
-        }
-
-        public class PingHandler : IRequestHandler<Ping, Pong>
-        {
-            public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
+            cfg.Scan(scanner =>
             {
-                return Task.FromResult(new Pong { Message = request.Message + " Pong" });
-            }
-        }
-
-        [Fact]
-        public async Task Should_resolve_main_handler()
-        {
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
 
-            var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetInstance<IMediator>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+        var response = await mediator.Send(new Ping { Message = "Ping" });
 
-            response.Message.ShouldBe("Ping Pong");
-        }
+        response.Message.ShouldBe("Ping Pong");
+    }
 
-        [Fact]
-        public async Task Should_resolve_main_handler_via_dynamic_dispatch()
+    [Fact]
+    public async Task Should_resolve_main_handler_via_dynamic_dispatch()
+    {
+        var container = new Container(cfg =>
         {
-            var container = new Container(cfg =>
+            cfg.Scan(scanner =>
             {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
-                cfg.For<IMediator>().Use<Mediator>();
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+            cfg.For<IMediator>().Use<Mediator>();
+        });
 
-            var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetInstance<IMediator>();
 
-            object request = new Ping { Message = "Ping" };
-            var response = await mediator.Send(request);
+        object request = new Ping { Message = "Ping" };
+        var response = await mediator.Send(request);
 
-            var pong = response.ShouldBeOfType<Pong>();
-            pong.Message.ShouldBe("Ping Pong");
-        }
+        var pong = response.ShouldBeOfType<Pong>();
+        pong.Message.ShouldBe("Ping Pong");
+    }
 
-        [Fact]
-        public async Task Should_resolve_main_handler_by_specific_interface()
+    [Fact]
+    public async Task Should_resolve_main_handler_by_specific_interface()
+    {
+        var container = new Container(cfg =>
         {
-            var container = new Container(cfg =>
+            cfg.Scan(scanner =>
             {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-                });
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<ISender>().Use<Mediator>();
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ISender>().Use<Mediator>();
+        });
 
-            var mediator = container.GetInstance<ISender>();
+        var mediator = container.GetInstance<ISender>();
 
-            var response = await mediator.Send(new Ping { Message = "Ping" });
+        var response = await mediator.Send(new Ping { Message = "Ping" });
 
-            response.Message.ShouldBe("Ping Pong");
-        }
+        response.Message.ShouldBe("Ping Pong");
     }
 }

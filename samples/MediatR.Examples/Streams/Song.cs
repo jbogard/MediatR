@@ -1,7 +1,6 @@
-namespace MediatR.Examples
+namespace MediatR.Examples;
+
+public class Song
 {
-    public class Song
-    {
-        public string Message { get; set; }
-    }
+    public string Message { get; set; }
 }

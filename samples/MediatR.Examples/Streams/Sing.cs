@@ -1,7 +1,6 @@
-namespace MediatR.Examples
+namespace MediatR.Examples;
+
+public class Sing : IRequest<Song>
 {
-    public class Sing : IRequest<Song>
-    {
-        public string Message { get; set; }
-    }
+    public string Message { get; set; }
 }

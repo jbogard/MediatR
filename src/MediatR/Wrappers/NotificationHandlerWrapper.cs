@@ -1,28 +1,27 @@
-namespace MediatR.Wrappers
+namespace MediatR.Wrappers;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+public abstract class NotificationHandlerWrapper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
+    public abstract Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
+        Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish);
+}
 
-    public abstract class NotificationHandlerWrapper
+public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandlerWrapper
+    where TNotification : INotification
+{
+    public override Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
+        Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish)
     {
-        public abstract Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
-                                    Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish);
-    }
+        var handlers = serviceFactory
+            .GetInstances<INotificationHandler<TNotification>>()
+            .Select(x => new Func<INotification, CancellationToken, Task>((theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));
 
-    public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandlerWrapper
-        where TNotification : INotification
-    {
-        public override Task Handle(INotification notification, CancellationToken cancellationToken, ServiceFactory serviceFactory,
-                                    Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish)
-        {
-            var handlers = serviceFactory
-                .GetInstances<INotificationHandler<TNotification>>()
-                .Select(x => new Func<INotification, CancellationToken, Task>((theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));
-
-            return publish(handlers, notification, cancellationToken);
-        }
+        return publish(handlers, notification, cancellationToken);
     }
 }

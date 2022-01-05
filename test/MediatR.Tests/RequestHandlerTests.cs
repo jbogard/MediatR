@@ -2,36 +2,35 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 
-namespace MediatR.Tests
+namespace MediatR.Tests;
+
+public class RequestHandlerTests
 {
-    public class RequestHandlerTests
+    public class Ping : IRequest<Pong>
     {
-        public class Ping : IRequest<Pong>
+        public string Message { get; set; }
+    }
+
+    public class Pong
+    {
+        public string Message { get; set; }
+    }
+
+    public class PingHandler : RequestHandler<Ping, Pong>
+    {
+        protected override Pong Handle(Ping request)
         {
-            public string Message { get; set; }
+            return new Pong { Message = request.Message + " Pong" };
         }
+    }
 
-        public class Pong
-        {
-            public string Message { get; set; }
-        }
+    [Fact]
+    public async Task Should_call_abstract_handler()
+    {
+        IRequestHandler<Ping, Pong> handler = new PingHandler();
 
-        public class PingHandler : RequestHandler<Ping, Pong>
-        {
-            protected override Pong Handle(Ping request)
-            {
-                return new Pong { Message = request.Message + " Pong" };
-            }
-        }
+        var response = await handler.Handle(new Ping() { Message = "Ping" }, default);
 
-        [Fact]
-        public async Task Should_call_abstract_handler()
-        {
-            IRequestHandler<Ping, Pong> handler = new PingHandler();
-
-            var response = await handler.Handle(new Ping() { Message = "Ping" }, default);
-
-            response.Message.ShouldBe("Ping Pong");
-        }
+        response.Message.ShouldBe("Ping Pong");
     }
 }

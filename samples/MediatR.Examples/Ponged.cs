@@ -1,7 +1,6 @@
-﻿namespace MediatR.Examples
-{
-    public class Ponged : INotification
-    {
+﻿namespace MediatR.Examples;
 
-    }
+public class Ponged : INotification
+{
+
 }

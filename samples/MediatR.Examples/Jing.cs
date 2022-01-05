@@ -1,7 +1,6 @@
-namespace MediatR.Examples
+namespace MediatR.Examples;
+
+public class Jing : IRequest
 {
-    public class Jing : IRequest
-    {
-        public string Message { get; set; }
-    }
+    public string Message { get; set; }
 }

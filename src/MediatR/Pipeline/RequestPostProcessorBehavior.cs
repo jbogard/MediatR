@@ -1,32 +1,31 @@
-namespace MediatR.Pipeline
+namespace MediatR.Pipeline;
+
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+/// <summary>
+/// Behavior for executing all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> instances after handling the request
+/// </summary>
+/// <typeparam name="TRequest">Request type</typeparam>
+/// <typeparam name="TResponse">Response type</typeparam>
+public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull
 {
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
+    private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
 
-    /// <summary>
-    /// Behavior for executing all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> instances after handling the request
-    /// </summary>
-    /// <typeparam name="TRequest">Request type</typeparam>
-    /// <typeparam name="TResponse">Response type</typeparam>
-    public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : notnull
+    public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors) 
+        => _postProcessors = postProcessors;
+
+    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
     {
-        private readonly IEnumerable<IRequestPostProcessor<TRequest, TResponse>> _postProcessors;
+        var response = await next().ConfigureAwait(false);
 
-        public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors) 
-            => _postProcessors = postProcessors;
-
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        foreach (var processor in _postProcessors)
         {
-            var response = await next().ConfigureAwait(false);
-
-            foreach (var processor in _postProcessors)
-            {
-                await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
-            }
-
-            return response;
+            await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
         }
+
+        return response;
     }
 }
