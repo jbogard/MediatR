@@ -4,25 +4,24 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.Examples
+namespace MediatR.Examples;
+
+public class GenericStreamPipelineBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
 {
-    public class GenericStreamPipelineBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+    private readonly TextWriter _writer;
+
+    public GenericStreamPipelineBehavior(TextWriter writer)
     {
-        private readonly TextWriter _writer;
+        _writer = writer;
+    }
 
-        public GenericStreamPipelineBehavior(TextWriter writer)
+    public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation]CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
+    {
+        await _writer.WriteLineAsync("-- Handling StreamRequest");
+        await foreach (var response in next().WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            _writer = writer;
+            yield return response;
         }
-
-        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation]CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
-        {
-            await _writer.WriteLineAsync("-- Handling StreamRequest");
-            await foreach (var response in next().WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
-                yield return response;
-            }
-            await _writer.WriteLineAsync("-- Finished StreamRequest");
-        }
+        await _writer.WriteLineAsync("-- Finished StreamRequest");
     }
 }

@@ -1,7 +1,6 @@
-namespace MediatR
-{
-    /// <summary>
-    /// Marker interface to represent a notification
-    /// </summary>
-    public interface INotification { }
-}
+namespace MediatR;
+
+/// <summary>
+/// Marker interface to represent a notification
+/// </summary>
+public interface INotification { }

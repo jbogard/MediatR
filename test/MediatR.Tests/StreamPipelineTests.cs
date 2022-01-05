@@ -1,384 +1,383 @@
 using System.Threading;
 
-namespace MediatR.Tests
+namespace MediatR.Tests;
+
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Shouldly;
+using StructureMap;
+using Xunit;
+
+public class StreamPipelineTests
 {
-    using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using Shouldly;
-    using StructureMap;
-    using Xunit;
-
-    public class StreamPipelineTests
+    public class Ping : IRequest<Pong>
     {
-        public class Ping : IRequest<Pong>
+        public string Message { get; set; }
+    }
+
+    public class Pong
+    {
+        public string Message { get; set; }
+    }
+
+    public class Zing : IRequest<Zong>
+    {
+        public string Message { get; set; }
+    }
+
+    public class Zong
+    {
+        public string Message { get; set; }
+    }
+
+    public class PingHandler : IStreamRequestHandler<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public PingHandler(Logger output)
         {
-            public string Message { get; set; }
+            _output = output;
         }
 
-        public class Pong
+        public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
         {
-            public string Message { get; set; }
+            _output.Messages.Add("Handler");
+            yield return await Task.FromResult(new Pong { Message = request.Message + " Pong" });
+        }
+    }
+
+    public class ZingHandler : IStreamRequestHandler<Zing, Zong>
+    {
+        private readonly Logger _output;
+
+        public ZingHandler(Logger output)
+        {
+            _output = output;
         }
 
-        public class Zing : IRequest<Zong>
+        public async IAsyncEnumerable<Zong> Handle(Zing request, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            public string Message { get; set; }
+            _output.Messages.Add("Handler");
+            yield return await Task.FromResult(new Zong { Message = request.Message + " Zong" });
+        }
+    }
+
+    public class OuterBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public OuterBehavior(Logger output)
+        {
+            _output = output;
         }
 
-        public class Zong
+        public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
         {
-            public string Message { get; set; }
+            _output.Messages.Add("Outer before");
+            await foreach (var result in next())
+            {
+                yield return result;
+            }
+            _output.Messages.Add("Outer after");
+        }
+    }
+
+    public class InnerBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public InnerBehavior(Logger output)
+        {
+            _output = output;
         }
 
-        public class PingHandler : IStreamRequestHandler<Ping, Pong>
+        public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
         {
-            private readonly Logger _output;
-
-            public PingHandler(Logger output)
+            _output.Messages.Add("Inner before");
+            await foreach (var result in next())
             {
-                _output = output;
+                yield return result;
             }
+            _output.Messages.Add("Inner after");
+        }
+    }
 
-            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation]CancellationToken cancellationToken)
-            {
-                _output.Messages.Add("Handler");
-                yield return await Task.FromResult(new Pong { Message = request.Message + " Pong" });
-            }
+    public class InnerBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+    {
+        private readonly Logger _output;
+
+        public InnerBehavior(Logger output)
+        {
+            _output = output;
         }
 
-        public class ZingHandler : IStreamRequestHandler<Zing, Zong>
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
         {
-            private readonly Logger _output;
-
-            public ZingHandler(Logger output)
+            _output.Messages.Add("Inner generic before");
+            await foreach (var result in next())
             {
-                _output = output;
+                yield return result;
             }
+            _output.Messages.Add("Inner generic after");
+        }
+    }
 
-            public async IAsyncEnumerable<Zong> Handle(Zing request, [EnumeratorCancellation] CancellationToken cancellationToken)
-            {
-                _output.Messages.Add("Handler");
-                yield return await Task.FromResult(new Zong { Message = request.Message + " Zong" });
-            }
+    public class OuterBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+    {
+        private readonly Logger _output;
+
+        public OuterBehavior(Logger output)
+        {
+            _output = output;
         }
 
-        public class OuterBehavior : IStreamPipelineBehavior<Ping, Pong>
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
         {
-            private readonly Logger _output;
-
-            public OuterBehavior(Logger output)
+            _output.Messages.Add("Outer generic before");
+            await foreach (var result in next())
             {
-                _output = output;
+                yield return result;
             }
+            _output.Messages.Add("Outer generic after");
+        }
+    }
 
-            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
+    public class ConstrainedBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+        where TRequest : Ping
+        where TResponse : Pong
+    {
+        private readonly Logger _output;
+
+        public ConstrainedBehavior(Logger output)
+        {
+            _output = output;
+        }
+        public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
+        {
+            _output.Messages.Add("Constrained before");
+            await foreach (var result in next())
             {
-                _output.Messages.Add("Outer before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Outer after");
+                yield return result;
             }
+            _output.Messages.Add("Constrained after");
+        }
+    }
+
+    public class ConcreteBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public ConcreteBehavior(Logger output)
+        {
+            _output = output;
         }
 
-        public class InnerBehavior : IStreamPipelineBehavior<Ping, Pong>
+        public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
         {
-            private readonly Logger _output;
-
-            public InnerBehavior(Logger output)
+            _output.Messages.Add("Concrete before");
+            await foreach (var result in next())
             {
-                _output = output;
+                yield return result;
             }
-
-            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
-            {
-                _output.Messages.Add("Inner before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Inner after");
-            }
+            _output.Messages.Add("Concrete after");
         }
+    }
 
-        public class InnerBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+    public class Logger
+    {
+        public IList<string> Messages { get; } = new List<string>();
+    }
+
+    [Fact]
+    public async Task Should_wrap_with_behavior()
+    {
+        var output = new Logger();
+        var container = new Container(cfg =>
         {
-            private readonly Logger _output;
-
-            public InnerBehavior(Logger output)
+            cfg.Scan(scanner =>
             {
-                _output = output;
-            }
-
-            public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
-            {
-                _output.Messages.Add("Inner generic before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Inner generic after");
-            }
-        }
-
-        public class OuterBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
-        {
-            private readonly Logger _output;
-
-            public OuterBehavior(Logger output)
-            {
-                _output = output;
-            }
-
-            public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
-            {
-                _output.Messages.Add("Outer generic before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Outer generic after");
-            }
-        }
-
-        public class ConstrainedBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
-            where TRequest : Ping
-            where TResponse : Pong
-        {
-            private readonly Logger _output;
-
-            public ConstrainedBehavior(Logger output)
-            {
-                _output = output;
-            }
-            public async IAsyncEnumerable<TResponse> Handle(TRequest request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<TResponse> next)
-            {
-                _output.Messages.Add("Constrained before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Constrained after");
-            }
-        }
-
-        public class ConcreteBehavior : IStreamPipelineBehavior<Ping, Pong>
-        {
-            private readonly Logger _output;
-
-            public ConcreteBehavior(Logger output)
-            {
-                _output = output;
-            }
-
-            public async IAsyncEnumerable<Pong> Handle(Ping request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Pong> next)
-            {
-                _output.Messages.Add("Concrete before");
-                await foreach (var result in next())
-                {
-                    yield return result;
-                }
-                _output.Messages.Add("Concrete after");
-            }
-        }
-
-        public class Logger
-        {
-            public IList<string> Messages { get; } = new List<string>();
-        }
-
-        [Fact]
-        public async Task Should_wrap_with_behavior()
-        {
-            var output = new Logger();
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
-                });
-                cfg.For<Logger>().Singleton().Use(output);
-                cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
-                cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
+            cfg.For<Logger>().Singleton().Use(output);
+            cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
+            cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
 
-            var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetInstance<IMediator>();
 
-            await foreach(var response in mediator.CreateStream(new Ping { Message = "Ping" }))
-            {
-                response.Message.ShouldBe("Ping Pong");
-            }
-
-            output.Messages.ShouldBe(new []
-            {
-                "Outer before",
-                "Inner before",
-                "Handler",
-                "Inner after",
-                "Outer after"
-            });
-        }
-
-        [Fact]
-        public async Task Should_wrap_generics_with_behavior()
+        await foreach(var response in mediator.CreateStream(new Ping { Message = "Ping" }))
         {
-            var output = new Logger();
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
-                });
-                cfg.For<Logger>().Singleton().Use(output);
-
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
-
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
-            });
-
-            var mediator = container.GetInstance<IMediator>();
-
-            await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
-            {
-                response.Message.ShouldBe("Ping Pong");
-            }
-
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Handler",
-                "Inner generic after",
-                "Outer generic after",
-            });
+            response.Message.ShouldBe("Ping Pong");
         }
 
-        [Fact]
-        public async Task Should_handle_constrained_generics()
+        output.Messages.ShouldBe(new []
         {
-            var output = new Logger();
-            var container = new Container(cfg =>
-            {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
-                });
-                cfg.For<Logger>().Singleton().Use(output);
+            "Outer before",
+            "Inner before",
+            "Handler",
+            "Inner after",
+            "Outer after"
+        });
+    }
 
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
-
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
-            });
-
-            var mediator = container.GetInstance<IMediator>();
-
-            await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
-            {
-                response.Message.ShouldBe("Ping Pong");
-            }
-
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Constrained before",
-                "Handler",
-                "Constrained after",
-                "Inner generic after",
-                "Outer generic after",
-            });
-
-            output.Messages.Clear();
-
-            await foreach (var response in mediator.CreateStream(new Zing { Message = "Zing" }))
-            {
-                response.Message.ShouldBe("Zing Zong");
-            }
-
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Handler",
-                "Inner generic after",
-                "Outer generic after",
-            });
-        }
-
-        [Fact(Skip = "StructureMap does not mix concrete and open generics. Use constraints instead.")]
-        public async Task Should_handle_concrete_and_open_generics()
+    [Fact]
+    public async Task Should_wrap_generics_with_behavior()
+    {
+        var output = new Logger();
+        var container = new Container(cfg =>
         {
-            var output = new Logger();
-            var container = new Container(cfg =>
+            cfg.Scan(scanner =>
             {
-                cfg.Scan(scanner =>
-                {
-                    scanner.AssemblyContainingType(typeof(PublishTests));
-                    scanner.IncludeNamespaceContainingType<Ping>();
-                    scanner.WithDefaultConventions();
-                    scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
-                });
-                cfg.For<Logger>().Singleton().Use(output);
-
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
-                cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
-                cfg.For(typeof(IStreamPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
-
-                cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
-                cfg.For<IMediator>().Use<Mediator>();
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
+            cfg.For<Logger>().Singleton().Use(output);
 
-            var mediator = container.GetInstance<IMediator>();
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
 
-            await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
-            {
-                response.Message.ShouldBe("Ping Pong");
-            }
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
 
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Concrete before",
-                "Handler",
-                "Concrete after",
-                "Inner generic after",
-                "Outer generic after",
-            });
+        var mediator = container.GetInstance<IMediator>();
 
-            output.Messages.Clear();
-
-            await foreach (var response in mediator.CreateStream(new Zing { Message = "Zing" }))
-            {
-                response.Message.ShouldBe("Zing Zong");
-            }
-
-            output.Messages.ShouldBe(new[]
-            {
-                "Outer generic before",
-                "Inner generic before",
-                "Handler",
-                "Inner generic after",
-                "Outer generic after",
-            });
+        await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
+        {
+            response.Message.ShouldBe("Ping Pong");
         }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer generic before",
+            "Inner generic before",
+            "Handler",
+            "Inner generic after",
+            "Outer generic after",
+        });
+    }
+
+    [Fact]
+    public async Task Should_handle_constrained_generics()
+    {
+        var output = new Logger();
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
+            });
+            cfg.For<Logger>().Singleton().Use(output);
+
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
+
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
+        {
+            response.Message.ShouldBe("Ping Pong");
+        }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer generic before",
+            "Inner generic before",
+            "Constrained before",
+            "Handler",
+            "Constrained after",
+            "Inner generic after",
+            "Outer generic after",
+        });
+
+        output.Messages.Clear();
+
+        await foreach (var response in mediator.CreateStream(new Zing { Message = "Zing" }))
+        {
+            response.Message.ShouldBe("Zing Zong");
+        }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer generic before",
+            "Inner generic before",
+            "Handler",
+            "Inner generic after",
+            "Outer generic after",
+        });
+    }
+
+    [Fact(Skip = "StructureMap does not mix concrete and open generics. Use constraints instead.")]
+    public async Task Should_handle_concrete_and_open_generics()
+    {
+        var output = new Logger();
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
+            });
+            cfg.For<Logger>().Singleton().Use(output);
+
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
+            cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
+            cfg.For(typeof(IStreamPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
+
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        await foreach (var response in mediator.CreateStream(new Ping { Message = "Ping" }))
+        {
+            response.Message.ShouldBe("Ping Pong");
+        }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer generic before",
+            "Inner generic before",
+            "Concrete before",
+            "Handler",
+            "Concrete after",
+            "Inner generic after",
+            "Outer generic after",
+        });
+
+        output.Messages.Clear();
+
+        await foreach (var response in mediator.CreateStream(new Zing { Message = "Zing" }))
+        {
+            response.Message.ShouldBe("Zing Zong");
+        }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer generic before",
+            "Inner generic before",
+            "Handler",
+            "Inner generic after",
+            "Outer generic after",
+        });
     }
 }

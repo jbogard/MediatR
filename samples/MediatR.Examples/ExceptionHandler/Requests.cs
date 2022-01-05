@@ -1,10 +1,9 @@
-namespace MediatR.Examples.ExceptionHandler
-{
-    public class PingResource : Ping { }
+namespace MediatR.Examples.ExceptionHandler;
 
-    public class PingNewResource : Ping { }
+public class PingResource : Ping { }
 
-    public class PingResourceTimeout : PingResource { }
+public class PingNewResource : Ping { }
 
-    public class PingProtectedResource : PingResource { }
-}
+public class PingResourceTimeout : PingResource { }
+
+public class PingProtectedResource : PingResource { }

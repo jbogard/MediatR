@@ -4,45 +4,44 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 
-namespace MediatR.Tests
+namespace MediatR.Tests;
+
+public class NotificationHandlerTests
 {
-    public class NotificationHandlerTests
+    public class Ping : INotification
     {
-        public class Ping : INotification
+        public string Message { get; set; }
+    }
+
+    public class PongChildHandler : NotificationHandler<Ping>
+    {
+        private readonly TextWriter _writer;
+
+        public PongChildHandler(TextWriter writer)
         {
-            public string Message { get; set; }
+            _writer = writer;
         }
 
-        public class PongChildHandler : NotificationHandler<Ping>
+        protected override void Handle(Ping notification)
         {
-            private readonly TextWriter _writer;
-
-            public PongChildHandler(TextWriter writer)
-            {
-                _writer = writer;
-            }
-
-            protected override void Handle(Ping notification)
-            {
-                _writer.WriteLine(notification.Message + " Pong");
-            }
+            _writer.WriteLine(notification.Message + " Pong");
         }
+    }
 
-        [Fact]
-        public async Task Should_call_abstract_handle_method()
-        {
-            var builder = new StringBuilder();
-            var writer = new StringWriter(builder);
+    [Fact]
+    public async Task Should_call_abstract_handle_method()
+    {
+        var builder = new StringBuilder();
+        var writer = new StringWriter(builder);
 
-            INotificationHandler<Ping> handler = new PongChildHandler(writer);
+        INotificationHandler<Ping> handler = new PongChildHandler(writer);
 
-            await handler.Handle(
-                new Ping() { Message = "Ping" },
-                default
-            );
+        await handler.Handle(
+            new Ping() { Message = "Ping" },
+            default
+        );
 
-            var result = builder.ToString();
-            result.ShouldContain("Ping Pong");
-        }
+        var result = builder.ToString();
+        result.ShouldContain("Ping Pong");
     }
 }
