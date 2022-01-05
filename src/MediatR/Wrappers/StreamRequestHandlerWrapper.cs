@@ -1,6 +1,5 @@
 namespace MediatR.Wrappers;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -21,7 +20,7 @@ internal abstract class StreamRequestHandlerWrapper<TResponse> : StreamRequestHa
 internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> : StreamRequestHandlerWrapper<TResponse>
     where TRequest : IRequest<TResponse>
 {
-    public async override IAsyncEnumerable<object?> Handle(object request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
+    public override async IAsyncEnumerable<object?> Handle(object request, [EnumeratorCancellation] CancellationToken cancellationToken, ServiceFactory serviceFactory)
     {
         await foreach (var item in Handle((IRequest<TResponse>) request, cancellationToken, serviceFactory))
         {
@@ -41,12 +40,11 @@ internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> : StreamRequ
                 (next, pipeline) => () => pipeline.Handle(
                     (TRequest) request, 
                     cancellationToken, 
-                    new StreamHandlerDelegate<TResponse>(
-                        () => NextWrapper(next(), cancellationToken))
+                    () => NextWrapper(next(), cancellationToken)
                 )
             )();
 
-        await foreach ( var item in items )
+        await foreach ( var item in items.WithCancellation(cancellationToken) )
         {
             yield return item;
         }

@@ -25,9 +25,9 @@ internal static class HandlersOrderer
 
     private static IEnumerable<ObjectDetails> RemoveOverridden(IList<ObjectDetails> handlersData)
     {
-        for (int i = 0; i < handlersData.Count - 1; i++)
+        for (var i = 0; i < handlersData.Count - 1; i++)
         {
-            for (int j = i + 1; j < handlersData.Count; j++)
+            for (var j = i + 1; j < handlersData.Count; j++)
             {
                 if (handlersData[i].IsOverridden || handlersData[j].IsOverridden)
                 {
