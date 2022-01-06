@@ -7,7 +7,7 @@ namespace MediatR.Examples;
 
 public class ConstrainedRequestPostProcessor<TRequest, TResponse>
     : IRequestPostProcessor<TRequest, TResponse>
-    where TRequest : Ping
+    where TRequest : Ping, IRequest<TResponse>
 {
     private readonly TextWriter _writer;
 

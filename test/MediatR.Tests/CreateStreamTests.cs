@@ -12,7 +12,7 @@ using Xunit;
 public class CreateStreamTests
 {
 
-    public class Ping : IRequest<Pong>
+    public class Ping : IStreamRequest<Pong>
     {
         public string Message { get; set; }
     }
