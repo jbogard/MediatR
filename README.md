@@ -25,3 +25,18 @@ Or via the .NET Core command line interface:
     dotnet add package MediatR
 
 Either commands, from Package Manager Console or .NET Core CLI, will download and install MediatR and all required dependencies.
+
+### Using Contracts-Only Package
+
+To reference only the contracts for MediatR, which includes:
+
+- `IRequest` (including generic variants and `Unit`)
+- `INotification`
+- `IStreamRequest`
+
+Add a package reference to [MediatR.Contracts](https://www.nuget.org/packages/MediatR.Contracts)
+
+This package is useful in scenarios where your MediatR contracts are in a separate assembly/project from handlers. Example scenarios include:
+- API contracts
+- GRPC contracts
+- Blazor
