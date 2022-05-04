@@ -72,7 +72,7 @@ public abstract class RequestHandler<TRequest, TResponse> : IRequestHandler<TReq
 }
 
 /// <summary>
-/// Wrapper class for a handler that synchronously handles a request does not return a response
+/// Wrapper class for a handler that synchronously handles a request and does not return a response
 /// </summary>
 /// <typeparam name="TRequest">The type of request being handled</typeparam>
 public abstract class RequestHandler<TRequest> : IRequestHandler<TRequest>
