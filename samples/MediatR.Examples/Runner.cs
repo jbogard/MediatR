@@ -281,7 +281,9 @@ public static class Runner
     {
         var messages = writer.Contents.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
 
+        // Note: For this handler type to be found in messages, it must be written in all tested exception handlers
         return messages[messages.Count - 2].Contains(typeof(THandler).FullName)
+            // Note: For this exception type to be found in messages, exception must be written in all tested exception handlers
                && messages[messages.Count - 3].Contains(typeof(TException).FullName);
     }
 }
