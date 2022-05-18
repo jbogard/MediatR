@@ -17,7 +17,12 @@ public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResource,
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
+        // Exception type name required because it is checked later in messages
+        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
+        
+        // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(CommonExceptionHandler).FullName}'").ConfigureAwait(false);
+        
         state.SetHandled(new Pong());
     }
 }
@@ -33,7 +38,12 @@ public class ConnectionExceptionHandler : IRequestExceptionHandler<PingResource,
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
+        // Exception type name required because it is checked later in messages
+        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
+        
+        // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ConnectionExceptionHandler).FullName}'").ConfigureAwait(false);
+        
         state.SetHandled(new Pong());
     }
 }
@@ -49,7 +59,12 @@ public class AccessDeniedExceptionHandler : IRequestExceptionHandler<PingResourc
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
+        // Exception type name required because it is checked later in messages
+        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
+        
+        // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(AccessDeniedExceptionHandler).FullName}'").ConfigureAwait(false);
+        
         state.SetHandled(new Pong());
     }
 }
@@ -65,7 +80,12 @@ public class ServerExceptionHandler : IRequestExceptionHandler<PingNewResource, 
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
+        // Exception type name required because it is checked later in messages
+        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
+
+        // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ServerExceptionHandler).FullName}'").ConfigureAwait(false);
+        
         state.SetHandled(new Pong());
     }
 }
