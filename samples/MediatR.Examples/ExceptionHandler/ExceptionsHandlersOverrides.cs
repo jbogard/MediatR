@@ -17,9 +17,7 @@ public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResourceT
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
-        // Exception type name required because it is checked later in messages
-        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
-
+        // Exception type name must be written in messages by LogExceptionAction before
         // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(CommonExceptionHandler).FullName}'").ConfigureAwait(false);
         
@@ -38,9 +36,7 @@ public class ServerExceptionHandler : ExceptionHandler.ServerExceptionHandler
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
-        // Exception type name required because it is checked later in messages
-        await _writer.WriteLineAsync($"Handling {exception.GetType().FullName}");
-
+        // Exception type name must be written in messages by LogExceptionAction before
         // Exception handler type name required because it is checked later in messages
         await _writer.WriteLineAsync($"---- Exception Handler: '{typeof(ServerExceptionHandler).FullName}'").ConfigureAwait(false);
         
