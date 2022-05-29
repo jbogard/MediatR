@@ -2,6 +2,7 @@ using System.Threading;
 
 namespace MediatR.Tests;
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -127,5 +128,33 @@ public class CreateStreamTests
         }
 
         i.ShouldBe(1);
+    }
+
+    [Fact]
+    public void Should_raise_execption_on_null_request()
+    {
+        var container = new Container(cfg =>
+        {
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((Ping) null));
+    }
+
+    [Fact]
+    public void Should_raise_execption_on_null_request_via_dynamic_dispatch()
+    {
+        var container = new Container(cfg =>
+        {
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((object) null));
     }
 }
