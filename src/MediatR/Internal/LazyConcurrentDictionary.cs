@@ -6,7 +6,7 @@ namespace MediatR.Internal;
 
 //https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2.getoradd?view=net-6.0
 //https://andrewlock.net/making-getoradd-on-concurrentdictionary-thread-safe-using-lazy/
-internal sealed class LazyConcurrentDictionary<TKey, TValue> where TKey : notnull
+internal readonly struct LazyConcurrentDictionary<TKey, TValue> where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _concurrentDictionary;
 
