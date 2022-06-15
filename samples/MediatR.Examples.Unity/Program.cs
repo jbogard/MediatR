@@ -1,10 +1,10 @@
+using MediatR.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using MediatR.Pipeline;
 using Unity;
 using Unity.Lifetime;
 
@@ -12,14 +12,14 @@ namespace MediatR.Examples.Unity;
 
 internal class Program
 {
-    private static Task Main(string[] args)
+    private static async Task Main(string[] args)
     {
         var writer = new WrappingWriter(Console.Out);
         var mediator = BuildMediator(writer);
 
-        writer.WriteLine("Unity is not a very good container and breaks immediately");
+        await writer.WriteLineAsync("Unity is not a very good container and breaks immediately");
 
-        return Runner.Run(mediator, writer, "Unity");
+        await Runner.Run(mediator, writer, "Unity");
     }
 
     private static IMediator BuildMediator(WrappingWriter writer)

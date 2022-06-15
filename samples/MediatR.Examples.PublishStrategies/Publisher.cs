@@ -78,7 +78,7 @@ public class Publisher
     {
         foreach (var handler in handlers)
         {
-            Task.Run(() => handler(notification, cancellationToken));
+            var task = Task.Run(() => handler(notification, cancellationToken));
         }
 
         return Task.CompletedTask;

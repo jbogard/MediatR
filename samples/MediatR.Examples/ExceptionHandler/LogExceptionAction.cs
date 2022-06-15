@@ -12,6 +12,6 @@ public class LogExceptionAction : RequestExceptionAction<Ping>
 
     protected override void Execute(Ping request, Exception exception)
     {
-        _writer.WriteLineAsync($"--- Exception: '{exception.GetType().FullName}'");
+        _writer.WriteLine($"--- Exception: '{exception.GetType().FullName}'");
     }
 }

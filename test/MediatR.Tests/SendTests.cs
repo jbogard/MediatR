@@ -2,10 +2,10 @@ using System.Threading;
 
 namespace MediatR.Tests;
 
-using System;
-using System.Threading.Tasks;
 using Shouldly;
 using StructureMap;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 public class SendTests
@@ -113,5 +113,39 @@ public class SendTests
         var mediator = container.GetInstance<ISender>();
 
         await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(null));
+    }
+
+
+    [Fact]
+    public async Task Should_Concurrency_MultipleInvoke_handler()
+    {
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+            });
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        //If you want to see it in the MediatR class in the Invoke section when you get GetOrAdd comment
+        var options = new ParallelOptions { MaxDegreeOfParallelism = 100 };
+
+        Parallel.For(1, 1000, options, i =>
+        {
+            var mediator = container.GetInstance<IMediator>();
+
+            var response = mediator.Send(new Ping { Message = "Ping" }).Result;
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        var response = await mediator.Send(new Ping { Message = "Ping" });
+
+        response.Message.ShouldBe("Ping Pong");
     }
 }
