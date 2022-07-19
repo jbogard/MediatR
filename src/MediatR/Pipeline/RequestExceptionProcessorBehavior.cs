@@ -33,6 +33,7 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
         {
             var state = new RequestExceptionHandlerState<TResponse>();
             Type? exceptionType = null;
+            var attemptedHandlerTypes = new List<Type>();
 
             while (!state.Handled && exceptionType != typeof(Exception))
             {
@@ -42,6 +43,16 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
 
                 foreach (var exceptionHandler in exceptionHandlers)
                 {
+                    var handlerType = exceptionHandler.GetType();
+                    if (attemptedHandlerTypes.Contains(handlerType))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        attemptedHandlerTypes.Add(handlerType);
+                    }
+
                     try
                     {
                         await ((Task)(handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })

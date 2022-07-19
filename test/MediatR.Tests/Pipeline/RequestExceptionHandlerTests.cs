@@ -35,6 +35,17 @@ public class RequestExceptionHandlerTests
         }
     }
 
+    public class GenericPingExceptionHandler : IRequestExceptionHandler<Ping, Pong>
+    {
+        public int ExecutionCount { get; private set; }
+
+        public Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
+        {
+            ExecutionCount++;
+            return Task.CompletedTask;
+        }
+    }
+
     public class PingPongExceptionHandlerForType : IRequestExceptionHandler<Ping, Pong, PingException>
     {
         public Task Handle(Ping request, PingException exception, RequestExceptionHandlerState<Pong> state, CancellationToken cancellationToken)
@@ -131,6 +142,30 @@ public class RequestExceptionHandlerTests
         {
             await mediator.Send(request);
         });
+    }
+
+    [Fact]
+    public async Task Should_run_matching_exception_handlers_only_once()
+    {
+        var genericPingExceptionHandler = new GenericPingExceptionHandler();
+        var container = new Container(cfg =>
+        {
+            cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
+            cfg.For<IRequestExceptionHandler<Ping, Pong>>().Use(genericPingExceptionHandler);
+            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
+            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        var request = new Ping { Message = "Ping" };
+        await Should.ThrowAsync<PingException>(async () =>
+        {
+            await mediator.Send(request);
+        });
+
+        genericPingExceptionHandler.ExecutionCount.ShouldBe(1);
     }
 
 }

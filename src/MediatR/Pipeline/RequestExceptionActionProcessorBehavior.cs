@@ -31,12 +31,24 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
         }
         catch (Exception exception)
         {
+            var attemptedActionTypes = new List<Type>();
+
             for (Type exceptionType = exception.GetType(); exceptionType != typeof(object); exceptionType = exceptionType.BaseType)
             {
                 var actionsForException = GetActionsForException(exceptionType, request, out MethodInfo actionMethod);
 
                 foreach (var actionForException in actionsForException)
                 {
+                    var actionType = actionForException.GetType();
+                    if (attemptedActionTypes.Contains(actionType))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        attemptedActionTypes.Add(actionType);
+                    }
+
                     try
                     {
                         await ((Task)(actionMethod.Invoke(actionForException, new object[] { request, exception, cancellationToken })
