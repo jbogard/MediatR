@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="7.0.0" />
+    <PackageReference Include="Lamar" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>

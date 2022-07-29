@@ -20,7 +20,7 @@ class Program
         var container = new Container();
 
         container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
-        container.UseInstance<TextWriter>(writer);
+        container.Use<TextWriter>(writer);
 
         //Pipeline works out of the box here
 
