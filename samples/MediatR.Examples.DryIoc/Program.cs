@@ -3,30 +3,29 @@ using System.IO;
 using System.Threading.Tasks;
 using DryIoc;
 
-namespace MediatR.Examples.DryIoc
+namespace MediatR.Examples.DryIoc;
+
+class Program
 {
-    class Program
+    static Task Main()
     {
-        static Task Main()
-        {
-            var writer = new WrappingWriter(Console.Out);
-            var mediator = BuildMediator(writer);
+        var writer = new WrappingWriter(Console.Out);
+        var mediator = BuildMediator(writer);
 
-            return Runner.Run(mediator, writer, "DryIoc");
-        }
+        return Runner.Run(mediator, writer, "DryIoc");
+    }
 
-        private static IMediator BuildMediator(WrappingWriter writer)
-        {
-            var container = new Container();
+    private static IMediator BuildMediator(WrappingWriter writer)
+    {
+        var container = new Container();
 
-            container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
-            container.UseInstance<TextWriter>(writer);
+        container.RegisterDelegate<ServiceFactory>(r => r.Resolve);
+        container.UseInstance<TextWriter>(writer);
 
-            //Pipeline works out of the box here
+        //Pipeline works out of the box here
 
-            container.RegisterMany(new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() }, Registrator.Interfaces);
+        container.RegisterMany(new[] { typeof(IMediator).GetAssembly(), typeof(Ping).GetAssembly() }, Registrator.Interfaces);
 
-            return container.Resolve<IMediator>();
-        }
+        return container.Resolve<IMediator>();
     }
 }

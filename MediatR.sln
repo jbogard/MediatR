@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6267E2ED-942C-497D-BFC9-B3CE0AFC276F}"
 EndProject
@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Autofac", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.LightInject", "samples\MediatR.Examples.LightInject\MediatR.Examples.LightInject.csproj", "{0A0796F1-A0BE-4D15-A8F3-B6EFA41CAF0B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Ninject", "samples\MediatR.Examples.Ninject\MediatR.Examples.Ninject.csproj", "{124CEC1B-16C7-4E33-AB57-6FB8E575D629}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.SimpleInjector", "samples\MediatR.Examples.SimpleInjector\MediatR.Examples.SimpleInjector.csproj", "{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.StructureMap", "samples\MediatR.Examples.StructureMap\MediatR.Examples.StructureMap.csproj", "{7487E97A-CDA0-454D-8F62-CEE376DD3C3E}"
@@ -35,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Build.ps1 = Build.ps1
+		BuildContracts.ps1 = BuildContracts.ps1
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Directory.Build.props = Directory.Build.props
 		Push.ps1 = Push.ps1
@@ -44,8 +43,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Unity", "samples\MediatR.Examples.Unity\MediatR.Examples.Unity.csproj", "{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.DryIocZero", "samples\MediatR.Examples.DryIocZero\MediatR.Examples.DryIocZero.csproj", "{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Lamar", "samples\MediatR.Examples.Lamar\MediatR.Examples.Lamar.csproj", "{F014598D-8B85-4D7E-942A-3493107ABE43}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.PublishStrategies", "samples\MediatR.Examples.PublishStrategies\MediatR.Examples.PublishStrategies.csproj", "{867EBA13-62F4-4525-8F92-B0AD828EE6D4}"
@@ -53,6 +50,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Benchmarks", "test\MediatR.Benchmarks\MediatR.Benchmarks.csproj", "{1FA62162-F8F1-4CAD-B08E-8DCA603395AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.GraceIoc", "samples\MediatR.Examples.GraceIoc\MediatR.Examples.GraceIoc.csproj", "{BE5319B4-8F4D-42EF-BE36-1CFEAF17A7AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Stashbox", "samples\MediatR.Examples.Stashbox\MediatR.Examples.Stashbox.csproj", "{575EC49E-BEC8-4DFF-BD22-8464844093FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Contracts", "src\MediatR.Contracts\MediatR.Contracts.csproj", "{87F5A238-44B5-4769-82E5-E68B712D6E6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,10 +81,6 @@ Global
 		{0A0796F1-A0BE-4D15-A8F3-B6EFA41CAF0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A0796F1-A0BE-4D15-A8F3-B6EFA41CAF0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A0796F1-A0BE-4D15-A8F3-B6EFA41CAF0B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{124CEC1B-16C7-4E33-AB57-6FB8E575D629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{124CEC1B-16C7-4E33-AB57-6FB8E575D629}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{124CEC1B-16C7-4E33-AB57-6FB8E575D629}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{124CEC1B-16C7-4E33-AB57-6FB8E575D629}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -108,10 +105,6 @@ Global
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F014598D-8B85-4D7E-942A-3493107ABE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -128,6 +121,14 @@ Global
 		{BE5319B4-8F4D-42EF-BE36-1CFEAF17A7AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE5319B4-8F4D-42EF-BE36-1CFEAF17A7AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE5319B4-8F4D-42EF-BE36-1CFEAF17A7AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{575EC49E-BEC8-4DFF-BD22-8464844093FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{575EC49E-BEC8-4DFF-BD22-8464844093FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{575EC49E-BEC8-4DFF-BD22-8464844093FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{575EC49E-BEC8-4DFF-BD22-8464844093FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87F5A238-44B5-4769-82E5-E68B712D6E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87F5A238-44B5-4769-82E5-E68B712D6E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87F5A238-44B5-4769-82E5-E68B712D6E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87F5A238-44B5-4769-82E5-E68B712D6E6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -138,18 +139,18 @@ Global
 		{18AB74EF-6E32-42C5-B6C4-159624CEDC5D} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{DD286AB8-BA96-4476-82DF-371275EA8C10} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{0A0796F1-A0BE-4D15-A8F3-B6EFA41CAF0B} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
-		{124CEC1B-16C7-4E33-AB57-6FB8E575D629} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{A7FB2047-A4A0-4630-8C4C-31E7FA6ED902} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{7487E97A-CDA0-454D-8F62-CEE376DD3C3E} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{BFF350A1-4FB1-4355-8437-675605BF8C52} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{24A1217D-8438-45DA-A802-0A3A7A3DDFD1} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{4A255E84-AAC5-4ED9-ABAC-822804DBA4F1} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{E6C51E44-59B4-4F4F-AFB3-4032CDDEF07A} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
-		{49AC9726-ECDF-45C0-B5B8-B4AB7F0E6B46} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{F014598D-8B85-4D7E-942A-3493107ABE43} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{867EBA13-62F4-4525-8F92-B0AD828EE6D4} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
 		{1FA62162-F8F1-4CAD-B08E-8DCA603395AD} = {962C5ACA-AB2B-4E9B-9EBB-7E7EE28CDBB1}
 		{BE5319B4-8F4D-42EF-BE36-1CFEAF17A7AF} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
+		{575EC49E-BEC8-4DFF-BD22-8464844093FE} = {95CFF0CD-87A6-4CB6-A99F-42EAD0829E37}
+		{87F5A238-44B5-4769-82E5-E68B712D6E6D} = {6267E2ED-942C-497D-BFC9-B3CE0AFC276F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D58286E3-878B-4ACB-8E76-F61E708D4339}

@@ -1,7 +1,6 @@
-﻿namespace MediatR.Examples
+﻿namespace MediatR.Examples;
+
+public class Ping : IRequest<Pong>
 {
-    public class Ping : IRequest<Pong>
-    {
-        public string Message { get; set; }
-    }
+    public string Message { get; set; }
 }
