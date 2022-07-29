@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="6.4.0" />
+    <PackageReference Include="LightInject" Version="6.4.1" />
   </ItemGroup>
 
 </Project>

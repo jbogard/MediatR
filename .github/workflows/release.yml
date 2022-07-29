@@ -8,9 +8,9 @@ jobs:
   build:
     strategy:
       matrix: 
-        os: [windows-latest]
+        os: [ubuntu-latest]
       fail-fast: false
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -20,10 +20,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
-    - name: Setup dotnet 3.1
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1.x'
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh

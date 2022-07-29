@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DryIoc" Version="4.8.5" />
+    <PackageReference Include="DryIoc" Version="5.1.0" />
   </ItemGroup>
 
 </Project>

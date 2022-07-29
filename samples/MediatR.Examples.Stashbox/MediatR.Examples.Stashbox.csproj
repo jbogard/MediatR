@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Stashbox" Version="4.1.0" />
+    <PackageReference Include="Stashbox" Version="5.4.2" />
   </ItemGroup>
 
   <ItemGroup>
