@@ -1,6 +1,6 @@
 namespace MediatR.Pipeline;
 
-using MediatR.Internal;
+using Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
