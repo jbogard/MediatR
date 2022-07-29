@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Behavior for executing all <see cref="IRequestExceptionAction{TRequest,TResponse,TException}"/>
+/// Behavior for executing all <see cref="IRequestExceptionAction{TRequest,TException}"/>
 ///     or <see cref="RequestExceptionAction{TRequest,TResponse}"/> instances
 ///     after an exception is thrown by the following pipeline steps
 /// </summary>
