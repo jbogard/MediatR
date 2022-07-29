@@ -5,7 +5,7 @@
     <Authors>Jimmy Bogard</Authors>
     <Description>Contracts package for requests, responses, and notifications</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>netstandard2.0;net461;</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Features>strict</Features>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>

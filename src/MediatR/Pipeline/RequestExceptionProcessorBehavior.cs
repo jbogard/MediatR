@@ -32,31 +32,32 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
         catch (Exception exception)
         {
             var state = new RequestExceptionHandlerState<TResponse>();
-            Type? exceptionType = null;
 
-            while (!state.Handled && exceptionType != typeof(Exception))
+            var exceptionTypes = GetExceptionTypes(exception.GetType());
+
+            var handlersForException = exceptionTypes
+                .SelectMany(exceptionType => GetHandlersForException(exceptionType, request))
+                .GroupBy(handlerForException => handlerForException.Handler.GetType())
+                .Select(handlerForException => handlerForException.First())
+                .Select(handlerForException => (MethodInfo: GetMethodInfoForHandler(handlerForException.ExceptionType), handlerForException.Handler))
+                .ToList();
+
+            foreach (var handlerForException in handlersForException)
             {
-                exceptionType = exceptionType == null ? exception.GetType() : exceptionType.BaseType
-                                                                              ?? throw new InvalidOperationException("Could not determine exception base type.");
-                var exceptionHandlers = GetExceptionHandlers(request, exceptionType, out MethodInfo handleMethod);
-
-                foreach (var exceptionHandler in exceptionHandlers)
+                try
                 {
-                    try
-                    {
-                        await ((Task)(handleMethod.Invoke(exceptionHandler, new object[] { request, exception, state, cancellationToken })
-                                      ?? throw new InvalidOperationException("Did not return a Task from the exception handler."))).ConfigureAwait(false);
-                    }
-                    catch (TargetInvocationException invocationException) when (invocationException.InnerException != null)
-                    {
-                        // Unwrap invocation exception to throw the actual error
-                        ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
-                    }
+                    await ((Task) (handlerForException.MethodInfo.Invoke(handlerForException.Handler, new object[] { request, exception, state, cancellationToken })
+                                   ?? throw new InvalidOperationException("Did not return a Task from the exception handler."))).ConfigureAwait(false);
+                }
+                catch (TargetInvocationException invocationException) when (invocationException.InnerException != null)
+                {
+                    // Unwrap invocation exception to throw the actual error
+                    ExceptionDispatchInfo.Capture(invocationException.InnerException).Throw();
+                }
 
-                    if (state.Handled)
-                    {
-                        break;
-                    }
+                if (state.Handled)
+                {
+                    break;
                 }
             }
 
@@ -73,16 +74,33 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
             return state.Response; //cannot be null if Handled
         }
     }
+    private static IEnumerable<Type> GetExceptionTypes(Type? exceptionType)
+    {
+        while (exceptionType != null && exceptionType != typeof(object))
+        {
+            yield return exceptionType;
+            exceptionType = exceptionType.BaseType;
+        }
+    }
 
-    private IList<object> GetExceptionHandlers(TRequest request, Type exceptionType, out MethodInfo handleMethodInfo)
+    private IEnumerable<(Type ExceptionType, object Handler)> GetHandlersForException(Type exceptionType, TRequest request)
     {
         var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
         var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-        handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle))
+
+        var exceptionHandlers = (IEnumerable<object>) _serviceFactory(enumerableExceptionHandlerInterfaceType);
+
+        return HandlersOrderer.Prioritize(exceptionHandlers.ToList(), request)
+            .Select(handler => (exceptionType, action: handler));
+    }
+
+    private static MethodInfo GetMethodInfoForHandler(Type exceptionType)
+    {
+        var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(typeof(TRequest), typeof(TResponse), exceptionType);
+        
+        var handleMethodInfo = exceptionHandlerInterfaceType.GetMethod(nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle))
                            ?? throw new InvalidOperationException($"Could not find method {nameof(IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle)} on type {exceptionHandlerInterfaceType}");
 
-        var exceptionHandlers = (IEnumerable<object>)_serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType);
-
-        return HandlersOrderer.Prioritize(exceptionHandlers.ToList(), request);
+        return handleMethodInfo;
     }
 }
