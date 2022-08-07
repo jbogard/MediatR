@@ -17,7 +17,7 @@ public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavi
     public RequestPostProcessorBehavior(IEnumerable<IRequestPostProcessor<TRequest, TResponse>> postProcessors) 
         => _postProcessors = postProcessors;
 
-    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var response = await next().ConfigureAwait(false);
 
