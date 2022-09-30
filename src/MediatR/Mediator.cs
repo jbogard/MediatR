@@ -38,7 +38,7 @@ public class Mediator : IMediator
             static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse)))
                                              ?? throw new InvalidOperationException($"Could not create wrapper type for {t}")));
 
-        return handler.Handle(request, cancellationToken, _serviceFactory);
+        return handler.Handle(request, _serviceFactory, cancellationToken);
     }
 
     public Task<object?> Send(object request, CancellationToken cancellationToken = default)
@@ -68,7 +68,7 @@ public class Mediator : IMediator
             });
 
         // call via dynamic dispatch to avoid calling through reflection for performance reasons
-        return handler.Handle(request, cancellationToken, _serviceFactory);
+        return handler.Handle(request, _serviceFactory, cancellationToken);
     }
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
@@ -112,7 +112,7 @@ public class Mediator : IMediator
             static t => (NotificationHandlerWrapper) (Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(t)) 
                                                       ?? throw new InvalidOperationException($"Could not create wrapper for type {t}")));
 
-        return handler.Handle(notification, cancellationToken, _serviceFactory, PublishCore);
+        return handler.Handle(notification, _serviceFactory, PublishCore, cancellationToken);
     }
 
 
@@ -128,7 +128,7 @@ public class Mediator : IMediator
         var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(requestType,
             t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-        var items = streamHandler.Handle(request, cancellationToken, _serviceFactory);
+        var items = streamHandler.Handle(request, _serviceFactory, cancellationToken);
 
         return items;
     }
@@ -161,7 +161,7 @@ public class Mediator : IMediator
             });
 
         // call via dynamic dispatch to avoid calling through reflection for performance reasons
-        var items = handler.Handle(request, cancellationToken, _serviceFactory);
+        var items = handler.Handle(request, _serviceFactory, cancellationToken);
 
         return items;
     }

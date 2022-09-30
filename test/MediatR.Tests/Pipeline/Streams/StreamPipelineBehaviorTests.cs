@@ -33,7 +33,7 @@ public class StreamPipelineBehaviorTests
 
     public class SingSongPipelineBehavior : IStreamPipelineBehavior<Sing, Song>
     {
-        public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation] CancellationToken cancellationToken, StreamHandlerDelegate<Song> next)
+        public async IAsyncEnumerable<Song> Handle(Sing request, StreamHandlerDelegate<Song> next, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             yield return new Song { Message = "Start behaving..." };
 

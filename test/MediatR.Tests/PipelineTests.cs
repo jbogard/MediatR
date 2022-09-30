@@ -69,7 +69,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+        public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Outer before");
             var response = await next();
@@ -88,7 +88,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+        public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Inner before");
             var response = await next();
@@ -108,7 +108,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Inner generic before");
             var response = await next();
@@ -128,7 +128,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Outer generic before");
             var response = await next();
@@ -149,7 +149,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Constrained before");
             var response = await next();
@@ -168,7 +168,7 @@ public class PipelineTests
             _output = output;
         }
 
-        public async Task<Pong> Handle(Ping request, CancellationToken cancellationToken, RequestHandlerDelegate<Pong> next)
+        public async Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken)
         {
             _output.Messages.Add("Concrete before");
             var response = await next();
