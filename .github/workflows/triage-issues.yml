@@ -15,7 +15,7 @@ env:
 
 jobs:
   issues:
-    name: "Issues"
+    name: "Close stale issues and PRs"
     runs-on: "ubuntu-latest"
     steps:
       - uses: "actions/stale@v6.0.0"
@@ -27,12 +27,6 @@ jobs:
           days-before-stale: "${{ env.ISSUES_DAYS_BEFORE_STALE }}"
           exempt-issue-assignees: true
           exempt-issue-labels: 'awaiting-approval,work-in-progress,up-for-grabs'
-  pull_request:
-    name: Pull Requests
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: "actions/stale@v6.0.0"
-        with:
           stale-pr-label: "stale"
           stale-pr-message: 'This PR is stale because it has been open ${{ env.PR_DAYS_BEFORE_STALE }} days with no activity. Remove stale label or comment or this will be closed in ${{ env.PR_DAYS_BEFORE_CLOSE }} days.'
           close-pr-message: 'This PR was closed because it has been stalled for ${{ env.PR_DAYS_BEFORE_CLOSE }} days with no activity.'
