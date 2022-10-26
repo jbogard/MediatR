@@ -32,6 +32,6 @@ public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrap
         return serviceFactory
             .GetInstances<IPipelineBehavior<TRequest, TResponse>>()
             .Reverse()
-            .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, next, cancellationToken))();
+            .Aggregate((RequestHandlerDelegate<TResponse>) Handler, (next, pipeline) => () => pipeline.Handle((TRequest)request, cancellationToken, next))();
     }
 }
