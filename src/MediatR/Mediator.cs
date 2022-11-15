@@ -148,7 +148,7 @@ public class Mediator : IMediator
             {
                 var requestInterfaceType = requestTypeKey
                     .GetInterfaces()
-                    .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStreamRequest<>));
+                    .FirstOrDefault(static i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStreamRequest<>));
                 var isValidRequest = requestInterfaceType != null;
 
                 if (!isValidRequest)

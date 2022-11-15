@@ -22,7 +22,7 @@ public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandler
     {
         var handlers = serviceFactory
             .GetInstances<INotificationHandler<TNotification>>()
-            .Select(x => new Func<INotification, CancellationToken, Task>((theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));
+            .Select(static x => new Func<INotification, CancellationToken, Task>((theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));
 
         return publish(handlers, notification, cancellationToken);
     }
