@@ -8,12 +8,12 @@ public class RequestHandlerTests
 {
     public class Ping : IRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : RequestHandler<Ping, Pong>

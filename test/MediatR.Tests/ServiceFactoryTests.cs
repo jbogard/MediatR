@@ -15,7 +15,7 @@ public class ServiceFactoryTests
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     [Fact]
@@ -24,7 +24,7 @@ public class ServiceFactoryTests
         var serviceFactory = new ServiceFactory(type =>
             typeof(IEnumerable).IsAssignableFrom(type)
                 ? Array.CreateInstance(type.GetGenericArguments().First(), 0)
-                : null);
+                : null!);
 
         var mediator = new Mediator(serviceFactory);
 

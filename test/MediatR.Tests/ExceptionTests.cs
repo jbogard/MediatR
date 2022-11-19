@@ -5,7 +5,7 @@ namespace MediatR.Tests;
 using System;
 using System.Threading.Tasks;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class ExceptionTests
@@ -72,7 +72,7 @@ public class ExceptionTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
         _mediator = container.GetInstance<IMediator>();
@@ -93,7 +93,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_not_throw_for_publish()
     {
-        Exception ex = null;
+        Exception ex = null!;
         try
         {
             await _mediator.Publish(new Pinged());
@@ -120,7 +120,7 @@ public class ExceptionTests
     [Fact]
     public async Task Should_not_throw_for_async_publish()
     {
-        Exception ex = null;
+        Exception ex = null!;
         try
         {
             await _mediator.Publish(new AsyncPinged());
@@ -144,12 +144,12 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
 
-        NullPing request = null;
+        NullPing request = null!;
 
         await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
     }
@@ -166,12 +166,12 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
 
-        VoidNullPing request = null;
+        VoidNullPing request = null!;
 
         await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(request));
     }
@@ -188,12 +188,12 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
 
-        NullPinged notification = null;
+        NullPinged notification = null!;
 
         await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
     }
@@ -210,12 +210,12 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
 
-        object notification = null;
+        object notification = null!;
 
         await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Publish(notification));
     }
@@ -232,7 +232,7 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
@@ -267,7 +267,7 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
@@ -289,7 +289,7 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();
@@ -317,7 +317,7 @@ public class ExceptionTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
         var mediator = container.GetInstance<IMediator>();

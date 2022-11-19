@@ -53,7 +53,7 @@ public class UnitTests
             new object[] {new object(), false},
             new object[] {"", false},
             new object[] {"()", false},
-            new object[] {null, false},
+            new object[] {null!, false},
             new object[] {new Uri("https://www.google.com"), false},
             new object[] {new Unit(), true},
             new object[] {Unit.Value, true},

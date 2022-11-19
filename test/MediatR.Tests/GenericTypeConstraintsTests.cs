@@ -6,7 +6,7 @@ namespace MediatR.Tests;
 using System;
 using System.Linq;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -55,7 +55,7 @@ public class GenericTypeConstraintsTests
 
     public class Jing : IRequest
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class JingHandler : IRequestHandler<Jing, Unit>
@@ -69,12 +69,12 @@ public class GenericTypeConstraintsTests
 
     public class Ping : IRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : IRequestHandler<Ping, Pong>
@@ -99,7 +99,7 @@ public class GenericTypeConstraintsTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

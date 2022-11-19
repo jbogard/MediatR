@@ -5,7 +5,7 @@ namespace MediatR.Tests;
 using System;
 using System.Threading.Tasks;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class SendTests
@@ -13,12 +13,12 @@ public class SendTests
 
     public class Ping : IRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : IRequestHandler<Ping, Pong>
@@ -41,7 +41,7 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -64,7 +64,7 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -89,7 +89,7 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<ISender>().Use<Mediator>();
         });
 
@@ -106,12 +106,12 @@ public class SendTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
+            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<ISender>().Use<Mediator>();
         });
 
         var mediator = container.GetInstance<ISender>();
 
-        await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(null));
+        await Should.ThrowAsync<ArgumentNullException>(async () => await mediator.Send(default!));
     }
 }
