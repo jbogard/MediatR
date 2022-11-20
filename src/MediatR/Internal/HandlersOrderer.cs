@@ -15,12 +15,12 @@ internal static class HandlersOrderer
         }
 
         var requestObjectDetails = new ObjectDetails(request);
-        var handlerObjectsDetails = handlers.Select(s => new ObjectDetails(s)).ToList();
+        var handlerObjectsDetails = handlers.Select(static s => new ObjectDetails(s)).ToList();
 
         var uniqueHandlers = RemoveOverridden(handlerObjectsDetails).ToArray();
         Array.Sort(uniqueHandlers, requestObjectDetails);
 
-        return uniqueHandlers.Select(s => s.Value).ToList();
+        return uniqueHandlers.Select(static s => s.Value).ToList();
     }
 
     private static IEnumerable<ObjectDetails> RemoveOverridden(IList<ObjectDetails> handlersData)
@@ -45,6 +45,6 @@ internal static class HandlersOrderer
             }
         }
 
-        return handlersData.Where(w => !w.IsOverridden);
+        return handlersData.Where(static w => !w.IsOverridden);
     }
 }

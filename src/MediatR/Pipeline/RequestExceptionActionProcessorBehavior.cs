@@ -35,9 +35,9 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
 
             var actionsForException = exceptionTypes
                 .SelectMany(exceptionType => GetActionsForException(exceptionType, request))
-                .GroupBy(actionForException => actionForException.Action.GetType())
-                .Select(actionForException => actionForException.First())
-                .Select(actionForException => (MethodInfo: GetMethodInfoForAction(actionForException.ExceptionType), actionForException.Action))
+                .GroupBy(static actionForException => actionForException.Action.GetType())
+                .Select(static actionForException => actionForException.First())
+                .Select(static actionForException => (MethodInfo: GetMethodInfoForAction(actionForException.ExceptionType), actionForException.Action))
                 .ToList();
 
             foreach (var actionForException in actionsForException)
