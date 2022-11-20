@@ -37,9 +37,9 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
 
             var handlersForException = exceptionTypes
                 .SelectMany(exceptionType => GetHandlersForException(exceptionType, request))
-                .GroupBy(handlerForException => handlerForException.Handler.GetType())
-                .Select(handlerForException => handlerForException.First())
-                .Select(handlerForException => (MethodInfo: GetMethodInfoForHandler(handlerForException.ExceptionType), handlerForException.Handler))
+                .GroupBy(static handlerForException => handlerForException.Handler.GetType())
+                .Select(static handlerForException => handlerForException.First())
+                .Select(static handlerForException => (MethodInfo: GetMethodInfoForHandler(handlerForException.ExceptionType), handlerForException.Handler))
                 .ToList();
 
             foreach (var handlerForException in handlersForException)
