@@ -89,7 +89,6 @@ public class RequestExceptionHandlerTests
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, PingException>>().Use<PingPongExceptionHandlerForType>();
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -108,7 +107,6 @@ public class RequestExceptionHandlerTests
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongExceptionHandlerNotHandled>();
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -131,7 +129,6 @@ public class RequestExceptionHandlerTests
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use<PingPongThrowingExceptionHandler>();
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -153,7 +150,6 @@ public class RequestExceptionHandlerTests
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
             cfg.For<IRequestExceptionHandler<Ping, Pong>>().Use(genericPingExceptionHandler);
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

@@ -41,7 +41,6 @@ public class SendVoidInterfaceTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
         });

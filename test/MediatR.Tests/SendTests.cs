@@ -41,7 +41,6 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -64,7 +63,6 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -89,7 +87,6 @@ public class SendTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<ISender>().Use<Mediator>();
         });
 
@@ -106,7 +103,6 @@ public class SendTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<ISender>().Use<Mediator>();
         });
 

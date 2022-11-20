@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// Extensions to scan for MediatR handlers and registers them.
 /// - Scans for any handler interface implementations and registers them as <see cref="ServiceLifetime.Transient"/>
 /// - Scans for any <see cref="IRequestPreProcessor{TRequest}"/> and <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations and registers them as transient instances
-/// Registers <see cref="ServiceFactory"/> and <see cref="IMediator"/> as transient instances
+/// Registers <see cref="IMediator"/> as a transient instance
 /// After calling AddMediatR you can use the container to resolve an <see cref="IMediator"/> instance.
 /// This does not scan for any <see cref="IPipelineBehavior{TRequest,TResponse}"/> instances including <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/> and <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/>.
 /// To register behaviors, use the <see cref="ServiceCollectionServiceExtensions.AddTransient(IServiceCollection,Type,Type)"/> with the open generic or closed generic types.

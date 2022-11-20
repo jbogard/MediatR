@@ -99,7 +99,6 @@ public class GenericTypeConstraintsTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

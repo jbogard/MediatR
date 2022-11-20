@@ -207,7 +207,6 @@ public class StreamPipelineTests
             cfg.For<Logger>().Use(output);
             cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
             cfg.For<IStreamPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -246,7 +245,6 @@ public class StreamPipelineTests
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
 
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -286,7 +284,6 @@ public class StreamPipelineTests
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
 
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -344,7 +341,6 @@ public class StreamPipelineTests
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
             cfg.For(typeof(IStreamPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
 
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

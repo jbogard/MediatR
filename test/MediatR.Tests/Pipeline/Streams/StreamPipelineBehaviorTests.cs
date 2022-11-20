@@ -60,7 +60,6 @@ public class StreamPipelineBehaviorTests
                 scanner.AddAllTypesOf(typeof(IStreamPipelineBehavior<,>));
             });
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(SingSongPipelineBehavior));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

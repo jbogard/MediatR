@@ -52,7 +52,6 @@ public class RequestPostProcessorTests
                 scanner.AddAllTypesOf(typeof(IRequestPostProcessor<,>));
             });
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

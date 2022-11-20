@@ -65,7 +65,6 @@ public class PublishTests
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
         });
 
         var mediator = container.GetInstance<IMediator>();
@@ -94,7 +93,6 @@ public class PublishTests
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
         });
 
         var mediator = container.GetInstance<IMediator>();
@@ -109,8 +107,8 @@ public class PublishTests
 
     public class SequentialMediator : Mediator
     {
-        public SequentialMediator(ServiceFactory serviceFactory)
-            : base(serviceFactory)
+        public SequentialMediator(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
         }
 
@@ -140,7 +138,6 @@ public class PublishTests
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<SequentialMediator>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
         });
 
         var mediator = container.GetInstance<IMediator>();
@@ -169,7 +166,6 @@ public class PublishTests
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<SequentialMediator>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
         });
 
         var mediator = container.GetInstance<IMediator>();
@@ -199,7 +195,6 @@ public class PublishTests
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IPublisher>().Use<Mediator>();
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
         });
 
         var mediator = container.GetInstance<IPublisher>();

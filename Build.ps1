@@ -32,18 +32,5 @@ exec { & dotnet build -c Release }
 
 exec { & dotnet test -c Release --no-build -l trx --verbosity=normal }
 
-$samples = Get-ChildItem .\samples\MediatR.Examples.*
-
-foreach ($sample in $samples) {
-    Push-Location -Path $sample
-
-    try {
-        exec { & dotnet run -c Release --no-build --no-restore }
-    } catch {
-    } finally {
-        Pop-Location
-    }
-}
-
 exec { & dotnet pack .\src\MediatR\MediatR.csproj -c Release -o $artifacts --no-build }
 

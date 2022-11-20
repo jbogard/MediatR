@@ -52,7 +52,6 @@ public class RequestPreProcessorTests
                 scanner.AddAllTypesOf(typeof(IRequestPreProcessor<>));
             });
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

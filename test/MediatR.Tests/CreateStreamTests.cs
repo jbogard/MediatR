@@ -43,7 +43,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -76,7 +75,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -110,7 +108,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<ISender>().Use<Mediator>();
         });
 
@@ -135,7 +132,6 @@ public class CreateStreamTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -149,7 +145,6 @@ public class CreateStreamTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
