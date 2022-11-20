@@ -1,3 +1,6 @@
+using System;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace MediatR.Wrappers;
 
 using System.Collections.Generic;
@@ -6,34 +9,41 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal abstract class StreamRequestHandlerBase : HandlerBase
+internal abstract class StreamRequestHandlerBase
 {
-    public abstract IAsyncEnumerable<object?> Handle(object request, ServiceFactory serviceFactory, CancellationToken cancellationToken);
+    public abstract IAsyncEnumerable<object?> Handle(object request, IServiceProvider serviceProvider, CancellationToken cancellationToken);
 }
 
 internal abstract class StreamRequestHandlerWrapper<TResponse> : StreamRequestHandlerBase
 {
-    public abstract IAsyncEnumerable<TResponse> Handle(IStreamRequest<TResponse> request, ServiceFactory serviceFactory,
+    public abstract IAsyncEnumerable<TResponse> Handle(
+        IStreamRequest<TResponse> request, 
+        IServiceProvider serviceProvider,
         CancellationToken cancellationToken);
 }
 
-internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> : StreamRequestHandlerWrapper<TResponse>
+internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> 
+    : StreamRequestHandlerWrapper<TResponse>
     where TRequest : IStreamRequest<TResponse>
 {
-    public override async IAsyncEnumerable<object?> Handle(object request, ServiceFactory serviceFactory, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<object?> Handle(object request, IServiceProvider serviceProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var item in Handle((IStreamRequest<TResponse>) request, serviceFactory, cancellationToken))
+        await foreach (var item in Handle((IStreamRequest<TResponse>) request, serviceProvider, cancellationToken))
         {
             yield return item;
         }
     }
 
-    public override async IAsyncEnumerable<TResponse> Handle(IStreamRequest<TResponse> request, ServiceFactory serviceFactory, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<TResponse> Handle(IStreamRequest<TResponse> request, 
+        IServiceProvider serviceProvider, 
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        IAsyncEnumerable<TResponse> Handler() => GetHandler<IStreamRequestHandler<TRequest, TResponse>>(serviceFactory).Handle((TRequest) request, cancellationToken);
+        IAsyncEnumerable<TResponse> Handler() => serviceProvider
+            .GetRequiredService<IStreamRequestHandler<TRequest, TResponse>>()
+            .Handle((TRequest) request, cancellationToken);
 
-        var items = serviceFactory
-            .GetInstances<IStreamPipelineBehavior<TRequest, TResponse>>()
+        var items = serviceProvider
+            .GetServices<IStreamPipelineBehavior<TRequest, TResponse>>()
             .Reverse()
             .Aggregate(
                 (StreamHandlerDelegate<TResponse>) Handler, 

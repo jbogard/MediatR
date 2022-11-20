@@ -3,7 +3,7 @@ using System.Threading;
 namespace MediatR.Tests.Pipeline.Streams;
 
 using Shouldly;
-using StructureMap;
+using Lamar;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -13,12 +13,12 @@ public class StreamPipelineBehaviorTests
 {
     public class Sing : IStreamRequest<Song>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Song
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class SingHandler : IStreamRequestHandler<Sing, Song>
@@ -60,7 +60,6 @@ public class StreamPipelineBehaviorTests
                 scanner.AddAllTypesOf(typeof(IStreamPipelineBehavior<,>));
             });
             cfg.For(typeof(IStreamPipelineBehavior<,>)).Add(typeof(SingSongPipelineBehavior));
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 

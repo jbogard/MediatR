@@ -5,29 +5,29 @@ namespace MediatR.Tests;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class PipelineTests
 {
     public class Ping : IRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Zing : IRequest<Zong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Zong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : IRequestHandler<Ping, Pong>
@@ -196,10 +196,9 @@ public class PipelineTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<Logger>().Singleton().Use(output);
+            cfg.For<Logger>().Use(output);
             cfg.For<IPipelineBehavior<Ping, Pong>>().Add<OuterBehavior>();
             cfg.For<IPipelineBehavior<Ping, Pong>>().Add<InnerBehavior>();
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -232,12 +231,11 @@ public class PipelineTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<Logger>().Singleton().Use(output);
+            cfg.For<Logger>().Use(output);
 
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
 
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -272,13 +270,12 @@ public class PipelineTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<Logger>().Singleton().Use(output);
+            cfg.For<Logger>().Use(output);
 
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(ConstrainedBehavior<,>));
 
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -317,7 +314,7 @@ public class PipelineTests
         });
     }
 
-    [Fact(Skip = "StructureMap does not mix concrete and open generics. Use constraints instead.")]
+    [Fact(Skip = "Lamar does not mix concrete and open generics. Use constraints instead.")]
     public async Task Should_handle_concrete_and_open_generics()
     {
         var output = new Logger();
@@ -330,13 +327,12 @@ public class PipelineTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
             });
-            cfg.For<Logger>().Singleton().Use(output);
+            cfg.For<Logger>().Use(output);
 
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(OuterBehavior<,>));
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(InnerBehavior<,>));
             cfg.For(typeof(IPipelineBehavior<Ping, Pong>)).Add(typeof(ConcreteBehavior));
 
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 

@@ -19,9 +19,9 @@ using System.Threading.Tasks;
 public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    private readonly ServiceFactory _serviceFactory;
+    private readonly IServiceProvider _serviceProvider;
 
-    public RequestExceptionActionProcessorBehavior(ServiceFactory serviceFactory) => _serviceFactory = serviceFactory;
+    public RequestExceptionActionProcessorBehavior(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
@@ -72,7 +72,7 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
         var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
         var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
 
-        var actionsForException = (IEnumerable<object>)_serviceFactory(enumerableExceptionActionInterfaceType);
+        var actionsForException = (IEnumerable<object>)_serviceProvider.GetService(enumerableExceptionActionInterfaceType);
 
         return HandlersOrderer.Prioritize(actionsForException.ToList(), request)
             .Select(action => (exceptionType, action));

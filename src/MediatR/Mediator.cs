@@ -13,7 +13,7 @@ using Wrappers;
 /// </summary>
 public class Mediator : IMediator
 {
-    private readonly ServiceFactory _serviceFactory;
+    private readonly IServiceProvider _serviceProvider;
     private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
     private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
     private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new();
@@ -21,9 +21,9 @@ public class Mediator : IMediator
     /// <summary>
     /// Initializes a new instance of the <see cref="Mediator"/> class.
     /// </summary>
-    /// <param name="serviceFactory">The single instance factory.</param>
-    public Mediator(ServiceFactory serviceFactory) 
-        => _serviceFactory = serviceFactory;
+    /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
+    public Mediator(IServiceProvider serviceProvider) 
+        => _serviceProvider = serviceProvider;
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
@@ -38,7 +38,7 @@ public class Mediator : IMediator
             static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(t, typeof(TResponse)))
                                              ?? throw new InvalidOperationException($"Could not create wrapper type for {t}")));
 
-        return handler.Handle(request, _serviceFactory, cancellationToken);
+        return handler.Handle(request, _serviceProvider, cancellationToken);
     }
 
     public Task<object?> Send(object request, CancellationToken cancellationToken = default)
@@ -68,7 +68,7 @@ public class Mediator : IMediator
             });
 
         // call via dynamic dispatch to avoid calling through reflection for performance reasons
-        return handler.Handle(request, _serviceFactory, cancellationToken);
+        return handler.Handle(request, _serviceProvider, cancellationToken);
     }
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
@@ -112,7 +112,7 @@ public class Mediator : IMediator
             static t => (NotificationHandlerWrapper) (Activator.CreateInstance(typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(t)) 
                                                       ?? throw new InvalidOperationException($"Could not create wrapper for type {t}")));
 
-        return handler.Handle(notification, _serviceFactory, PublishCore, cancellationToken);
+        return handler.Handle(notification, _serviceProvider, PublishCore, cancellationToken);
     }
 
 
@@ -128,7 +128,7 @@ public class Mediator : IMediator
         var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(requestType,
             t => (StreamRequestHandlerBase) Activator.CreateInstance(typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse))));
 
-        var items = streamHandler.Handle(request, _serviceFactory, cancellationToken);
+        var items = streamHandler.Handle(request, _serviceProvider, cancellationToken);
 
         return items;
     }
@@ -161,7 +161,7 @@ public class Mediator : IMediator
             });
 
         // call via dynamic dispatch to avoid calling through reflection for performance reasons
-        var items = handler.Handle(request, _serviceFactory, cancellationToken);
+        var items = handler.Handle(request, _serviceProvider, cancellationToken);
 
         return items;
     }

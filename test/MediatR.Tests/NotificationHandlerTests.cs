@@ -10,7 +10,7 @@ public class NotificationHandlerTests
 {
     public class Ping : INotification
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PongChildHandler : NotificationHandler<Ping>

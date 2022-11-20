@@ -1,7 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using MediatR.Examples;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -5,19 +5,19 @@ namespace MediatR.Tests.Pipeline;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class RequestPreProcessorTests
 {
     public class Ping : IRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : IRequestHandler<Ping, Pong>
@@ -52,7 +52,6 @@ public class RequestPreProcessorTests
                 scanner.AddAllTypesOf(typeof(IRequestPreProcessor<>));
             });
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class CreateStreamTests
@@ -15,12 +15,12 @@ public class CreateStreamTests
 
     public class Ping : IStreamRequest<Pong>
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class Pong
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingStreamHandler : IStreamRequestHandler<Ping, Pong>
@@ -43,7 +43,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -76,7 +75,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
             cfg.For<IMediator>().Use<Mediator>();
         });
 
@@ -85,11 +83,11 @@ public class CreateStreamTests
         object request = new Ping { Message = "Ping" };
         var response = mediator.CreateStream(request);
         int i = 0;
-        await foreach (Pong result in response)
+        await foreach (Pong? result in response)
         {
             if (i == 0)
             {
-                result.Message.ShouldBe("Ping Pang");
+                result!.Message.ShouldBe("Ping Pang");
             }
 
             i++;
@@ -110,7 +108,6 @@ public class CreateStreamTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IStreamRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<ISender>().Use<Mediator>();
         });
 
@@ -135,13 +132,12 @@ public class CreateStreamTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
         var mediator = container.GetInstance<IMediator>();
 
-        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((Ping) null));
+        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((Ping) null!));
     }
 
     [Fact]
@@ -149,12 +145,11 @@ public class CreateStreamTests
     {
         var container = new Container(cfg =>
         {
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => t => ctx.GetInstance(t));
             cfg.For<IMediator>().Use<Mediator>();
         });
 
         var mediator = container.GetInstance<IMediator>();
 
-        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((object) null));
+        Should.Throw<ArgumentNullException>(() => mediator.CreateStream((object) null!));
     }
 }

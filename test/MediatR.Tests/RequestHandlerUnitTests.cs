@@ -10,7 +10,7 @@ public class RequestHandlerUnitTests
 {
     public class Ping : IRequest
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : RequestHandler<Ping>

@@ -6,14 +6,14 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Shouldly;
-using StructureMap;
+using Lamar;
 using Xunit;
 
 public class SendVoidInterfaceTests
 {
     public class Ping : IRequest
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
     }
 
     public class PingHandler : AsyncRequestHandler<Ping>
@@ -41,7 +41,6 @@ public class SendVoidInterfaceTests
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof (IRequestHandler<,>));
             });
-            cfg.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
         });
