@@ -3,6 +3,7 @@ using Stashbox.Configuration;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.Stashbox;
 
@@ -19,10 +20,9 @@ class Program
     {
         var container = new StashboxContainer()
             .RegisterInstance<TextWriter>(writer)
-            .Register<ServiceFactory>(c => c.WithFactory(r => type => r.Resolve(type)))
             .RegisterAssemblies(new[] { typeof(Mediator).Assembly, typeof(Ping).Assembly }, 
                 serviceTypeSelector: Rules.ServiceRegistrationFilters.Interfaces, registerSelf: false);
 
-        return container.Resolve<IMediator>();
+        return container.GetRequiredService<IMediator>();
     }
 }
