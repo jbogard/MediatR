@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.SimpleInjector;
 
@@ -23,6 +24,12 @@ internal static class Program
     private static IMediator BuildMediator(WrappingWriter writer)
     {
         var container = new Container();
+
+        var services = new ServiceCollection();
+
+        services
+            .AddSimpleInjector(container);
+
         var assemblies = GetAssemblies().ToArray();
         container.RegisterSingleton<IMediator, Mediator>();
         container.Register(typeof(IRequestHandler<,>), assemblies);
@@ -32,10 +39,10 @@ internal static class Program
         RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
         RegisterHandlers(container, typeof(IStreamRequestHandler<,>), assemblies);
 
-        container.Register(() => (TextWriter)writer, Lifestyle.Singleton);
+        container.Register(() => (TextWriter) writer, Lifestyle.Singleton);
 
         //Pipeline
-        container.Collection.Register(typeof(IPipelineBehavior<,>), new []
+        container.Collection.Register(typeof(IPipelineBehavior<,>), new[]
         {
             typeof(RequestExceptionProcessorBehavior<,>),
             typeof(RequestExceptionActionProcessorBehavior<,>),
@@ -43,18 +50,18 @@ internal static class Program
             typeof(RequestPostProcessorBehavior<,>),
             typeof(GenericPipelineBehavior<,>)
         });
-        container.Collection.Register(typeof(IRequestPreProcessor<>), new [] { typeof(GenericRequestPreProcessor<>) });
+        container.Collection.Register(typeof(IRequestPreProcessor<>), new[] { typeof(GenericRequestPreProcessor<>) });
         container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
         container.Collection.Register(typeof(IStreamPipelineBehavior<,>), new[]
         {
             typeof(GenericStreamPipelineBehavior<,>)
         });
 
-        container.Register(() => new ServiceFactory(container.GetInstance), Lifestyle.Singleton);
+        var serviceProvider = services.BuildServiceProvider().UseSimpleInjector(container);
 
-        container.Verify();
+        container.RegisterInstance<IServiceProvider>(container);
 
-        var mediator = container.GetInstance<IMediator>();
+        var mediator = container.GetRequiredService<IMediator>();
 
         return mediator;
     }
