@@ -9,7 +9,6 @@ class Program
     static async Task Main(string[] args)
     {
         var services = new ServiceCollection();
-        services.AddScoped<ServiceFactory>(p => p.GetService);
 
         services.AddSingleton<Publisher>();
 

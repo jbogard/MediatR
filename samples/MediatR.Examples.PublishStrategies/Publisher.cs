@@ -8,9 +8,9 @@ namespace MediatR.Examples.PublishStrategies;
 
 public class Publisher
 {
-    private readonly ServiceFactory _serviceFactory;
+    private readonly IServiceProvider _serviceFactory;
 
-    public Publisher(ServiceFactory serviceFactory)
+    public Publisher(IServiceProvider serviceFactory)
     {
         _serviceFactory = serviceFactory;
 
