@@ -45,31 +45,31 @@ internal class Program
 
         container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
         container.Register(Component.For<TextWriter>().Instance(writer));
-        container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => (type =>
-        {
-            var enumerableType = type
-                .GetInterfaces()
-                .Concat(new[] { type })
-                .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        //container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => (type =>
+        //{
+        //    var enumerableType = type
+        //        .GetInterfaces()
+        //        .Concat(new[] { type })
+        //        .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
-            var service = enumerableType?.GetGenericArguments()?[0];
-            var resolvedType = enumerableType != null ? k.ResolveAll(service) : k.Resolve(type);
-            var genericArguments = service?.GetGenericArguments();
+        //    var service = enumerableType?.GetGenericArguments()?[0];
+        //    var resolvedType = enumerableType != null ? k.ResolveAll(service) : k.Resolve(type);
+        //    var genericArguments = service?.GetGenericArguments();
 
-            // Handle exceptions even using the base request types for IRequestExceptionHandler<,,>
-            var isRequestExceptionHandler = service?.GetGenericTypeDefinition()
-                ?.IsAssignableTo(typeof(IRequestExceptionHandler<,,>)) ?? false;
-            if (isRequestExceptionHandler)
-                return ResolveRequestExceptionHandler(k, type, service, resolvedType, genericArguments);
+        //    // Handle exceptions even using the base request types for IRequestExceptionHandler<,,>
+        //    var isRequestExceptionHandler = service?.GetGenericTypeDefinition()
+        //        ?.IsAssignableTo(typeof(IRequestExceptionHandler<,,>)) ?? false;
+        //    if (isRequestExceptionHandler)
+        //        return ResolveRequestExceptionHandler(k, type, service, resolvedType, genericArguments);
 
-            // Handle exceptions even using the base request types for IRequestExceptionAction<,>
-            var isRequestExceptionAction = service?.GetGenericTypeDefinition()
-                ?.IsAssignableTo(typeof(IRequestExceptionAction<,>)) ?? false;
-            if (isRequestExceptionAction)
-                return ResolveRequestExceptionAction(k, type, service, resolvedType, genericArguments);
+        //    // Handle exceptions even using the base request types for IRequestExceptionAction<,>
+        //    var isRequestExceptionAction = service?.GetGenericTypeDefinition()
+        //        ?.IsAssignableTo(typeof(IRequestExceptionAction<,>)) ?? false;
+        //    if (isRequestExceptionAction)
+        //        return ResolveRequestExceptionAction(k, type, service, resolvedType, genericArguments);
             
-            return resolvedType;
-        })));
+        //    return resolvedType;
+        //})));
 
         //Pipeline
         container.Register(Component.For(typeof(IStreamPipelineBehavior<,>)).ImplementedBy(typeof(GenericStreamPipelineBehavior<,>)));
