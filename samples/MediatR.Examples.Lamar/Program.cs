@@ -45,7 +45,6 @@ class Program
             // This is the default but let's be explicit. At most we should be container scoped.
             cfg.For<IMediator>().Use<Mediator>().Transient();
 
-            cfg.For<ServiceFactory>().Use(ctx => ctx.GetInstance);
             cfg.For<TextWriter>().Use(writer);
         });
 
