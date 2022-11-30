@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SimpleInjector" Version="5.4.1" />
+    <PackageReference Include="SimpleInjector.Integration.ServiceCollection" Version="5.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>

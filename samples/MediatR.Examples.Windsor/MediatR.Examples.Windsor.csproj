@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Windsor" Version="5.1.2" />
+    <PackageReference Include="Castle.Windsor.Extensions.DependencyInjection" Version="5.1.2" />
+  </ItemGroup>
+
+</Project>

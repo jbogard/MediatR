@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Examples\MediatR.Examples.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>
