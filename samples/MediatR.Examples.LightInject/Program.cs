@@ -3,7 +3,9 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using LightInject;
+using LightInject.Microsoft.DependencyInjection;
 using MediatR.Pipeline;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.LightInject;
 
@@ -19,7 +21,7 @@ class Program
 
     private static IMediator BuildMediator(WrappingWriter writer)
     {
-        var serviceContainer = new ServiceContainer();
+        var serviceContainer = new ServiceContainer(ContainerOptions.Default.WithMicrosoftSettings());
         serviceContainer.Register<IMediator, Mediator>();            
         serviceContainer.RegisterInstance<TextWriter>(writer);
 
@@ -46,10 +48,10 @@ class Program
                 typeof(ConstrainedRequestPostProcessor<,>)
             }, type => null);
                    
-        serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));            
-            
+        serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
 
-        serviceContainer.Register<ServiceFactory>(fac => fac.GetInstance);
-        return serviceContainer.GetInstance<IMediator>(); 
+        var services = new ServiceCollection();
+        var provider = serviceContainer.CreateServiceProvider(services);
+        return provider.GetRequiredService<IMediator>(); 
     }
 }
