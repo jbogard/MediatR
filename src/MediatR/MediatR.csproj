@@ -12,6 +12,8 @@
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>gradient_128x128.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/jbogard/MediatR/</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/jbogard/MediatR/blob/master/LICENSE</PackageLicenseUrl>
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
