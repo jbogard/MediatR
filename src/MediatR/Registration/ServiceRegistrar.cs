@@ -217,20 +217,53 @@ public static class ServiceRegistrar
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
 
-        // Use TryAddTransientExact (see below), we dó want to register our Pre/Post processor behavior, even if (a more concrete)
-        // registration for IPipelineBehavior<,> already exists. But only once.
-        services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
-        services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
-
-        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
+        foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
-            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestExceptionActionProcessorBehavior<,>));
-            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
+            services.Add(serviceDescriptor);
+        }
+
+        // Use TryAddTransientExact (see below), we do want to register our Pre/Post processor behavior, even if (a more concrete)
+        // registration for IPipelineBehavior<,> already exists. But only once.
+        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPreProcessorBehavior<,>),
+            typeof(IRequestPreProcessor<>));
+        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPostProcessorBehavior<,>),
+            typeof(IRequestPostProcessor<,>));
+
+        if (serviceConfiguration.RequestExceptionActionProcessorStrategy ==
+            RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
+        {
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>),
+                typeof(IRequestExceptionAction<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>),
+                typeof(IRequestExceptionHandler<,,>));
         }
         else
         {
-            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestExceptionProcessorBehavior<,>));
-            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), typeof(RequestExceptionActionProcessorBehavior<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>),
+                typeof(IRequestExceptionHandler<,,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>),
+                typeof(IRequestExceptionAction<,>));
+        }
+    }
+
+    private static void RegisterBehaviorIfImplementationsExist(
+        IServiceCollection services,
+        Type behaviorType,
+        Type subBehaviorType
+        )
+    {
+        var hasAnyRegistrationsOfSubBehaviorType = services
+            .Select(service => service.ImplementationType)
+            .Where(type => type != null)
+            .SelectMany(type => type!.GetInterfaces())
+            .Where(type => type.IsGenericType)
+            .Select(type => type.GetGenericTypeDefinition())
+            .Where(type => type != null)
+            .Any(type => type == subBehaviorType);
+
+        if (hasAnyRegistrationsOfSubBehaviorType)
+        {
+            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), behaviorType);
         }
     }
 

@@ -18,7 +18,7 @@ public class CustomMediatorTests
         services.AddMediatR(cfg =>
         {
             cfg.MediatorImplementationType = typeof(MyCustomMediator);
-            cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests));
+            cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));
         });
         _provider = services.BuildServiceProvider();
     }
@@ -50,11 +50,11 @@ public class CustomMediatorTests
         services.AddMediatR(cfg =>
         {
             cfg.MediatorImplementationType = typeof(MyCustomMediator);
-            cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests));
+            cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));
         });
             
         // Call AddMediatr again, this should NOT override our custom mediatr (With MS DI, last registration wins)
-        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests)));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests)));
 
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();

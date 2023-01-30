@@ -24,7 +24,7 @@ public static class Program
 
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterHandlersFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
+            cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
         });
 
         services.AddScoped(typeof(IStreamRequestHandler<Sing, Song>), typeof(SingHandler));

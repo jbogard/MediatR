@@ -12,24 +12,52 @@ public class MediatRServiceConfiguration
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; }
         = RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions;
+
     internal List<Assembly> AssembliesToRegister { get; } = new();
 
-    public MediatRServiceConfiguration RegisterHandlersFromAssemblyContaining<T>() 
-        => RegisterHandlersFromAssemblyContaining(typeof(T));
+    public List<ServiceDescriptor> BehaviorsToRegister { get; } = new();
 
-    public MediatRServiceConfiguration RegisterHandlersFromAssemblyContaining(Type type) 
-        => RegisterHandlersFromAssembly(type.Assembly);
+    public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining<T>()
+        => RegisterServicesFromAssemblyContaining(typeof(T));
 
-    public MediatRServiceConfiguration RegisterHandlersFromAssembly(Assembly assembly)
+    public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining(Type type)
+        => RegisterServicesFromAssembly(type.Assembly);
+
+    public MediatRServiceConfiguration RegisterServicesFromAssembly(Assembly assembly)
     {
         AssembliesToRegister.Add(assembly);
+
         return this;
     }
 
-    public MediatRServiceConfiguration RegisterHandlersFromAssemblies(
+    public MediatRServiceConfiguration RegisterServicesFromAssemblies(
         params Assembly[] assemblies)
     {
         AssembliesToRegister.AddRange(assemblies);
+
+        return this;
+    }
+
+    public MediatRServiceConfiguration AddBehavior<TServiceType, TImplementationType>(
+        ServiceLifetime serviceLifetime = ServiceLifetime.Transient) =>
+        AddBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+
+    public MediatRServiceConfiguration AddBehavior(
+        Type serviceType,
+        Type implementationType,
+        ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
+
+        return this;
+    }
+
+    public MediatRServiceConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        var serviceType = typeof(IPipelineBehavior<,>);
+
+        BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, openBehaviorType, serviceLifetime));
+
         return this;
     }
 }

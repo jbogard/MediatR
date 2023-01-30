@@ -37,9 +37,9 @@ public static class ServiceCollectionExtensions
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");
         }
 
-        ServiceRegistrar.AddRequiredServices(services, serviceConfig);
-
         ServiceRegistrar.AddMediatRClasses(services, serviceConfig);
+
+        ServiceRegistrar.AddRequiredServices(services, serviceConfig);
 
         return services;
     }
