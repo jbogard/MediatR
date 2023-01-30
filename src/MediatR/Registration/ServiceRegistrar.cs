@@ -10,9 +10,9 @@ namespace MediatR.Registration;
 
 public static class ServiceRegistrar
 {
-    public static void AddMediatRClasses(IServiceCollection services, IEnumerable<Assembly> assembliesToScan, MediatRServiceConfiguration configuration)
+    public static void AddMediatRClasses(IServiceCollection services, MediatRServiceConfiguration configuration)
     {
-        assembliesToScan = assembliesToScan.Distinct().ToArray();
+        var assembliesToScan = configuration.AssembliesToRegister.Distinct().ToArray();
 
         ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>), services, assembliesToScan, false, configuration);
         ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>), services, assembliesToScan, true, configuration);

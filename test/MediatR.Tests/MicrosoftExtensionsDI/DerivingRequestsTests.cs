@@ -15,7 +15,7 @@ public class DerivingRequestsTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(typeof(Ping));
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssemblyContaining(typeof(Ping)));
         _provider = services.BuildServiceProvider();
         _mediator = _provider.GetRequiredService<IMediator>();
     }

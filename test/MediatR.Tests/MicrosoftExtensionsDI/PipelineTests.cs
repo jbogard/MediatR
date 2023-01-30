@@ -323,7 +323,7 @@ public class PipelineTests
         services.AddSingleton(output);
         services.AddTransient<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
         services.AddTransient<IPipelineBehavior<Ping, Pong>, InnerBehavior>();
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -359,7 +359,7 @@ public class PipelineTests
         services.AddSingleton(output);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(OuterBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(InnerBehavior<,>));
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -392,7 +392,7 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -421,7 +421,7 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -438,7 +438,7 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -455,7 +455,7 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -475,7 +475,7 @@ public class PipelineTests
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(OuterBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(InnerBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstrainedBehavior<,>));
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssembly(typeof(Ping).Assembly));
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();

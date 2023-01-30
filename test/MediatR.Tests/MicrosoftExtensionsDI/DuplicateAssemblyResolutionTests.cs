@@ -15,7 +15,7 @@ public class DuplicateAssemblyResolutionTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(typeof(Ping), typeof(Ping));
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssemblies(typeof(Ping).Assembly, typeof(Ping).Assembly));
         _provider = services.BuildServiceProvider();
     }
 

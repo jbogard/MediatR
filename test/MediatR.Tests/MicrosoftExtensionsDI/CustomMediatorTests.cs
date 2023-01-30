@@ -15,7 +15,11 @@ public class CustomMediatorTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(cfg => cfg.Using<MyCustomMediator>(), typeof(CustomMediatorTests));
+        services.AddMediatR(cfg =>
+        {
+            cfg.MediatorImplementationType = typeof(MyCustomMediator);
+            cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests));
+        });
         _provider = services.BuildServiceProvider();
     }
 
@@ -43,10 +47,14 @@ public class CustomMediatorTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(cfg => cfg.Using<MyCustomMediator>(), typeof(CustomMediatorTests));
+        services.AddMediatR(cfg =>
+        {
+            cfg.MediatorImplementationType = typeof(MyCustomMediator);
+            cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests));
+        });
             
         // Call AddMediatr again, this should NOT override our custom mediatr (With MS DI, last registration wins)
-        services.AddMediatR(typeof(CustomMediatorTests));
+        services.AddMediatR(cfg => cfg.RegisterHandlersFromAssemblyContaining(typeof(CustomMediatorTests)));
 
         var provider = services.BuildServiceProvider();
         var mediator = provider.GetRequiredService<IMediator>();

@@ -16,9 +16,10 @@ public class TypeEvaluatorTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(new[] { typeof(Ping).GetTypeInfo().Assembly }, cfg =>
+        services.AddMediatR(cfg =>
         {
-            cfg.WithEvaluator(t => t.Namespace == "MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included");
+            cfg.RegisterHandlersFromAssemblyContaining(typeof(Ping));
+            cfg.TypeEvaluator = t => t.Namespace == "MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included";
         });
         _provider = services.BuildServiceProvider();
     }

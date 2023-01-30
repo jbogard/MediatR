@@ -1,48 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using MediatR;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public class MediatRServiceConfiguration
 {
-    public Func<Type, bool> TypeEvaluator { get; private set; } = t => true;
-    public Type MediatorImplementationType { get; private set; }
-    public ServiceLifetime Lifetime { get; private set; }
+    public Func<Type, bool> TypeEvaluator { get; set; } = t => true;
+    public Type MediatorImplementationType { get; set; } = typeof(Mediator);
+    public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; }
+        = RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions;
+    internal List<Assembly> AssembliesToRegister { get; } = new();
 
-    public MediatRServiceConfiguration()
-    {
-        MediatorImplementationType = typeof(Mediator);
-        Lifetime = ServiceLifetime.Transient;
-    }
+    public MediatRServiceConfiguration RegisterHandlersFromAssemblyContaining<T>() 
+        => RegisterHandlersFromAssemblyContaining(typeof(T));
 
-    public MediatRServiceConfiguration Using<TMediator>() where TMediator : IMediator
+    public MediatRServiceConfiguration RegisterHandlersFromAssemblyContaining(Type type) 
+        => RegisterHandlersFromAssembly(type.Assembly);
+
+    public MediatRServiceConfiguration RegisterHandlersFromAssembly(Assembly assembly)
     {
-        MediatorImplementationType = typeof(TMediator);
+        AssembliesToRegister.Add(assembly);
         return this;
     }
 
-    public MediatRServiceConfiguration AsSingleton()
+    public MediatRServiceConfiguration RegisterHandlersFromAssemblies(
+        params Assembly[] assemblies)
     {
-        Lifetime = ServiceLifetime.Singleton;
-        return this;
-    }
-
-    public MediatRServiceConfiguration AsScoped()
-    {
-        Lifetime = ServiceLifetime.Scoped;
-        return this;
-    }
-
-    public MediatRServiceConfiguration AsTransient()
-    {
-        Lifetime = ServiceLifetime.Transient;
-        return this;
-    }
-
-    public MediatRServiceConfiguration WithEvaluator(Func<Type, bool> evaluator)
-    {
-        TypeEvaluator = evaluator;
+        AssembliesToRegister.AddRange(assemblies);
         return this;
     }
 }
