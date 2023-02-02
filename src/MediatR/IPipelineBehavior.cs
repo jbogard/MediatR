@@ -17,7 +17,7 @@ public delegate Task<TResponse> RequestHandlerDelegate<TResponse>();
 /// </summary>
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
-public interface IPipelineBehavior<in TRequest, TResponse> where TRequest : IRequest<TResponse>
+public interface IPipelineBehavior<in TRequest, TResponse> where TRequest : IBaseRequest
 {
     /// <summary>
     /// Pipeline handler. Perform any additional behavior and await the <paramref name="next"/> delegate as necessary
