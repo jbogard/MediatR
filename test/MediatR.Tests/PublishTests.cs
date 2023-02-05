@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using Lamar;
 using Xunit;
+using MediatR.Examples.PublishStrategies;
 
 public class PublishTests
 {
@@ -112,7 +113,7 @@ public class PublishTests
         {
         }
 
-        protected override async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
+        protected override async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, PublishStrategy publishStrategy, CancellationToken cancellationToken)
         {
             foreach (var handler in allHandlers)
             {

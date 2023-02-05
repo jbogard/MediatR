@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
 {
+    using MediatR.Examples.PublishStrategies;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -200,6 +201,16 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
+        }
+
+        public Task Publish(object notification, PublishStrategy publishStrategy, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Publish<TNotification>(TNotification notification, PublishStrategy publishStrategy, CancellationToken cancellationToken = default) where TNotification : INotification
+        {
+            throw new NotImplementedException();
         }
     }
 }
