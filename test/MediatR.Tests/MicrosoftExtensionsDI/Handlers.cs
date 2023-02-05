@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
 {
-    using MediatR.Examples.PublishStrategies;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;

@@ -1,4 +1,4 @@
-namespace MediatR.Examples.PublishStrategies;
+namespace MediatR;
 
 /// <summary>
 /// Strategy to use when publishing notifications

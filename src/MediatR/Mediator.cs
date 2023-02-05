@@ -1,6 +1,5 @@
 namespace MediatR;
 
-using MediatR.Examples.PublishStrategies;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

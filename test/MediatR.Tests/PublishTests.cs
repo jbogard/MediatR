@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Shouldly;
 using Lamar;
 using Xunit;
-using MediatR.Examples.PublishStrategies;
 
 public class PublishTests
 {

@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Wrappers;
 
-using MediatR.Examples.PublishStrategies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
