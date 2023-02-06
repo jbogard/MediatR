@@ -20,7 +20,7 @@ namespace MediatR.Benchmarks
 
             services.AddSingleton(TextWriter.Null);
 
-            services.AddMediatR(typeof(Ping));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Ping)));
 
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>));
             services.AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));

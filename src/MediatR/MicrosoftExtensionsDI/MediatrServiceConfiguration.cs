@@ -1,48 +1,63 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using MediatR;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public class MediatRServiceConfiguration
 {
-    public Func<Type, bool> TypeEvaluator { get; private set; } = t => true;
-    public Type MediatorImplementationType { get; private set; }
-    public ServiceLifetime Lifetime { get; private set; }
+    public Func<Type, bool> TypeEvaluator { get; set; } = t => true;
+    public Type MediatorImplementationType { get; set; } = typeof(Mediator);
+    public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; }
+        = RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions;
 
-    public MediatRServiceConfiguration()
-    {
-        MediatorImplementationType = typeof(Mediator);
-        Lifetime = ServiceLifetime.Transient;
-    }
+    internal List<Assembly> AssembliesToRegister { get; } = new();
 
-    public MediatRServiceConfiguration Using<TMediator>() where TMediator : IMediator
+    public List<ServiceDescriptor> BehaviorsToRegister { get; } = new();
+
+    public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining<T>()
+        => RegisterServicesFromAssemblyContaining(typeof(T));
+
+    public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining(Type type)
+        => RegisterServicesFromAssembly(type.Assembly);
+
+    public MediatRServiceConfiguration RegisterServicesFromAssembly(Assembly assembly)
     {
-        MediatorImplementationType = typeof(TMediator);
+        AssembliesToRegister.Add(assembly);
+
         return this;
     }
 
-    public MediatRServiceConfiguration AsSingleton()
+    public MediatRServiceConfiguration RegisterServicesFromAssemblies(
+        params Assembly[] assemblies)
     {
-        Lifetime = ServiceLifetime.Singleton;
+        AssembliesToRegister.AddRange(assemblies);
+
         return this;
     }
 
-    public MediatRServiceConfiguration AsScoped()
+    public MediatRServiceConfiguration AddBehavior<TServiceType, TImplementationType>(
+        ServiceLifetime serviceLifetime = ServiceLifetime.Transient) =>
+        AddBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+
+    public MediatRServiceConfiguration AddBehavior(
+        Type serviceType,
+        Type implementationType,
+        ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        Lifetime = ServiceLifetime.Scoped;
+        BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
+
         return this;
     }
 
-    public MediatRServiceConfiguration AsTransient()
+    public MediatRServiceConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        Lifetime = ServiceLifetime.Transient;
-        return this;
-    }
+        var serviceType = typeof(IPipelineBehavior<,>);
 
-    public MediatRServiceConfiguration WithEvaluator(Func<Type, bool> evaluator)
-    {
-        TypeEvaluator = evaluator;
+        BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, openBehaviorType, serviceLifetime));
+
         return this;
     }
 }

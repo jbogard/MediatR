@@ -16,7 +16,7 @@ public class AssemblyResolutionTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(typeof(Ping).GetTypeInfo().Assembly);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
         _provider = services.BuildServiceProvider();
     }
 
@@ -55,7 +55,7 @@ public class AssemblyResolutionTests
     {
         var services = new ServiceCollection();
 
-        Action registration = () => services.AddMediatR(new Type[0]);
+        Action registration = () => services.AddMediatR(_ => {});
 
         registration.ShouldThrow<ArgumentException>();
     }

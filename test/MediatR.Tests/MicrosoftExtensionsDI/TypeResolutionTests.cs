@@ -16,7 +16,7 @@ public class TypeResolutionTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(typeof(Ping));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Ping)));
         _provider = services.BuildServiceProvider();
     }
 

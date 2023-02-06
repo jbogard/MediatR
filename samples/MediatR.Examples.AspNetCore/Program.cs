@@ -22,7 +22,10 @@ public static class Program
 
         services.AddSingleton<TextWriter>(writer);
 
-        services.AddMediatR(typeof(Ping), typeof(Sing));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
+        });
 
         services.AddScoped(typeof(IStreamRequestHandler<Sing, Song>), typeof(SingHandler));
 

@@ -1,26 +1,30 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
-using MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included;
+using Included;
+using MediatR.Pipeline;
 using Shouldly;
 using System;
-using System.Reflection;
 using Xunit;
 
 public class TypeEvaluatorTests
 {
     private readonly IServiceProvider _provider;
+    private readonly IServiceCollection _services;
+
 
     public TypeEvaluatorTests()
     {
-        IServiceCollection services = new ServiceCollection();
-        services.AddSingleton(new Logger());
-        services.AddMediatR(new[] { typeof(Ping).GetTypeInfo().Assembly }, cfg =>
+        _services = new ServiceCollection();
+        _services.AddSingleton(new Logger());
+        _services.AddMediatR(cfg =>
         {
-            cfg.WithEvaluator(t => t.Namespace == "MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included");
+            cfg.RegisterServicesFromAssemblyContaining(typeof(Ping));
+            cfg.TypeEvaluator = t => t.Namespace == "MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included";
         });
-        _provider = services.BuildServiceProvider();
+        _provider = _services.BuildServiceProvider();
     }
 
     [Fact]
@@ -34,5 +38,18 @@ public class TypeEvaluatorTests
     {
         _provider.GetService<IRequestHandler<Foo, Bar>>().ShouldNotBeNull();
         _provider.GetService<IRequestHandler<Ping, Pong>>().ShouldBeNull();
+    }
+
+    [Fact]
+    public void ShouldNotRegisterUnNeededBehaviors()
+    {
+        _services.Any(service => service.ImplementationType == typeof(RequestPreProcessorBehavior<,>))
+            .ShouldBeFalse();
+        _services.Any(service => service.ImplementationType == typeof(RequestPostProcessorBehavior<,>))
+            .ShouldBeFalse();
+        _services.Any(service => service.ImplementationType == typeof(RequestExceptionActionProcessorBehavior<,>))
+            .ShouldBeFalse();
+        _services.Any(service => service.ImplementationType == typeof(RequestExceptionProcessorBehavior<,>))
+            .ShouldBeFalse();
     }
 }
