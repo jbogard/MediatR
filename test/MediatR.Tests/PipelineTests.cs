@@ -98,8 +98,8 @@ public class PipelineTests
         }
     }
 
-    public class InnerBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+    public class InnerBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> 
+        where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -118,8 +118,7 @@ public class PipelineTests
         }
     }
 
-    public class OuterBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+    public class OuterBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -139,7 +138,7 @@ public class PipelineTests
     }
 
     public class ConstrainedBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : Ping, IRequest<TResponse>
+        where TRequest : Ping
         where TResponse : Pong
     {
         private readonly Logger _output;
