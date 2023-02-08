@@ -10,14 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Behavior for executing all <see cref="IRequestExceptionAction{TRequest,TException}"/>
-///     or <see cref="RequestExceptionAction{TRequest,TResponse}"/> instances
+/// Behavior for executing all <see cref="IRequestExceptionAction{TRequest,TException}"/> instances
 ///     after an exception is thrown by the following pipeline steps
 /// </summary>
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
 public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
 {
     private readonly IServiceProvider _serviceProvider;
 

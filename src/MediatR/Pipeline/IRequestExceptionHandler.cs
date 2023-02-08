@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 /// <typeparam name="TResponse">Response type</typeparam>
 /// <typeparam name="TException">Exception type</typeparam>
 public interface IRequestExceptionHandler<in TRequest, TResponse, in TException>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
     where TException : Exception
 {
     /// <summary>
@@ -31,7 +31,7 @@ public interface IRequestExceptionHandler<in TRequest, TResponse, in TException>
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
 public interface IRequestExceptionHandler<in TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse, Exception>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
 {
 }
 
@@ -41,10 +41,12 @@ public interface IRequestExceptionHandler<in TRequest, TResponse> : IRequestExce
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
 public abstract class AsyncRequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
 {
-    async Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken) 
-        => await Handle(request, exception, state, cancellationToken).ConfigureAwait(false);
+    async Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
+    {
+        await Handle(request, exception, state, cancellationToken).ConfigureAwait(false);
+    }
 
     /// <summary>
     /// Override in a derived class for the handler logic
@@ -63,7 +65,7 @@ public abstract class AsyncRequestExceptionHandler<TRequest, TResponse> : IReque
 /// <typeparam name="TResponse">Response type</typeparam>
 /// <typeparam name="TException">Exception type</typeparam>
 public abstract class RequestExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
     where TException : Exception
 {
     Task IRequestExceptionHandler<TRequest, TResponse, TException>.Handle(TRequest request, TException exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
@@ -87,7 +89,7 @@ public abstract class RequestExceptionHandler<TRequest, TResponse, TException> :
 /// <typeparam name="TRequest">Request type</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
 public abstract class RequestExceptionHandler<TRequest, TResponse> : IRequestExceptionHandler<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : notnull
 {
     Task IRequestExceptionHandler<TRequest, TResponse, Exception>.Handle(TRequest request, Exception exception, RequestExceptionHandlerState<TResponse> state, CancellationToken cancellationToken)
     {

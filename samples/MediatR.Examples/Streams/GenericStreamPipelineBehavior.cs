@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace MediatR.Examples;
 
 public class GenericStreamPipelineBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
-    where TRequest : IStreamRequest<TResponse>
 {
     private readonly TextWriter _writer;
 

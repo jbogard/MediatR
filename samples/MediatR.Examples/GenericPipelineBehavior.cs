@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 namespace MediatR.Examples;
 
 public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
 {
     private readonly TextWriter _writer;
 
