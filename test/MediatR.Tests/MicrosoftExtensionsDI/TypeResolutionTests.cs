@@ -47,7 +47,7 @@ public class TypeResolutionTests
     [Fact]
     public void ShouldResolveVoidRequestHandler()
     {
-        _provider.GetService<IRequestHandler<Ding, Unit>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<Ding>>().ShouldNotBeNull();
     }
 
     [Fact]

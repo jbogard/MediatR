@@ -61,11 +61,11 @@ public class ExceptionTests
         }
     }
 
-    public class VoidNullPingHandler : IRequestHandler<VoidNullPing, Unit>
+    public class VoidNullPingHandler : IRequestHandler<VoidNullPing>
     {
-        public Task<Unit> Handle(VoidNullPing request, CancellationToken cancellationToken)
+        public Task Handle(VoidNullPing request, CancellationToken cancellationToken)
         {
-            return Unit.Task;
+            return Task.CompletedTask;
         }
     }
 
@@ -244,7 +244,7 @@ public class ExceptionTests
 
     public class PingExceptionHandler : IRequestHandler<PingException>
     {
-        public Task<Unit> Handle(PingException request, CancellationToken cancellationToken)
+        public Task Handle(PingException request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -261,6 +261,7 @@ public class ExceptionTests
                 scanner.IncludeNamespaceContainingType<Ping>();
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
             });
             cfg.For<IMediator>().Use<Mediator>();
         });
@@ -309,6 +310,7 @@ public class ExceptionTests
                 scanner.IncludeNamespaceContainingType<Ping>();
                 scanner.WithDefaultConventions();
                 scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
             });
             cfg.For<IMediator>().Use<Mediator>();
         });

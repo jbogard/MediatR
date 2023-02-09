@@ -19,7 +19,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
-    <Version>1.0.1</Version>
+    <Version>2.0.0</Version>
     <RootNamespace>MediatR</RootNamespace>
 
   </PropertyGroup>

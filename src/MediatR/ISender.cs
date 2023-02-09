@@ -19,6 +19,15 @@ public interface ISender
     Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Asynchronously send a request to a single handler with no response
+    /// </summary>
+    /// <param name="request">Request object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the send operation.</returns>
+    Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
+        where TRequest : IRequest;
+
+    /// <summary>
     /// Asynchronously send an object request to a single handler via dynamic dispatch
     /// </summary>
     /// <param name="request">Request object</param>
