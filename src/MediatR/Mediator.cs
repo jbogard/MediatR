@@ -41,6 +41,23 @@ public class Mediator : IMediator
         return handler.Handle(request, _serviceProvider, cancellationToken);
     }
 
+    public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
+        where TRequest : IRequest
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        var requestType = typeof(TRequest);
+
+        var handler = (RequestHandlerWrapper)_requestHandlers.GetOrAdd(requestType,
+            static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(t))
+                                             ?? throw new InvalidOperationException($"Could not create wrapper type for {t}")));
+
+        return handler.Handle(request, _serviceProvider, cancellationToken);
+    }
+
     public Task<object?> Send(object request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -55,13 +72,29 @@ public class Mediator : IMediator
                     .GetInterfaces()
                     .FirstOrDefault(static i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
 
+                Type wrapperType;
+
                 if (requestInterfaceType is null)
                 {
-                    throw new ArgumentException($"{requestTypeKey.Name} does not implement {nameof(IRequest)}", nameof(request));
-                }
+                    requestInterfaceType = requestTypeKey
+                        .GetInterfaces()
+                        .FirstOrDefault(static i => i == typeof(IRequest));
 
-                var responseType = requestInterfaceType.GetGenericArguments()[0];
-                var wrapperType = typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType);
+                    if (requestInterfaceType is null)
+                    {
+                        throw new ArgumentException($"{requestTypeKey.Name} does not implement {nameof(IRequest)}",
+                            nameof(request));
+                    }
+
+                    wrapperType =
+                        typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestTypeKey);
+                }
+                else
+                {
+                    var responseType = requestInterfaceType.GetGenericArguments()[0];
+                    wrapperType =
+                        typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestTypeKey, responseType);
+                }
 
                 return (RequestHandlerBase)(Activator.CreateInstance(wrapperType) 
                                             ?? throw new InvalidOperationException($"Could not create wrapper for type {wrapperType}"));

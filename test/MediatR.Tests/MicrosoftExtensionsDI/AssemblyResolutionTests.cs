@@ -35,7 +35,7 @@ public class AssemblyResolutionTests
     [Fact]
     public void ShouldResolveInternalHandler()
     {
-        _provider.GetService<IRequestHandler<InternalPing, Unit>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<InternalPing>>().ShouldNotBeNull();
     }
 
     [Fact]

@@ -16,6 +16,10 @@ public class SendTests
         public string? Message { get; set; }
     }
 
+    public class VoidPing : IRequest
+    {
+    }
+
     public class Pong
     {
         public string? Message { get; set; }
@@ -26,6 +30,25 @@ public class SendTests
         public Task<Pong> Handle(Ping request, CancellationToken cancellationToken)
         {
             return Task.FromResult(new Pong { Message = request.Message + " Pong" });
+        }
+    }
+
+    public class Dependency
+    {
+        public bool Called { get; set; }
+    }
+
+    public class VoidPingHandler : IRequestHandler<VoidPing>
+    {
+        private readonly Dependency _dependency;
+
+        public VoidPingHandler(Dependency dependency) => _dependency = dependency;
+
+        public Task Handle(VoidPing request, CancellationToken cancellationToken)
+        {
+            _dependency.Called = true;
+
+            return Task.CompletedTask;
         }
     }
 
@@ -52,6 +75,32 @@ public class SendTests
     }
 
     [Fact]
+    public async Task Should_resolve_main_void_handler()
+    {
+        var dependency = new Dependency();
+
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+            });
+            cfg.ForSingletonOf<Dependency>().Use(dependency);
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        await mediator.Send(new VoidPing());
+
+        dependency.Called.ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task Should_resolve_main_handler_via_dynamic_dispatch()
     {
         var container = new Container(cfg =>
@@ -73,6 +122,35 @@ public class SendTests
 
         var pong = response.ShouldBeOfType<Pong>();
         pong.Message.ShouldBe("Ping Pong");
+    }
+
+    [Fact]
+    public async Task Should_resolve_main_void_handler_via_dynamic_dispatch()
+    {
+        var dependency = new Dependency();
+       
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(IRequestHandler<>));
+                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
+            });
+            cfg.ForSingletonOf<Dependency>().Use(dependency);
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        object request = new VoidPing();
+        var response = await mediator.Send(request);
+
+        response.ShouldBeOfType<Unit>();
+
+        dependency.Called.ShouldBeTrue();
     }
 
     [Fact]

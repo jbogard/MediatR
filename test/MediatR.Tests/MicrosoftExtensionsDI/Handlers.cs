@@ -59,7 +59,7 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
 
     public class DingAsyncHandler : IRequestHandler<Ding>
     {
-        public Task<Unit> Handle(Ding message, CancellationToken cancellationToken) => Unit.Task;
+        public Task Handle(Ding message, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     public class PingedHandler : INotificationHandler<Pinged>
@@ -166,7 +166,7 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
 
     class InternalPingHandler : IRequestHandler<InternalPing>
     {
-        public Task<Unit> Handle(InternalPing request, CancellationToken cancellationToken) => Unit.Task;
+        public Task Handle(InternalPing request, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 
     class MyCustomMediator : IMediator
@@ -198,6 +198,11 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+        {
+            throw new System.NotImplementedException();
+        }
+        public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
+            where TRequest : IRequest
         {
             throw new System.NotImplementedException();
         }
