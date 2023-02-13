@@ -21,7 +21,7 @@ public class TaskWhenAllPublisher : INotificationPublisher
     {
         var tasks = handlerExecutors
             .Select(handler => handler.HandlerCallback(notification, cancellationToken))
-            .ToList();
+            .ToArray();
 
         return Task.WhenAll(tasks);
     }
