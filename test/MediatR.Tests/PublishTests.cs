@@ -112,11 +112,25 @@ public class PublishTests
         {
         }
 
-        protected override async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
+        protected override async Task PublishCore(IEnumerable<NotificationHandlerExecutor> allHandlers, INotification notification, CancellationToken cancellationToken)
         {
             foreach (var handler in allHandlers)
             {
-                await handler(notification, cancellationToken).ConfigureAwait(false);
+                await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    public class SequentialPublisher : INotificationPublisher
+    {
+        public int CallCount { get; set; }
+
+        public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+        {
+            foreach (var handler in handlerExecutors)
+            {
+                await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);
+                CallCount++;
             }
         }
     }
@@ -147,6 +161,37 @@ public class PublishTests
         var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         result.ShouldContain("Ping Pong");
         result.ShouldContain("Ping Pung");
+    }
+
+    [Fact]
+    public async Task Should_override_with_sequential_firing_through_injection()
+    {
+        var builder = new StringBuilder();
+        var writer = new StringWriter(builder);
+        var publisher = new SequentialPublisher();
+
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
+            });
+            cfg.For<TextWriter>().Use(writer);
+            cfg.For<INotificationPublisher>().Use(publisher);
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        await mediator.Publish(new Ping { Message = "Ping" });
+
+        var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        result.ShouldContain("Ping Pong");
+        result.ShouldContain("Ping Pung");
+        publisher.CallCount.ShouldBe(2);
     }
 
     [Fact]

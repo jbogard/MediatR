@@ -50,41 +50,41 @@ public class Publisher
         return mediator.Publish(notification, cancellationToken);
     }
 
-    private Task ParallelWhenAll(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private Task ParallelWhenAll(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
 
         foreach (var handler in handlers)
         {
-            tasks.Add(Task.Run(() => handler(notification, cancellationToken)));
+            tasks.Add(Task.Run(() => handler.HandlerCallback(notification, cancellationToken)));
         }
 
         return Task.WhenAll(tasks);
     }
 
-    private Task ParallelWhenAny(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private Task ParallelWhenAny(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
 
         foreach (var handler in handlers)
         {
-            tasks.Add(Task.Run(() => handler(notification, cancellationToken)));
+            tasks.Add(Task.Run(() => handler.HandlerCallback(notification, cancellationToken)));
         }
 
         return Task.WhenAny(tasks);
     }
 
-    private Task ParallelNoWait(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private Task ParallelNoWait(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         foreach (var handler in handlers)
         {
-            Task.Run(() => handler(notification, cancellationToken));
+            Task.Run(() => handler.HandlerCallback(notification, cancellationToken));
         }
 
         return Task.CompletedTask;
     }
 
-    private async Task AsyncContinueOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private async Task AsyncContinueOnException(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         var tasks = new List<Task>();
         var exceptions = new List<Exception>();
@@ -93,7 +93,7 @@ public class Publisher
         {
             try
             {
-                tasks.Add(handler(notification, cancellationToken));
+                tasks.Add(handler.HandlerCallback(notification, cancellationToken));
             }
             catch (Exception ex) when (!(ex is OutOfMemoryException || ex is StackOverflowException))
             {
@@ -120,15 +120,15 @@ public class Publisher
         }
     }
 
-    private async Task SyncStopOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private async Task SyncStopOnException(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         foreach (var handler in handlers)
         {
-            await handler(notification, cancellationToken).ConfigureAwait(false);
+            await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private async Task SyncContinueOnException(IEnumerable<Func<INotification, CancellationToken, Task>> handlers, INotification notification, CancellationToken cancellationToken)
+    private async Task SyncContinueOnException(IEnumerable<NotificationHandlerExecutor> handlers, INotification notification, CancellationToken cancellationToken)
     {
         var exceptions = new List<Exception>();
 
@@ -136,7 +136,7 @@ public class Publisher
         {
             try
             {
-                await handler(notification, cancellationToken).ConfigureAwait(false);
+                await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);
             }
             catch (AggregateException ex)
             {

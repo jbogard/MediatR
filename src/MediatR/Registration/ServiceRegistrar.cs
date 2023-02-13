@@ -218,6 +218,11 @@ public static class ServiceRegistrar
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
 
+        services.TryAdd(serviceConfiguration.NotificationPublisherType != null
+            ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType,
+                serviceConfiguration.Lifetime)
+            : new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisher));
+
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
             services.Add(serviceDescriptor);
