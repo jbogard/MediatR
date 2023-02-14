@@ -1,3 +1,5 @@
+using MediatR.NotificationPublishers;
+
 namespace MediatR;
 
 using System;
@@ -14,6 +16,7 @@ using Wrappers;
 public class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly INotificationPublisher _publisher;
     private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
     private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
     private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new();
@@ -23,7 +26,18 @@ public class Mediator : IMediator
     /// </summary>
     /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
     public Mediator(IServiceProvider serviceProvider) 
-        => _serviceProvider = serviceProvider;
+        : this(serviceProvider, new ForeachAwaitPublisher()) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Mediator"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
+    /// <param name="publisher">Notification publisher. Defaults to <see cref="ForeachAwaitPublisher"/>.</param>
+    public Mediator(IServiceProvider serviceProvider, INotificationPublisher publisher)
+    {
+        _serviceProvider = serviceProvider;
+        _publisher = publisher;
+    }
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
@@ -124,19 +138,14 @@ public class Mediator : IMediator
         };
 
     /// <summary>
-    /// Override in a derived class to control how the tasks are awaited. By default the implementation is a foreach and await of each handler
+    /// Override in a derived class to control how the tasks are awaited. By default the implementation calls the <see cref="INotificationPublisher"/>.
     /// </summary>
-    /// <param name="allHandlers">Enumerable of tasks representing invoking each notification handler</param>
+    /// <param name="handlerExecutors">Enumerable of tasks representing invoking each notification handler</param>
     /// <param name="notification">The notification being published</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>A task representing invoking all handlers</returns>
-    protected virtual async Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
-    {
-        foreach (var handler in allHandlers)
-        {
-            await handler(notification, cancellationToken).ConfigureAwait(false);
-        }
-    }
+    protected virtual Task PublishCore(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken) 
+        => _publisher.Publish(handlerExecutors, notification, cancellationToken);
 
     private Task PublishNotification(INotification notification, CancellationToken cancellationToken = default)
     {
