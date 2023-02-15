@@ -63,7 +63,7 @@ public class Mediator : IMediator
             throw new ArgumentNullException(nameof(request));
         }
 
-        var requestType = typeof(TRequest);
+        var requestType = request.GetType();
 
         var handler = (RequestHandlerWrapper)_requestHandlers.GetOrAdd(requestType,
             static t => (RequestHandlerBase)(Activator.CreateInstance(typeof(RequestHandlerWrapperImpl<>).MakeGenericType(t))
