@@ -30,7 +30,7 @@ Either commands, from Package Manager Console or .NET Core CLI, will download an
 
 To reference only the contracts for MediatR, which includes:
 
-- `IRequest` (including generic variants and `Unit`)
+- `IRequest` (including generic variants)
 - `INotification`
 - `IStreamRequest`
 
@@ -40,3 +40,49 @@ This package is useful in scenarios where your MediatR contracts are in a separa
 - API contracts
 - GRPC contracts
 - Blazor
+
+### Registering with `IServiceCollection`
+
+MediatR supports `Microsoft.Extensions.DependencyInjection.Abstractions` directly. To register various MediatR services and handlers:
+
+```
+services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Startup>());
+```
+
+or with an assembly:
+
+```
+services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly));
+```
+
+This registers:
+
+- `IMediator` as transient
+- `ISender` as transient
+- `IPublisher` as transient
+- `IRequestHandler<,>` concrete implementations as transient
+- `IRequestHandler<>` concrete implementations as transient
+- `INotificationHandler<>` concrete implementations as transient
+- `IStreamRequestHandler<>` concrete implementations as transient
+- `IRequestPreProcessor<>` concrete implementations as transient
+- `IRequestPostProcessor<,>` concrete implementations as transient
+- `IRequestExceptionHandler<,,>` concrete implementations as transient
+- `IRequestExceptionAction<,>)` concrete implementations as transient
+
+This also registers open generic implementations for:
+
+- `INotificationHandler<>`
+- `IRequestPreProcessor<>`
+- `IRequestPostProcessor<,>`
+- `IRequestExceptionHandler<,,>`
+- `IRequestExceptionAction<,>`
+
+To register behaviors:
+
+```csharp
+services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly);
+    cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, PingPongBehavior>();
+    cfg.AddOpenBehavior(typeof(GenericBehavior<,>));
+    });
+```
