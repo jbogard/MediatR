@@ -18,6 +18,8 @@ public class PublishTests
         public string? Message { get; set; }
     }
 
+    public class Sing : Ping { }
+
     public class PongHandler : INotificationHandler<Ping>
     {
         private readonly TextWriter _writer;
@@ -103,6 +105,34 @@ public class PublishTests
         var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
         result.ShouldContain("Ping Pong");
         result.ShouldContain("Ping Pung");
+    }
+
+    [Fact]
+    public async Task Should_resolve_contravariant_handler_when_derived_type_is_used()
+    {
+        var builder = new StringBuilder();
+        var writer = new StringWriter(builder);
+
+        var container = new Container(cfg =>
+        {
+            cfg.Scan(scanner =>
+            {
+                scanner.AssemblyContainingType(typeof(PublishTests));
+                scanner.IncludeNamespaceContainingType<Ping>();
+                scanner.WithDefaultConventions();
+                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+            });
+            cfg.For<TextWriter>().Use(writer);
+            cfg.For<IMediator>().Use<Mediator>();
+        });
+
+        var mediator = container.GetInstance<IMediator>();
+
+        await mediator.Publish(new Sing { Message = "Sing" });
+
+        var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+        result.ShouldContain("Sing Pong");
+        result.ShouldContain("Sing Pung");
     }
 
     public class SequentialMediator : Mediator
