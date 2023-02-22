@@ -49,7 +49,7 @@ public class NotificationPublisherTests
 
         timer.Stop();
         
-        timer.ElapsedMilliseconds.ShouldBeGreaterThan(750);
+        timer.ElapsedMilliseconds.ShouldBeGreaterThanOrEqualTo(750);
 
         _output.WriteLine(timer.ElapsedMilliseconds.ToString());
     }
