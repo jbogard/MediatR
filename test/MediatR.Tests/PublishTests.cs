@@ -1,4 +1,5 @@
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Tests;
 
@@ -108,7 +109,7 @@ public class PublishTests
     }
 
     [Fact]
-    public async Task Should_resolve_contravariant_handler_when_derived_type_is_used()
+    public async Task Should_resolve_contravariant_handler()
     {
         var builder = new StringBuilder();
         var writer = new StringWriter(builder);
@@ -127,6 +128,28 @@ public class PublishTests
         });
 
         var mediator = container.GetInstance<IMediator>();
+
+        await mediator.Publish(new Sing { Message = "Sing" });
+
+        var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+        result.ShouldContain("Sing Pong");
+        result.ShouldContain("Sing Pung");
+    }
+
+    [Fact]
+    public async Task Should_resolve_contravariant_handler_when_container_is_microsoft_di()
+    {
+        var builder = new StringBuilder();
+        var writer = new StringWriter(builder);
+
+        var services = new ServiceCollection();
+        services.AddSingleton<TextWriter>(writer);
+        services.AddTransient<IMediator, Mediator>();
+        services.AddTransient<INotificationHandler<Ping>, PongHandler>();
+        services.AddTransient<INotificationHandler<Ping>, PungHandler>();
+
+        await using var container = services.BuildServiceProvider();
+        var mediator = container.GetRequiredService<IMediator>();
 
         await mediator.Publish(new Sing { Message = "Sing" });
 
