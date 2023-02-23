@@ -105,7 +105,7 @@ public static class ServiceRegistrar
         }
     }
 
-    private static bool IsMatchingWithInterface(Type handlerType, Type handlerInterface)
+    private static bool IsMatchingWithInterface(Type? handlerType, Type handlerInterface)
     {
         if (handlerType == null || handlerInterface == null)
         {
@@ -186,15 +186,15 @@ public static class ServiceRegistrar
                 yield return interfaceType;
             }
         }
-        else if (pluggedType.GetTypeInfo().BaseType.GetTypeInfo().IsGenericType &&
-                 (pluggedType.GetTypeInfo().BaseType.GetGenericTypeDefinition() == templateType))
+        else if (pluggedType.GetTypeInfo().BaseType!.GetTypeInfo().IsGenericType &&
+                 (pluggedType.GetTypeInfo().BaseType!.GetGenericTypeDefinition() == templateType))
         {
-            yield return pluggedType.GetTypeInfo().BaseType;
+            yield return pluggedType.GetTypeInfo().BaseType!;
         }
 
         if (pluggedType.GetTypeInfo().BaseType == typeof(object)) yield break;
 
-        foreach (var interfaceType in FindInterfacesThatClosesCore(pluggedType.GetTypeInfo().BaseType, templateType))
+        foreach (var interfaceType in FindInterfacesThatClosesCore(pluggedType.GetTypeInfo().BaseType!, templateType))
         {
             yield return interfaceType;
         }
