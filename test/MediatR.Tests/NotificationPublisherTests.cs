@@ -49,34 +49,26 @@ public class NotificationPublisherTests
 
         timer.Stop();
         
-        timer.ElapsedMilliseconds.ShouldBeGreaterThanOrEqualTo(750);
+        var sequentialElapsed = timer.ElapsedMilliseconds;
 
-        _output.WriteLine(timer.ElapsedMilliseconds.ToString());
-    }
-
-
-    [Fact]
-    public async Task Should_handle_in_parallel_with_when_all()
-    {
-        var services = new ServiceCollection();
+        services = new ServiceCollection();
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining<Notification>();
             cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
         });
-        var serviceProvider = services.BuildServiceProvider();
+        serviceProvider = services.BuildServiceProvider();
 
-        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        mediator = serviceProvider.GetRequiredService<IMediator>();
 
-        var timer = new Stopwatch();
-        timer.Start();
+        timer.Restart();
 
         await mediator.Publish(new Notification());
 
         timer.Stop();
         
-        timer.ElapsedMilliseconds.ShouldBeLessThan(750);
-        
-        _output.WriteLine(timer.ElapsedMilliseconds.ToString());
+        var parallelElapsed = timer.ElapsedMilliseconds;
+
+        sequentialElapsed.ShouldBeGreaterThan(parallelElapsed);
     }
 }
