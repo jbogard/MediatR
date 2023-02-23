@@ -1,6 +1,7 @@
 namespace MediatR.Pipeline;
 
 using Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,7 +72,7 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
         var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
         var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
 
-        var actionsForException = (IEnumerable<object>)_serviceProvider.GetService(enumerableExceptionActionInterfaceType);
+        var actionsForException = (IEnumerable<object>)_serviceProvider.GetRequiredService(enumerableExceptionActionInterfaceType);
 
         return HandlersOrderer.Prioritize(actionsForException.ToList(), request)
             .Select(action => (exceptionType, action));
