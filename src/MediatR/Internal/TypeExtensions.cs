@@ -17,14 +17,12 @@ internal static class TypeExtensions
         if (type == null) throw new ArgumentNullException(nameof(type));
         if (filter == null) throw new ArgumentNullException(nameof(filter));
 
-        var collection = new Stack<Type>();
         while (true)
         {
-            var i = type.GetInterfaces();
             var baseType = type.BaseType;
-            if (baseType == null) return collection;
+            if (baseType == null) yield break;
 
-            if (filter(baseType, filterCriteria)) collection.Push(baseType);
+            if (filter(baseType, filterCriteria)) yield return baseType;
             type = baseType;
         }
     }

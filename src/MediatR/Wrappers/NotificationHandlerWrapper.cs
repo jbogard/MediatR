@@ -30,6 +30,7 @@ public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandler
             // Resolve all INotificationHandler<...> for the type from service provider
             .Select(static t => typeof(INotificationHandler<>).MakeGenericType(t))
             .SelectMany(serviceFactory.GetServices)
+            .Distinct(new ObjectTypeEqualityComparer())
 
             // And create executors
             .Cast<INotificationHandler<TNotification>>()
