@@ -218,75 +218,47 @@ public static class ServiceRegistrar
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
 
-        services.TryAdd(serviceConfiguration.NotificationPublisherType != null
-            ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType,
-                serviceConfiguration.Lifetime)
-            : new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisher));
+        var notificationPublisherServiceDescriptor = serviceConfiguration.NotificationPublisherType != null
+            ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType, serviceConfiguration.Lifetime)
+            : new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisher);
+
+        services.TryAdd(notificationPublisherServiceDescriptor);
 
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
-            services.Add(serviceDescriptor);
+            services.TryAddEnumerable(serviceDescriptor);
         }
 
-        // Use TryAddTransientExact (see below), we do want to register our Pre/Post processor behavior, even if (a more concrete)
-        // registration for IPipelineBehavior<,> already exists. But only once.
-        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPreProcessorBehavior<,>),
-            typeof(IRequestPreProcessor<>));
-        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPostProcessorBehavior<,>),
-            typeof(IRequestPostProcessor<,>));
+        // Use built-in Microsoft TryAddEnumerable method, we do want to register our Pre/Post processor behavior,
+        // even if (a more concrete) registration for IPipelineBehavior<,> already exists. But only once.
+        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPreProcessorBehavior<,>), typeof(IRequestPreProcessor<>));
+        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPostProcessorBehavior<,>), typeof(IRequestPostProcessor<,>));
 
-        if (serviceConfiguration.RequestExceptionActionProcessorStrategy ==
-            RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
+        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
         {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>),
-                typeof(IRequestExceptionAction<,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>),
-                typeof(IRequestExceptionHandler<,,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
         }
         else
         {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>),
-                typeof(IRequestExceptionHandler<,,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>),
-                typeof(IRequestExceptionAction<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
         }
     }
 
-    private static void RegisterBehaviorIfImplementationsExist(
-        IServiceCollection services,
-        Type behaviorType,
-        Type subBehaviorType
-        )
+    private static void RegisterBehaviorIfImplementationsExist(IServiceCollection services, Type behaviorType, Type subBehaviorType)
     {
         var hasAnyRegistrationsOfSubBehaviorType = services
             .Select(service => service.ImplementationType)
-            .Where(type => type != null)
-            .SelectMany(type => type!.GetInterfaces())
+            .OfType<Type>()
+            .SelectMany(type => type.GetInterfaces())
             .Where(type => type.IsGenericType)
             .Select(type => type.GetGenericTypeDefinition())
-            .Where(type => type != null)
             .Any(type => type == subBehaviorType);
 
         if (hasAnyRegistrationsOfSubBehaviorType)
         {
-            services.TryAddTransientExact(typeof(IPipelineBehavior<,>), behaviorType);
+            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), behaviorType, ServiceLifetime.Transient));
         }
-    }
-
-    /// <summary>
-    /// Adds a new transient registration to the service collection only when no existing registration of the same service type and implementation type exists.
-    /// In contrast to TryAddTransient, which only checks the service type.
-    /// </summary>
-    /// <param name="services">The service collection</param>
-    /// <param name="serviceType">Service type</param>
-    /// <param name="implementationType">Implementation type</param>
-    private static void TryAddTransientExact(this IServiceCollection services, Type serviceType, Type implementationType)
-    {
-        if (services.Any(reg => reg.ServiceType == serviceType && reg.ImplementationType == implementationType))
-        {
-            return;
-        }
-
-        services.AddTransient(serviceType, implementationType);
     }
 }
