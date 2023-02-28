@@ -53,7 +53,7 @@ public class PipelineTests
     }
 
     public class InnerBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+        where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -73,7 +73,7 @@ public class PipelineTests
     }
 
     public class OuterBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+        where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -93,7 +93,7 @@ public class PipelineTests
     }
 
     public class ConstrainedBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : Ping, IRequest<TResponse>
+        where TRequest : notnull
         where TResponse : Pong
     {
         private readonly Logger _output;
@@ -174,7 +174,7 @@ public class PipelineTests
     }
 
     public class FirstPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+        where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -205,7 +205,7 @@ public class PipelineTests
     }
 
     public class NextPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+        where TRequest : notnull
     {
         private readonly Logger _output;
 
@@ -315,6 +315,36 @@ public class PipelineTests
         }
     }
 
+    public class NotAnOpenBehavior : IPipelineBehavior<Ping, Pong>
+    {
+        public Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken) => next();
+    }
+
+    public class NotAnOpenStreamBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        public IAsyncEnumerable<Pong> Handle(Ping request, StreamHandlerDelegate<Pong> next, CancellationToken cancellationToken) => next();
+    }
+
+    public class OpenBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) => next();
+    }
+
+    public class OpenStreamBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerDelegate<TResponse> next, CancellationToken cancellationToken) => next();
+    }
+
+    public class MultiOpenBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>, IStreamPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) => next();
+
+        public IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerDelegate<TResponse> next, CancellationToken cancellationToken) => next();
+    }
+
     [Fact]
     public async Task Should_wrap_with_behavior()
     {
@@ -350,7 +380,6 @@ public class PipelineTests
         });
     }
 
-
     [Fact]
     public async Task Should_wrap_generics_with_behavior()
     {
@@ -359,9 +388,13 @@ public class PipelineTests
         services.AddSingleton(output);
         services.AddMediatR(cfg =>
         {
-            cfg.AddOpenBehavior(typeof(OuterBehavior<,>));
-            cfg.AddOpenBehavior(typeof(InnerBehavior<,>));
-            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            // Call these registration methods multiple times to prove we don't register a service if it is already registered
+            for (var i = 0; i < 3; i++)
+            {
+                cfg.AddOpenBehavior(typeof(OuterBehavior<,>));
+                cfg.AddOpenBehavior(typeof(InnerBehavior<,>));
+                cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            }
         });
         var provider = services.BuildServiceProvider();
 
@@ -526,4 +559,64 @@ public class PipelineTests
         });
     }
 
+    [Fact]
+    public void Should_throw_when_adding_non_open_behavior()
+    {
+        Should.Throw<InvalidOperationException>(() => new MediatRServiceConfiguration().AddOpenBehavior(typeof(NotAnOpenBehavior)));
+    }
+
+    [Fact]
+    public void Should_throw_when_adding_non_open_stream_behavior()
+    {
+        Should.Throw<InvalidOperationException>(() => new MediatRServiceConfiguration().AddOpenBehavior(typeof(NotAnOpenStreamBehavior)));
+    }
+
+    [Fact]
+    public void Should_throw_when_adding_random_generic_type_as_open_behavior()
+    {
+        Should.Throw<InvalidOperationException>(() => new MediatRServiceConfiguration().AddOpenBehavior(typeof(List<string>)));
+    }
+
+    [Fact]
+    public void Should_handle_open_behavior_registration()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddOpenBehavior(typeof(OpenBehavior<,>));
+        cfg.AddOpenBehavior(typeof(OpenStreamBehavior<,>));
+
+        cfg.BehaviorsToRegister.Count.ShouldBe(2);
+
+        cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(OpenBehavior<,>));
+        cfg.BehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+
+        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OpenStreamBehavior<,>));
+        cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+    }
+
+    [Fact]
+    public void Should_handle_open_behaviors_registration_from_a_single_type()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddOpenBehavior(typeof(MultiOpenBehavior<,>), ServiceLifetime.Singleton);
+
+        cfg.BehaviorsToRegister.Count.ShouldBe(2);
+
+        cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(MultiOpenBehavior<,>));
+        cfg.BehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Singleton);
+
+        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(MultiOpenBehavior<,>));
+        cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Singleton);
+    }
 }

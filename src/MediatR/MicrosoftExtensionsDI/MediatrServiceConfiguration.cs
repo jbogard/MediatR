@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using MediatR;
 using MediatR.NotificationPublishers;
@@ -94,9 +95,8 @@ public class MediatRServiceConfiguration
     /// <typeparam name="TImplementationType">Closed behavior implementation type</typeparam>
     /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
     /// <returns>This</returns>
-    public MediatRServiceConfiguration AddBehavior<TServiceType, TImplementationType>(
-        ServiceLifetime serviceLifetime = ServiceLifetime.Transient) =>
-        AddBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+    public MediatRServiceConfiguration AddBehavior<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        => AddBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
 
     /// <summary>
     /// Register a closed behavior type
@@ -105,10 +105,7 @@ public class MediatRServiceConfiguration
     /// <param name="implementationType">Closed behavior implementation type</param>
     /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
     /// <returns>This</returns>
-    public MediatRServiceConfiguration AddBehavior(
-        Type serviceType,
-        Type implementationType,
-        ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    public MediatRServiceConfiguration AddBehavior(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
         BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
@@ -123,9 +120,23 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        var serviceType = typeof(IPipelineBehavior<,>);
+        if (!openBehaviorType.IsGenericType)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
+        }
 
-        BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, openBehaviorType, serviceLifetime));
+        var implementedGenericInterfaces = openBehaviorType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
+        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IPipelineBehavior<,>) || i == typeof(IStreamPipelineBehavior<,>)));
+
+        if (implementedOpenBehaviorInterfaces.Count == 0)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IPipelineBehavior<,>).FullName} or {typeof(IStreamPipelineBehavior<,>).FullName}");
+        }
+
+        foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
+        {
+            BehaviorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
+        }
 
         return this;
     }
