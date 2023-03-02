@@ -157,12 +157,12 @@ public static class ServiceRegistrar
 
         if (pluggedType == pluginType) return true;
 
-        return pluginType.GetTypeInfo().IsAssignableFrom(pluggedType.GetTypeInfo());
+        return pluginType.IsAssignableFrom(pluggedType);
     }
 
     private static bool IsOpenGeneric(this Type type)
     {
-        return type.GetTypeInfo().IsGenericTypeDefinition || type.GetTypeInfo().ContainsGenericParameters;
+        return type.IsGenericTypeDefinition || type.ContainsGenericParameters;
     }
 
     private static IEnumerable<Type> FindInterfacesThatClose(this Type pluggedType, Type templateType)
@@ -176,25 +176,25 @@ public static class ServiceRegistrar
 
         if (!pluggedType.IsConcrete()) yield break;
 
-        if (templateType.GetTypeInfo().IsInterface)
+        if (templateType.IsInterface)
         {
             foreach (
                 var interfaceType in
                 pluggedType.GetInterfaces()
-                    .Where(type => type.GetTypeInfo().IsGenericType && (type.GetGenericTypeDefinition() == templateType)))
+                    .Where(type => type.IsGenericType && (type.GetGenericTypeDefinition() == templateType)))
             {
                 yield return interfaceType;
             }
         }
-        else if (pluggedType.GetTypeInfo().BaseType!.GetTypeInfo().IsGenericType &&
-                 (pluggedType.GetTypeInfo().BaseType!.GetGenericTypeDefinition() == templateType))
+        else if (pluggedType.BaseType!.IsGenericType &&
+                 (pluggedType.BaseType!.GetGenericTypeDefinition() == templateType))
         {
-            yield return pluggedType.GetTypeInfo().BaseType!;
+            yield return pluggedType.BaseType!;
         }
 
-        if (pluggedType.GetTypeInfo().BaseType == typeof(object)) yield break;
+        if (pluggedType.BaseType == typeof(object)) yield break;
 
-        foreach (var interfaceType in FindInterfacesThatClosesCore(pluggedType.GetTypeInfo().BaseType!, templateType))
+        foreach (var interfaceType in FindInterfacesThatClosesCore(pluggedType.BaseType!, templateType))
         {
             yield return interfaceType;
         }
@@ -202,7 +202,7 @@ public static class ServiceRegistrar
 
     private static bool IsConcrete(this Type type)
     {
-        return !type.GetTypeInfo().IsAbstract && !type.GetTypeInfo().IsInterface;
+        return !type.IsAbstract && !type.IsInterface;
     }
 
     private static void Fill<T>(this IList<T> list, T value)
