@@ -213,7 +213,7 @@ public static class ServiceRegistrar
 
     public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
     {
-        // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overriden
+        // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
         services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
