@@ -50,7 +50,8 @@ namespace MediatR.Benchmarks
                     {
                         var dotTracePath = Path.Combine(
                             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                            @"JetBrains\Installations\dotTrace192\ConsoleProfiler.exe");
+                           // @"JetBrains\Installations\dotTrace192\ConsoleProfiler.exe");
+                            @"JetBrains\Installations\dotTrace223\ConsoleProfiler.exe");
                         var startInfo = new ProcessStartInfo(
                             dotTracePath,
                             $"attach {parameters.Process.Id} --save-to={_saveLocation} --profiling-type=Sampling")
