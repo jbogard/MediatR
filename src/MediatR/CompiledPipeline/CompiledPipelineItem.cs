@@ -6,6 +6,12 @@ using MediatR.CompiledPipeline.Extensions;
 
 namespace MediatR.CompiledPipeline;
 
+public delegate Task<TResponse> PipelineItemDelegate<in TRequest, TResponse>(
+    TRequest request, 
+    TResponse? response = default,
+    CancellationToken cancellationToken = default)
+    where TRequest : IRequest<TResponse>
+    where TResponse : class;
 
 public class CompiledPipelineItem
 {
@@ -29,7 +35,8 @@ public class CompiledPipelineItem
     public string? HandlerMethodName { get; set; } = "Handle";
 
     public ItemTypes ItemType { get; set; }
-    
+  
+
     public Type? ResponseType { get; set; }
     public object? ResponseInstance { get; set; }
 }
@@ -38,12 +45,12 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
     where TRequest : IRequest<TResponse>
     where TResponse : class
 {
-    public TRequest Request
+    public TRequest? Request
     {
         get
         {
             if (RequestInstance == null)
-                throw new ArgumentNullException(nameof(RequestInstance));
+                return default;
             
             return (TRequest) RequestInstance;
         }
@@ -57,12 +64,12 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
         }
     }
 
-    public IRequestHandler<TRequest, TResponse> Handler
+    public IRequestHandler<TRequest, TResponse>? Handler
     {
         get
         {
             if (HandlerInstance == null)
-                throw new ArgumentNullException(nameof(HandlerInstance));
+                return null;
             
             return (IRequestHandler<TRequest, TResponse>) HandlerInstance;
         }
@@ -76,12 +83,12 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
         }
     }
 
-    public TResponse Response
+    public TResponse? Response
     {
         get
         {
             if (ResponseInstance == null)
-                throw new ArgumentNullException(nameof(ResponseInstance));
+                return default;
             
             return (TResponse) ResponseInstance;
         }
@@ -107,7 +114,8 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
     {
         return (Expression<Func<TRequest, CancellationToken, Task<TResponse>>>?) PreparedHandler;
     }
-    public PipelineDelegate<TRequest, TResponse>? AsHandlerDelegate()
+    
+    public PipelineItemDelegate<TRequest, TResponse>? AsHandlerDelegate()
     {
         var myHandler = AsHandlerExpression()!.Compile();
         return (request, response, cancellationToken) =>
@@ -122,7 +130,7 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
     {
         return (Expression<Func<TRequest, CancellationToken, Task>>?) PreparedHandler;
     }
-    public PipelineDelegate<TRequest, TResponse>? AsPreProcessorDelegate()
+    public PipelineItemDelegate<TRequest, TResponse>? AsPreProcessorDelegate()
     {
         var myFunc = AsPreProcessorExpression()!.Compile();
         return ((request, response, cancellationToken) =>
@@ -136,17 +144,21 @@ public class CompiledPipelineItem<TRequest, TResponse> : CompiledPipelineItem
     {
         return (Expression<Func<TRequest, TResponse, CancellationToken, Task>>?) PreparedHandler;
     }
-    public PipelineDelegate<TRequest, TResponse>? AsPostProcessorDelegate()
+    public PipelineItemDelegate<TRequest, TResponse>? AsPostProcessorDelegate()
     {
         var myFunc = AsPostProcessorExpression()!.Compile();
         return (request, response, cancellationToken) =>
         {
-            myFunc(request, response!, cancellationToken);
+            if (response == null)
+            {
+                response = Activator.CreateInstance<TResponse>();
+            }
+            myFunc(request, response, cancellationToken);
             return Task.FromResult(response!);
         };
     }
 
-    public PipelineDelegate<TRequest, TResponse>? AsDelegate()
+    public PipelineItemDelegate<TRequest, TResponse>? AsDelegate()
     {
         switch (this.ItemType)
         {

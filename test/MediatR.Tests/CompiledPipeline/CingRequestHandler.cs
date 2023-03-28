@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.Benchmarks
+namespace MediatR.Tests.CompiledPipeline
 {
     public class CingRequestHandler : IRequestHandler<Cing, Cong>
     {

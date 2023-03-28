@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.2.20220510" />
     <PackageReference Include="Lamar" Version="8.1.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />

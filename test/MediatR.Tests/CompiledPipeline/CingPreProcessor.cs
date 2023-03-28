@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 
-namespace MediatR.Benchmarks
+namespace MediatR.Tests.CompiledPipeline
 {
     public class CingPreProcessor: IRequestPreProcessor<Cing>
     {

@@ -11,48 +11,56 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MediatR.CompiledPipeline;
 
 // RequestHandlerDelegate seems not reusable here...?
-public delegate Task<TResponse> PipelineDelegate<in TRequest, TResponse>(
-    TRequest request, 
-    TResponse? response = default,
+public delegate Task<TOutput> PipelineDelegate<in TInput, TOutput>(
+    TInput input, 
     CancellationToken cancellationToken = default)
-    where TRequest : IRequest<TResponse>
-    where TResponse : class;
+    where TInput : class
+    where TOutput : class;
 
-public class CompiledPipeline
+public class CompiledPipeline<TInput, TOutput>
+    where TInput : class
+    where TOutput : class
 {
 
     
     private readonly List<CompiledPipelineItem> _items = new();
-     
+    
     private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
 
-    private Delegate? _compiled;
-    public PipelineDelegate<TRequest, TResponse>? Compiled<TRequest, TResponse>()
+    private PipelineDelegate<TInput, TOutput>? _compiled;
+
+    public PipelineDelegate<TInput, TOutput> Compiled<TRequest, TResponse>()
         where TRequest : IRequest<TResponse>
         where TResponse : class
     {
         if (_compiled == null)
         {
-            Compile<TRequest, TResponse>();
+            _compiled = Compile<TRequest,TResponse>();
         }
 
-        return (PipelineDelegate<TRequest, TResponse>?) _compiled;
+        return _compiled;
     }
 
-    public CompiledPipeline Compile<TRequest, TResponse>()
+    public PipelineDelegate<TInput, TOutput> Compile<TRequest, TResponse>()
         where TRequest : IRequest<TResponse>
         where TResponse : class
     {
+
         var delegatesArr =
             _items
                 .Cast<CompiledPipelineItem<TRequest, TResponse>>()
                 .Select(item => item.AsDelegate())
                 .ToArray();
-
-        _compiled = (PipelineDelegate<TRequest, TResponse>?) Delegate.Combine(delegatesArr);
         
-        return this;
+        var pipelineItemsDelegate = (PipelineItemDelegate<TRequest, TResponse>) Delegate.Combine(delegatesArr)!;
+
+        return (async (input, token) =>
+        {
+            TResponse? response = Activator.CreateInstance<TResponse>();
+            var result = await pipelineItemsDelegate((TRequest)Convert.ChangeType(input, typeof(TRequest)), response, token);
+            return (TOutput) Convert.ChangeType(result, typeof(TOutput));
+        });
     }
     
     public CompiledPipeline(
@@ -124,13 +132,13 @@ public class CompiledPipeline
         return _items.Remove(item);
     }
 
-    public CompiledPipeline Prepare<TInput, TOutput>()
-        where TInput : IRequest<TOutput>
-        where TOutput : class
+    public CompiledPipeline<TInput, TOutput> Prepare<TRequest, TResponse>()
+        where TRequest : IRequest<TResponse>
+        where TResponse : class
     {
         for ( var i=0; i<_items.Count; i++)
         {
-            var item = (CompiledPipelineItem<TInput, TOutput>)_items[i];
+            var item = (CompiledPipelineItem<TRequest, TResponse>) _items[i];
 
             if (string.IsNullOrWhiteSpace(item.HandlerMethodName))
             {
@@ -154,13 +162,13 @@ public class CompiledPipeline
             switch (item.ItemType)
             {
                 case CompiledPipelineItem.ItemTypes.Handler:
-                    item.PreparedHandler = BuildHandlerCallExpression<TInput, TOutput>(item, methodInfo);
+                    item.PreparedHandler = BuildHandlerCallExpression(item, methodInfo);
                     break;
                 case CompiledPipelineItem.ItemTypes.PreProcessor:
-                    item.PreparedHandler = BuildPreProcessorCallExpression<TInput, TOutput>(item, methodInfo);
+                    item.PreparedHandler = BuildPreProcessorCallExpression(item, methodInfo);
                     break;
                 case CompiledPipelineItem.ItemTypes.PostProcessor:
-                    item.PreparedHandler = BuildPostProcessorCallExpression<TInput, TOutput>(item, methodInfo);
+                    item.PreparedHandler = BuildPostProcessorCallExpression(item, methodInfo);
                     break;
                 case CompiledPipelineItem.ItemTypes.Unknown:
                 default:
