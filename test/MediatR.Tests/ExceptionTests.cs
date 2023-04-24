@@ -2,12 +2,12 @@ using System.Threading;
 
 namespace MediatR.Tests;
 
+using Lamar;
+using Lamar.IoC;
+using Shouldly;
 using System;
 using System.Threading.Tasks;
-using Shouldly;
-using Lamar;
 using Xunit;
-using Lamar.IoC;
 
 public class ExceptionTests
 {
@@ -25,7 +25,7 @@ public class ExceptionTests
     {
     }
 
-    public class Pinged : INotification
+    public class Pinged
     {
     }
 
@@ -37,7 +37,7 @@ public class ExceptionTests
     {
     }
 
-    public class AsyncPinged : INotification
+    public class AsyncPinged
     {
     }
 
@@ -49,7 +49,7 @@ public class ExceptionTests
     {
     }
 
-    public class NullPinged : INotification
+    public class NullPinged
     {
     }
 
@@ -217,7 +217,7 @@ public class ExceptionTests
     }
 
     [Fact]
-    public async Task Should_throw_argument_exception_for_publish_when_request_is_not_notification()
+    public async Task Should_not_throw_argument_exception_for_publish_when_request_is_not_notification()
     {
         var container = new Container(cfg =>
         {
@@ -234,7 +234,7 @@ public class ExceptionTests
 
         object notification = "totally not notification";
 
-        await Should.ThrowAsync<ArgumentException>(async () => await mediator.Publish(notification));
+        await Should.NotThrowAsync(async () => await mediator.Publish(notification));
     }
 
     public class PingException : IRequest

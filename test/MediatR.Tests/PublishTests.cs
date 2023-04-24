@@ -2,18 +2,18 @@ using System.Threading;
 
 namespace MediatR.Tests;
 
+using Lamar;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Shouldly;
-using Lamar;
 using Xunit;
 
 public class PublishTests
 {
-    public class Ping : INotification
+    public class Ping
     {
         public string? Message { get; set; }
     }
@@ -61,7 +61,7 @@ public class PublishTests
                 scanner.AssemblyContainingType(typeof(PublishTests));
                 scanner.IncludeNamespaceContainingType<Ping>();
                 scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
@@ -71,7 +71,7 @@ public class PublishTests
 
         await mediator.Publish(new Ping { Message = "Ping" });
 
-        var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+        var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         result.ShouldContain("Ping Pong");
         result.ShouldContain("Ping Pung");
     }
@@ -89,7 +89,7 @@ public class PublishTests
                 scanner.AssemblyContainingType(typeof(PublishTests));
                 scanner.IncludeNamespaceContainingType<Ping>();
                 scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IMediator>().Use<Mediator>();
@@ -100,7 +100,7 @@ public class PublishTests
         object message = new Ping { Message = "Ping" };
         await mediator.Publish(message);
 
-        var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+        var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         result.ShouldContain("Ping Pong");
         result.ShouldContain("Ping Pung");
     }
@@ -112,7 +112,7 @@ public class PublishTests
         {
         }
 
-        protected override async Task PublishCore(IEnumerable<NotificationHandlerExecutor> allHandlers, INotification notification, CancellationToken cancellationToken)
+        protected override async Task PublishCore(IEnumerable<NotificationHandlerExecutor> allHandlers, object notification, CancellationToken cancellationToken)
         {
             foreach (var handler in allHandlers)
             {
@@ -125,7 +125,7 @@ public class PublishTests
     {
         public int CallCount { get; set; }
 
-        public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+        public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, object notification, CancellationToken cancellationToken)
         {
             foreach (var handler in handlerExecutors)
             {
@@ -216,7 +216,7 @@ public class PublishTests
         var mediator = container.GetInstance<IMediator>();
 
         // wrap notifications in an array, so this test won't break on a 'replace with var' refactoring
-        var notifications = new INotification[] { new Ping { Message = "Ping" } };
+        var notifications = new object[] { new Ping { Message = "Ping" } };
         await mediator.Publish(notifications[0]);
 
         var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -237,7 +237,7 @@ public class PublishTests
                 scanner.AssemblyContainingType(typeof(PublishTests));
                 scanner.IncludeNamespaceContainingType<Ping>();
                 scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof (INotificationHandler<>));
+                scanner.AddAllTypesOf(typeof(INotificationHandler<>));
             });
             cfg.For<TextWriter>().Use(writer);
             cfg.For<IPublisher>().Use<Mediator>();
@@ -247,7 +247,7 @@ public class PublishTests
 
         await mediator.Publish(new Ping { Message = "Ping" });
 
-        var result = builder.ToString().Split(new [] {Environment.NewLine}, StringSplitOptions.None);
+        var result = builder.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         result.ShouldContain("Ping Pong");
         result.ShouldContain("Ping Pung");
     }

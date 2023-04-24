@@ -1,11 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR.NotificationPublishers;
-using Shouldly;
 using Xunit;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
@@ -16,7 +14,7 @@ public class NotificationPublisherTests
     {
         public int CallCount { get; set; }
 
-        public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+        public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, object notification, CancellationToken cancellationToken)
         {
             foreach (var handlerExecutor in handlerExecutors)
             {
@@ -64,7 +62,7 @@ public class NotificationPublisherTests
         mediator.ShouldNotBeNull();
 
         await mediator.Publish(new Pinged());
-        
+
         publisher.CallCount.ShouldBeGreaterThan(0);
     }
 

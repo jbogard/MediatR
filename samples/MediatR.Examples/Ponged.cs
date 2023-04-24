@@ -1,6 +1,6 @@
 ﻿namespace MediatR.Examples;
 
-public class Ponged : INotification
+public class Ponged
 {
 
 }

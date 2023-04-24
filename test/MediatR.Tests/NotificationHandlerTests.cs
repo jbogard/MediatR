@@ -1,14 +1,14 @@
+using Shouldly;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Shouldly;
 using Xunit;
 
 namespace MediatR.Tests;
 
 public class NotificationHandlerTests
 {
-    public class Ping : INotification
+    public class Ping
     {
         public string? Message { get; set; }
     }

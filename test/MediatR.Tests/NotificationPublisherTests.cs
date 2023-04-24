@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using MediatR.NotificationPublishers;
+﻿using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,18 +15,18 @@ public class NotificationPublisherTests
 
     public NotificationPublisherTests(ITestOutputHelper output) => _output = output;
 
-    public class Notification : INotification
+    public class Notification
     {
     }
 
     public class FirstHandler : INotificationHandler<Notification>
     {
-        public async Task Handle(Notification notification, CancellationToken cancellationToken) 
+        public async Task Handle(Notification notification, CancellationToken cancellationToken)
             => await Task.Delay(500, cancellationToken);
     }
     public class SecondHandler : INotificationHandler<Notification>
     {
-        public async Task Handle(Notification notification, CancellationToken cancellationToken) 
+        public async Task Handle(Notification notification, CancellationToken cancellationToken)
             => await Task.Delay(250, cancellationToken);
     }
 
@@ -48,7 +48,7 @@ public class NotificationPublisherTests
         await mediator.Publish(new Notification());
 
         timer.Stop();
-        
+
         var sequentialElapsed = timer.ElapsedMilliseconds;
 
         services = new ServiceCollection();
@@ -66,7 +66,7 @@ public class NotificationPublisherTests
         await mediator.Publish(new Notification());
 
         timer.Stop();
-        
+
         var parallelElapsed = timer.ElapsedMilliseconds;
 
         sequentialElapsed.ShouldBeGreaterThan(parallelElapsed);

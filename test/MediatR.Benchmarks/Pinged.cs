@@ -1,6 +1,6 @@
 namespace MediatR.Benchmarks
 {
-    public class Pinged : INotification
+    public class Pinged
     {
 
     }

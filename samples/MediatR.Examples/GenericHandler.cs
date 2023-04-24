@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MediatR.Examples;
 
-public class GenericHandler : INotificationHandler<INotification>
+public class GenericHandler : INotificationHandler<object>
 {
     private readonly TextWriter _writer;
 
@@ -13,7 +13,7 @@ public class GenericHandler : INotificationHandler<INotification>
         _writer = writer;
     }
 
-    public Task Handle(INotification notification, CancellationToken cancellationToken)
+    public Task Handle(object notification, CancellationToken cancellationToken)
     {
         return _writer.WriteLineAsync("Got notified.");
     }

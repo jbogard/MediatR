@@ -17,7 +17,7 @@ namespace MediatR.NotificationPublishers;
 /// </summary>
 public class TaskWhenAllPublisher : INotificationPublisher
 {
-    public Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+    public Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, object notification, CancellationToken cancellationToken)
     {
         var tasks = handlerExecutors
             .Select(handler => handler.HandlerCallback(notification, cancellationToken))

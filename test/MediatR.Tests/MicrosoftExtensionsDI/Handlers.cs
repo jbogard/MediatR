@@ -37,7 +37,7 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
         public string? Message { get; init; }
     }
 
-    public class Pinged : INotification
+    public class Pinged
     {
 
     }
@@ -49,9 +49,9 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
         public string? Message { get; init; }
     }
 
-    public class GenericHandler : INotificationHandler<INotification>
+    public class GenericHandler : INotificationHandler<object>
     {
-        public Task Handle(INotification notification, CancellationToken cancellationToken)
+        public Task Handle(object notification, CancellationToken cancellationToken)
         {
             return Task.FromResult(0);
         }
@@ -192,7 +192,7 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
             throw new System.NotImplementedException();
         }
 
-        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
+        public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
         {
             throw new System.NotImplementedException();
         }

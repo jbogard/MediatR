@@ -14,7 +14,7 @@ namespace MediatR.NotificationPublishers;
 /// </summary>
 public class ForeachAwaitPublisher : INotificationPublisher
 {
-    public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+    public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, object notification, CancellationToken cancellationToken)
     {
         foreach (var handler in handlerExecutors)
         {
