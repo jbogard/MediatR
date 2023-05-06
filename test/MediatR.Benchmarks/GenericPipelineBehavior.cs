@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace MediatR.Benchmarks
 {
     public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+        where TRequest : notnull
     {
         private readonly TextWriter _writer;
 

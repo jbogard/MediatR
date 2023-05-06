@@ -6,6 +6,7 @@ using MediatR.Pipeline;
 namespace MediatR.Benchmarks
 {
     public class GenericRequestPreProcessor<TRequest> : IRequestPreProcessor<TRequest>
+        where TRequest : notnull
     {
         private readonly TextWriter _writer;
 
