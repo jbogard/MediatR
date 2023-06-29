@@ -3,6 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.DryIoc;

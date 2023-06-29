@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Stashbox.Lifetime;
 

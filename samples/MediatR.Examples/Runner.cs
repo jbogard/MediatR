@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using System.Text;
-
-namespace MediatR.Examples;
-
+using MediatR.Abstraction;
 using MediatR.Examples.ExceptionHandler;
 using System.IO;
 using System.Threading.Tasks;
+
+namespace MediatR.Examples;
 
 public static class Runner
 {
@@ -18,19 +18,19 @@ public static class Runner
         await writer.WriteLineAsync();
 
         await writer.WriteLineAsync("Sending Ping...");
-        var pong = await mediator.Send(new Ping { Message = "Ping" });
+        var pong = await mediator.Send<Ping, Pong>(new Ping { Message = "Ping" });
         await writer.WriteLineAsync("Received: " + pong.Message);
         await writer.WriteLineAsync();
 
         await writer.WriteLineAsync("Publishing Pinged...");
-        await mediator.Publish(new Pinged());
+        mediator.Publish(new Pinged());
         await writer.WriteLineAsync();
 
         await writer.WriteLineAsync("Publishing Ponged...");
         var failedPong = false;
         try
         {
-            await mediator.Publish(new Ponged());
+            mediator.Publish(new Ponged());
         }
         catch (Exception e)
         {
@@ -59,41 +59,41 @@ public static class Runner
             try
             {
                 int i = 0;
-                await foreach (Song s in mediator.CreateStream(new Sing { Message = "Sing" }))
+                await foreach (var s in mediator.CreateStream<Sing, Song>(new Sing { Message = "Sing" }))
                 {
                     if (i == 0) {
-                        failedSing = !(s.Message.Contains("Singing do"));
+                        failedSing = !s.Message.Contains("Singing do");
                     }
                     else if (i == 1)
                     {
-                        failedSing = !(s.Message.Contains("Singing re"));
+                        failedSing = !s.Message.Contains("Singing re");
                     }
                     else if (i == 2)
                     {
-                        failedSing = !(s.Message.Contains("Singing mi"));
+                        failedSing = !s.Message.Contains("Singing mi");
                     }
                     else if (i == 3)
                     {
-                        failedSing = !(s.Message.Contains("Singing fa"));
+                        failedSing = !s.Message.Contains("Singing fa");
                     }
                     else if (i == 4)
                     {
-                        failedSing = !(s.Message.Contains("Singing so"));
+                        failedSing = !s.Message.Contains("Singing so");
                     }
                     else if (i == 5)
                     {
-                        failedSing = !(s.Message.Contains("Singing la"));
+                        failedSing = !s.Message.Contains("Singing la");
                     }
                     else if (i == 6)
                     {
-                        failedSing = !(s.Message.Contains("Singing ti"));
+                        failedSing = !s.Message.Contains("Singing ti");
                     }
                     else if (i == 7)
                     {
-                        failedSing = !(s.Message.Contains("Singing do"));
+                        failedSing = !s.Message.Contains("Singing do");
                     }
 
-                    failedSing = failedSing || (++i) > 10;
+                    failedSing = failedSing || ++i > 10;
                 }
             }
             catch (Exception e)
@@ -188,7 +188,7 @@ public static class Runner
         await writer.WriteLineAsync("Checking handler to catch exact exception...");
         try
         {
-            await mediator.Send(new PingProtectedResource { Message = "Ping to protected resource" });
+            await mediator.Send<PingProtectedResource, Pong>(new PingProtectedResource { Message = "Ping to protected resource" });
             isHandledCorrectly = IsExceptionHandledBy<ForbiddenException, AccessDeniedExceptionHandler>(writer);
         }
         catch (Exception e)
@@ -207,7 +207,7 @@ public static class Runner
         await writer.WriteLineAsync("Checking shared handler to catch exception by base type...");
         try
         {
-            await mediator.Send(new PingResource { Message = "Ping to missed resource" });
+            await mediator.Send<PingResource, Pong>(new PingResource { Message = "Ping to missed resource" });
             isHandledCorrectly = IsExceptionHandledBy<ResourceNotFoundException, ConnectionExceptionHandler>(writer);
         }
         catch (Exception e)
@@ -226,7 +226,7 @@ public static class Runner
         await writer.WriteLineAsync("Checking base handler to catch any exception...");
         try
         {
-            await mediator.Send(new PingResourceTimeout { Message = "Ping to ISS resource" });
+            await mediator.Send<PingResourceTimeout, Pong>(new PingResourceTimeout { Message = "Ping to ISS resource" });
             isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, CommonExceptionHandler> (writer);
         }
         catch (Exception e)
@@ -246,7 +246,7 @@ public static class Runner
 
         try
         {
-            await mediator.Send(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
+            await mediator.Send<ExceptionHandler.Overrides.PingResourceTimeout, Pong>(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
             isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
         }
         catch (Exception e)
@@ -266,7 +266,7 @@ public static class Runner
 
         try
         {
-            await mediator.Send(new PingNewResource { Message = "Ping to ISS resource (override)" });
+            await mediator.Send<PingNewResource, Pong>(new PingNewResource { Message = "Ping to ISS resource (override)" });
             isHandledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
         }
         catch (Exception e)
@@ -286,9 +286,9 @@ public static class Runner
             return false;
 
         // Note: For this handler type to be found in messages, it must be written in messages by LogExceptionAction
-        return messages[messages.Count - 2].Contains(typeof(THandler).FullName)
-            // Note: For this exception type to be found in messages, exception must be written in all tested exception handlers
-               && messages[messages.Count - 3].Contains(typeof(TException).FullName);
+        return messages[^6].Contains(typeof(TException).FullName!) && 
+        // Note: For this exception type to be found in messages, exception must be written in all tested exception handlers
+               messages[^5].Contains(typeof(THandler).FullName!);
     }
 }
 
@@ -320,7 +320,7 @@ public sealed class RunResults
 public sealed class WrappingWriter : TextWriter
 {
     private readonly TextWriter _innerWriter;
-    private readonly StringBuilder _stringWriter = new StringBuilder();
+    private readonly StringBuilder _stringWriter = new();
 
     public WrappingWriter(TextWriter innerWriter)
     {

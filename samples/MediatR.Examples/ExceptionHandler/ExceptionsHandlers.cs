@@ -1,4 +1,3 @@
-using MediatR.Pipeline;
 using System;
 using System.IO;
 using System.Threading;
@@ -9,15 +8,15 @@ using MediatR.ExceptionHandling;
 
 namespace MediatR.Examples.ExceptionHandler;
 
-public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResource, Pong>
+public class CommonExceptionHandler : IRequestResponseExceptionHandler<PingResource, Pong>
 {
     private readonly TextWriter _writer;
 
     public CommonExceptionHandler(TextWriter writer) => _writer = writer;
 
-    protected override async Task Handle(PingResource request,
+    public async Task Handle(PingResource request,
         Exception exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before
@@ -28,7 +27,7 @@ public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResource,
     }
 }
 
-public class ConnectionExceptionHandler : IRequestExceptionHandler<PingResource, Pong, ConnectionException>
+public class ConnectionExceptionHandler : IRequestResponseExceptionHandler<PingResource, Pong, ConnectionException>
 {
     private readonly TextWriter _writer;
 
@@ -36,7 +35,7 @@ public class ConnectionExceptionHandler : IRequestExceptionHandler<PingResource,
 
     public async Task Handle(PingResource request,
         ConnectionException exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before
@@ -47,7 +46,7 @@ public class ConnectionExceptionHandler : IRequestExceptionHandler<PingResource,
     }
 }
 
-public class AccessDeniedExceptionHandler : IRequestExceptionHandler<PingResource, Pong, ForbiddenException>
+public class AccessDeniedExceptionHandler : IRequestResponseExceptionHandler<PingResource, Pong, ForbiddenException>
 {
     private readonly TextWriter _writer;
 
@@ -55,7 +54,7 @@ public class AccessDeniedExceptionHandler : IRequestExceptionHandler<PingResourc
 
     public async Task Handle(PingResource request,
         ForbiddenException exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before
@@ -66,7 +65,7 @@ public class AccessDeniedExceptionHandler : IRequestExceptionHandler<PingResourc
     }
 }
 
-public class ServerExceptionHandler : IRequestExceptionHandler<PingNewResource, Pong, ServerException>
+public class ServerExceptionHandler : IRequestResponseExceptionHandler<PingNewResource, Pong, ServerException>
 {
     private readonly TextWriter _writer;
 
@@ -74,7 +73,7 @@ public class ServerExceptionHandler : IRequestExceptionHandler<PingNewResource, 
 
     public virtual async Task Handle(PingNewResource request,
         ServerException exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
-using MediatR.Pipeline;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.LightInject;

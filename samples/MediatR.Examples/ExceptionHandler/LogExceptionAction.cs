@@ -1,12 +1,12 @@
-using MediatR.Pipeline;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction.ExceptionHandler;
 
 namespace MediatR.Examples.ExceptionHandler;
 
-public class LogExceptionAction : IRequestExceptionAction<Ping>
+public class LogExceptionAction : IRequestResponseExceptionAction<Ping, Pong>
 {
     private readonly TextWriter _writer;
 

@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction;
+using MediatR.Abstraction.Handlers;
 
 namespace MediatR.NotificationPublishers;
 
@@ -13,12 +14,7 @@ namespace MediatR.NotificationPublishers;
 /// </summary>
 public class TaskWhenAllPublisher : INotificationPublisher
 {
-    public Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
-    {
-        var tasks = handlerExecutors
-            .Select(handler => handler.HandlerCallback(notification, cancellationToken))
-            .ToArray();
-
-        return Task.WhenAll(tasks);
-    }
+    public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
+        where TNotification : INotification =>
+        Task.WhenAll(notificationHandlers.Select(h => h.Handle(notification, cancellationToken)));
 }

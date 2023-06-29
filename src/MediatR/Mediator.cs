@@ -1,200 +1,138 @@
-using MediatR.NotificationPublishers;
-
-namespace MediatR;
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Wrappers;
+using MediatR.Abstraction;
+using MediatR.Abstraction.Behaviors;
+using MediatR.Subscriptions;
+
+namespace MediatR;
 
 /// <summary>
 /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
 /// </summary>
 public sealed class Mediator : IMediator
 {
+    private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new();
+    private static readonly ConcurrentDictionary<Type, RequestHandler> _requestHandlers = new();
+    private static readonly ConcurrentDictionary<Type, RequestResponseHandler> _requestResponseHandlers = new();
+    private static readonly ConcurrentDictionary<Type, StreamRequestHandler> _streamRequestHandlers = new();
+
     private readonly IServiceProvider _serviceProvider;
-    private readonly INotificationPublisher _publisher;
-    private static readonly ConcurrentDictionary<Type, RequestHandlerBase> _requestHandlers = new();
-    private static readonly ConcurrentDictionary<Type, NotificationHandlerWrapper> _notificationHandlers = new();
-    private static readonly ConcurrentDictionary<Type, StreamRequestHandlerBase> _streamRequestHandlers = new();
+    private readonly Func<Type, NotificationHandler> _notificationFactory;
+    private readonly Func<Type, RequestHandler> _requestFactory;
+    private readonly Func<Type, Type, RequestResponseHandler> _requestResponseFactory;
+    private readonly Func<Type, Type, StreamRequestHandler> _streamRequestFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Mediator"/> class.
     /// </summary>
     /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
-    public Mediator(IServiceProvider serviceProvider) 
-        : this(serviceProvider, new ForeachAwaitPublisher()) { }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Mediator"/> class.
-    /// </summary>
-    /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
-    /// <param name="publisher">Notification publisher. Defaults to <see cref="ForeachAwaitPublisher"/>.</param>
-    public Mediator(IServiceProvider serviceProvider, INotificationPublisher publisher)
+    public Mediator(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _publisher = publisher;
+
+        var factory = serviceProvider.GetRequiredService<SubscriptionFactory>();
+        _notificationFactory = factory.CreateNotificationHandler;
+        _requestFactory = factory.CreateRequestHandler;
+        _requestResponseFactory = factory.CreateRequestResponseHandler;
+        _streamRequestFactory = factory.CreateStreamRequestHandler;
     }
 
-    public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    public ValueTask<TResponse> Send<TRequest, TResponse>(TRequest? request, CancellationToken cancellationToken = default)
+        where TRequest : IRequest<TResponse>
     {
-        if (request == null)
+        if (request is null)
         {
-            throw new ArgumentNullException(nameof(request));
+            return ThrowArgumentNullRef<ValueTask<TResponse>>(nameof(request));
         }
 
-        var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        var behaviors = _serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
+        RequestHandlerDelegate<TRequest, TResponse> handler = Handle;
+        for (var i = behaviors.Length - 1; i >= 0; i--)
         {
-            var wrapperType = typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse));
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
-            return (RequestHandlerBase)wrapper;
-        });
+            var next = handler;
+            var behavior = behaviors[i];
+            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
+        }
 
-        return handler.Handle(request, _serviceProvider, cancellationToken);
+        return handler(request, cancellationToken);
+
+        ValueTask<TResponse> Handle(TRequest handlerRequest, CancellationToken token)
+        {
+            return _requestResponseHandlers.GetOrAdd(typeof(TRequest), requestType => _requestResponseFactory(requestType, typeof(TResponse)))
+                .HandleAsync<TRequest, TResponse>(handlerRequest, token);
+        }
     }
 
-    public Task Send<TRequest>(TRequest request, CancellationToken cancellationToken = default)
+    public ValueTask Send<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
         where TRequest : IRequest
     {
-        if (request == null)
+        if (request is null)
         {
-            throw new ArgumentNullException(nameof(request));
+            return ThrowArgumentNullRef<ValueTask>(nameof(request));
         }
 
-        var handler = (RequestHandlerWrapper)_requestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        var behaviors = _serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
+        RequestHandlerDelegate<TRequest> handler = Handle;
+        for (var i = behaviors.Length - 1; i >= 0; i--)
         {
-            var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
-            return (RequestHandlerBase)wrapper;
-        });
-
-        return handler.Handle(request, _serviceProvider, cancellationToken);
-    }
-
-    public Task<object?> Send(object request, CancellationToken cancellationToken = default)
-    {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
+            var next = handler;
+            var behavior = behaviors[i];
+            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        var handler = _requestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        return handler(request, cancellationToken);
+
+        ValueTask Handle(TRequest handlerRequest, CancellationToken token)
         {
-            Type wrapperType;
-
-            var requestInterfaceType = requestType.GetInterfaces().FirstOrDefault(static i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
-            if (requestInterfaceType is null)
-            {
-                requestInterfaceType = requestType.GetInterfaces().FirstOrDefault(static i => i == typeof(IRequest));
-                if (requestInterfaceType is null)
-                {
-                    throw new ArgumentException($"{requestType.Name} does not implement {nameof(IRequest)}", nameof(request));
-                }
-
-                wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-            }
-            else
-            {
-                var responseType = requestInterfaceType.GetGenericArguments()[0];
-                wrapperType = typeof(RequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
-            }
-
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {requestType}");
-            return (RequestHandlerBase)wrapper;
-        });
-
-        // call via dynamic dispatch to avoid calling through reflection for performance reasons
-        return handler.Handle(request, _serviceProvider, cancellationToken);
+            return _requestHandlers.GetOrAdd(typeof(TRequest), _requestFactory)
+                .HandleAsync(handlerRequest, token);
+        }
     }
 
-    public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
+    public void Publish<TNotification>(TNotification? notification, CancellationToken cancellationToken = default)
         where TNotification : INotification
     {
-        if (notification == null)
+        if (notification is null)
         {
-            throw new ArgumentNullException(nameof(notification));
+            ThrowArgumentNullRef<int>(nameof(notification));
+            return;
         }
 
-        return PublishNotification(notification, cancellationToken);
+        _notificationHandlers.GetOrAdd(typeof(TNotification), _notificationFactory)
+            .Handle(notification, cancellationToken);
     }
 
-    public Task Publish(object notification, CancellationToken cancellationToken = default) =>
-        notification switch
-        {
-            null => throw new ArgumentNullException(nameof(notification)),
-            INotification instance => PublishNotification(instance, cancellationToken),
-            _ => throw new ArgumentException($"{nameof(notification)} does not implement ${nameof(INotification)}")
-        };
-
-    /// <summary>
-    /// Override in a derived class to control how the tasks are awaited. By default the implementation calls the <see cref="INotificationPublisher"/>.
-    /// </summary>
-    /// <param name="handlerExecutors">Enumerable of tasks representing invoking each notification handler</param>
-    /// <param name="notification">The notification being published</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A task representing invoking all handlers</returns>
-    protected virtual Task PublishCore(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken) 
-        => _publisher.Publish(handlerExecutors, notification, cancellationToken);
-
-    private Task PublishNotification(INotification notification, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<TResponse> CreateStream<TRequest, TResponse>(TRequest? request, CancellationToken cancellationToken = default)
+        where TRequest : IStreamRequest<TResponse>
     {
-        var handler = _notificationHandlers.GetOrAdd(notification.GetType(), static notificationType =>
+        if (request is null)
         {
-            var wrapperType = typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType);
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {notificationType}");
-            return (NotificationHandlerWrapper)wrapper;
-        });
-
-        return handler.Handle(notification, _serviceProvider, PublishCore, cancellationToken);
-    }
-
-
-    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
-    {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
+            return ThrowArgumentNullRef<IAsyncEnumerable<TResponse>>(nameof(request));
         }
 
-        var streamHandler = (StreamRequestHandlerWrapper<TResponse>)_streamRequestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        var behaviors = _serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
+        StreamHandlerNext<TRequest, TResponse> handler = Handle;
+        for (var i = behaviors.Length - 1; i >= 0; i--)
         {
-            var wrapperType = typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse));
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {requestType}");
-            return (StreamRequestHandlerBase)wrapper;
-        });
-
-        var items = streamHandler.Handle(request, _serviceProvider, cancellationToken);
-
-        return items;
-    }
-
-
-    public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
-    {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
+            var next = handler;
+            var behavior = behaviors[i];
+            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        var handler = _streamRequestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        return handler(request, cancellationToken);
+
+        IAsyncEnumerable<TResponse> Handle(TRequest handlerRequest, CancellationToken token)
         {
-            var requestInterfaceType = requestType.GetInterfaces().FirstOrDefault(static i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStreamRequest<>));
-            if (requestInterfaceType is null)
-            {
-                throw new ArgumentException($"{requestType.Name} does not implement IStreamRequest<TResponse>", nameof(request));
-            }
-
-            var responseType = requestInterfaceType.GetGenericArguments()[0];
-            var wrapperType = typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, responseType);
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {requestType}");
-            return (StreamRequestHandlerBase)wrapper;
-        });
-
-        var items = handler.Handle(request, _serviceProvider, cancellationToken);
-
-        return items;
+            return _streamRequestHandlers.GetOrAdd(typeof(TRequest), (requestType) => _streamRequestFactory(requestType, typeof(TResponse)))
+                .Handle<TRequest, TResponse>(handlerRequest, token);
+        }
     }
+
+    // The exception throwing was moved to this function to reduce the JIT output per function that would throw an exception.
+    // This reduces the JIT output which then reduces the instruction that needs to be loaded which makes the function faster.
+    // And because throwing an exception is really slow one more method call or less doesn't make much of a difference.
+    private static T ThrowArgumentNullRef<T>(string message) => throw new ArgumentNullException(message);
 }

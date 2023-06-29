@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction;
+using MediatR.Abstraction.Handlers;
 
 namespace MediatR.NotificationPublishers;
 
@@ -14,11 +15,12 @@ namespace MediatR.NotificationPublishers;
 /// </summary>
 public class ForeachAwaitPublisher : INotificationPublisher
 {
-    public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
+    public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
+        where TNotification : INotification
     {
-        foreach (var handler in handlerExecutors)
+        foreach (var notificationHandler in notificationHandlers)
         {
-            await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);
+            await notificationHandler.Handle(notification, cancellationToken);
         }
     }
 }

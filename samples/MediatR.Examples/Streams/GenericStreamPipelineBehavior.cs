@@ -3,10 +3,12 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction.Behaviors;
 
 namespace MediatR.Examples;
 
 public class GenericStreamPipelineBehavior<TRequest, TResponse> : IStreamPipelineBehavior<TRequest, TResponse>
+    where TRequest : IStreamRequest<TResponse>
 {
     private readonly TextWriter _writer;
 
@@ -15,10 +17,10 @@ public class GenericStreamPipelineBehavior<TRequest, TResponse> : IStreamPipelin
         _writer = writer;
     }
 
-    public async IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerDelegate<TResponse> next, [EnumeratorCancellation]CancellationToken cancellationToken)
+    public async IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerNext<TRequest, TResponse> next, [EnumeratorCancellation]CancellationToken cancellationToken)
     {
         await _writer.WriteLineAsync("-- Handling StreamRequest");
-        await foreach (var response in next().WithCancellation(cancellationToken).ConfigureAwait(false))
+        await foreach (var response in next(request, cancellationToken).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             yield return response;
         }

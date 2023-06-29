@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using MediatR.Pipeline;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -27,13 +29,6 @@ public static class Program
             cfg.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
         });
-
-        services.AddScoped(typeof(IStreamRequestHandler<Sing, Song>), typeof(SingHandler));
-
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(GenericPipelineBehavior<,>));
-        services.AddScoped(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
-        services.AddScoped(typeof(IRequestPostProcessor<,>), typeof(GenericRequestPostProcessor<,>));
-        services.AddScoped(typeof(IStreamPipelineBehavior<,>), typeof(GenericStreamPipelineBehavior<,>));
 
         var provider = services.BuildServiceProvider();
 

@@ -1,11 +1,12 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR.Pipeline;
+using MediatR.Abstraction.Pipeline;
 
 namespace MediatR.Examples;
 
 public class GenericRequestPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
     private readonly TextWriter _writer;
 

@@ -1,13 +1,12 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR.Pipeline;
+using MediatR.Abstraction.Pipeline;
 
 namespace MediatR.Examples;
 
-public class ConstrainedRequestPostProcessor<TRequest, TResponse>
-    : IRequestPostProcessor<TRequest, TResponse>
-    where TRequest : Ping
+public class ConstrainedRequestPostProcessor<TRequest, TResponse> : IRequestPostProcessor<TRequest, TResponse>
+    where TRequest : Ping, IRequest<TResponse>
 {
     private readonly TextWriter _writer;
 

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
-using MediatR.Pipeline;
+using MediatR.Abstraction;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using MediatR.DependencyInjection;
@@ -24,23 +25,11 @@ internal static class Program
 
         services.AddSimpleInjector(container);
 
-        container.Register(() => (TextWriter) writer, Lifestyle.Singleton);
-
-        //Pipeline
-        container.Collection.Register(typeof(IPipelineBehavior<,>), new[]
+        container.ConfigureMediarR(config =>
         {
-            typeof(RequestExceptionProcessorBehavior<,>),
-            typeof(RequestExceptionActionProcessorBehavior<,>),
-            typeof(RequestPreProcessorBehavior<,>),
-            typeof(RequestPostProcessorBehavior<,>),
-            typeof(GenericPipelineBehavior<,>)
-        });
-        container.Collection.Register(typeof(IRequestPreProcessor<>), new[] { typeof(GenericRequestPreProcessor<>) });
-        container.Collection.Register(typeof(IRequestPostProcessor<,>), new[] { typeof(GenericRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>) });
-        container.Collection.Register(typeof(IStreamPipelineBehavior<,>), new[]
-        {
-            typeof(GenericStreamPipelineBehavior<,>)
-        });
+            config.RegisterServicesFromAssemblyContaining<Ping>();
+        })
+            .RegisterInstance(writer.GetType(), writer);
 
         services.BuildServiceProvider().UseSimpleInjector(container);
 

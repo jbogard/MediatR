@@ -1,10 +1,11 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction.Behaviors;
 
 namespace MediatR.Benchmarks
 {
-    public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<>
         where TRequest : notnull
     {
         private readonly TextWriter _writer;

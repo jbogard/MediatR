@@ -1,4 +1,6 @@
 using Autofac.Extensions.DependencyInjection;
+using MediatR.Abstraction;
+using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;

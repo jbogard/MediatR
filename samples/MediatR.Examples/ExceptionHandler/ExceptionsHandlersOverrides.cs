@@ -1,4 +1,3 @@
-using MediatR.Pipeline;
 using System;
 using System.IO;
 using System.Threading;
@@ -8,15 +7,15 @@ using MediatR.ExceptionHandling;
 
 namespace MediatR.Examples.ExceptionHandler.Overrides;
 
-public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResourceTimeout, Pong>
+public class CommonExceptionHandler : IRequestResponseExceptionHandler<PingResourceTimeout, Pong>
 {
     private readonly TextWriter _writer;
 
     public CommonExceptionHandler(TextWriter writer) => _writer = writer;
 
-    protected override async Task Handle(PingResourceTimeout request,
+    public async Task Handle(PingResourceTimeout request,
         Exception exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before
@@ -35,7 +34,7 @@ public class ServerExceptionHandler : ExceptionHandler.ServerExceptionHandler
 
     public override async Task Handle(PingNewResource request,
         ServerException exception,
-        RequestExceptionHandlerState<Pong> state,
+        RequestResponseExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
     {
         // Exception type name must be written in messages by LogExceptionAction before

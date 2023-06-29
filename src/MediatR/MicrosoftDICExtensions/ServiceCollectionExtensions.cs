@@ -1,19 +1,13 @@
 using System;
-using System.Linq;
-using MediatR;
-using MediatR.Pipeline;
-using MediatR.Registration;
+using System.Reflection;
+using MediatR.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace MediatR.MicrosoftDICExtensions;
 
 /// <summary>
-/// Extensions to scan for MediatR handlers and registers them.
-/// - Scans for any handler interface implementations and registers them as <see cref="ServiceLifetime.Transient"/>
-/// - Scans for any <see cref="IRequestPreProcessor{TRequest}"/> and <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations and registers them as transient instances
-/// Registers <see cref="IMediator"/> as a transient instance
-/// After calling AddMediatR you can use the container to resolve an <see cref="IMediator"/> instance.
-/// This does not scan for any <see cref="IPipelineBehavior{TRequest,TResponse}"/> instances including <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/> and <see cref="RequestPreProcessorBehavior{TRequest,TResponse}"/>.
-/// To register behaviors, use the <see cref="ServiceCollectionServiceExtensions.AddTransient(IServiceCollection,Type,Type)"/> with the open generic or closed generic types.
+/// Registers MediatR in a ServiceCollection
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -23,8 +17,7 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceCollection">Service collection</param>
     /// <param name="configuration">The action used to configure the options</param>
     /// <returns>Service collection</returns>
-    public static IServiceCollection AddMediatR(this IServiceCollection services, 
-        Action<MediatRServiceConfiguration> configuration)
+    public static IServiceCollection ConfigureMediatR(this IServiceCollection serviceCollection, Action<MediatRServiceConfiguration<IServiceCollection>> configuration)
     {
         var adapter = new DependencyInjectionRegistrarAdapter<IServiceCollection>(
             serviceCollection,

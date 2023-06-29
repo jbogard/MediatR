@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction.Handlers;
 
 namespace MediatR.Benchmarks
 {

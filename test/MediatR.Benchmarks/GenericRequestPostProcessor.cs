@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction.Pipeline;
 using MediatR.Pipeline;
 
 namespace MediatR.Benchmarks

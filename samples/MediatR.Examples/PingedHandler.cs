@@ -1,4 +1,5 @@
 using System.Threading;
+using MediatR.Abstraction.Handlers;
 
 namespace MediatR.Examples;
 

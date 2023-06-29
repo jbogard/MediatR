@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Abstraction;
+using MediatR.Abstraction.Handlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.PublishStrategies;
 
