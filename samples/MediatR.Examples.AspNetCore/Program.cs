@@ -22,8 +22,9 @@ public static class Program
 
         services.AddSingleton<TextWriter>(writer);
 
-        services.AddMediatR(cfg =>
+        services.ConfigureMediatR(cfg =>
         {
+            cfg.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
         });
 

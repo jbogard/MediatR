@@ -101,6 +101,8 @@ public static class Runner
                 failedSing = true;
                 await writer.WriteLineAsync(e.ToString());
             }
+
+            await writer.WriteLineAsync($"Singing Succeded: {!failedSing}");
             await writer.WriteLineAsync();
         }
 
@@ -279,8 +281,8 @@ public static class Runner
     private static bool IsExceptionHandledBy<TException, THandler>(WrappingWriter writer)
         where TException : Exception
     {
-        var messages = writer.Contents.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
-        if (messages.Count - 3 < 0)
+        var messages = writer.Contents.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToArray();
+        if (messages.Length - 6 < 0)
             return false;
 
         // Note: For this handler type to be found in messages, it must be written in messages by LogExceptionAction
@@ -290,7 +292,7 @@ public static class Runner
     }
 }
 
-public class RunResults
+public sealed class RunResults
 {
     public bool RequestHandlers { get; set; }
     public bool VoidRequestsHandlers { get; set; }
@@ -315,7 +317,7 @@ public class RunResults
     public bool StreamOrderedPipelineBehaviors { get; set; }
 }
 
-public class WrappingWriter : TextWriter
+public sealed class WrappingWriter : TextWriter
 {
     private readonly TextWriter _innerWriter;
     private readonly StringBuilder _stringWriter = new StringBuilder();

@@ -11,7 +11,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageIcon>gradient_128x128.png</PackageIcon>
+    <PackageIcon>Assets\gradient_128x128.png</PackageIcon>
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -23,19 +23,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\assets\logo\gradient_128x128.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="IsExternalInit" Version="1.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MediatR.Contracts" Version="[2.0.1, 3.0.0)" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="4.3.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="IStreamPipelineBehavior.cs" />
+    <Compile Remove="INotificationHandler.cs" />
+    <Compile Remove="IRequestHandler.cs" />
+    <Compile Remove="Pipeline\IRequestPostProcessor.cs" />
+    <Compile Remove="Pipeline\IRequestPreProcessor.cs" />
+    <Compile Remove="IMediator.cs" />
+    <Compile Remove="IPublisher.cs" />
+    <Compile Remove="ISender.cs" />
+    <Compile Remove="Internal\HandlersOrderer.cs" />
+    <Compile Remove="MicrosoftExtensionsDI\MediatrServiceConfiguration.cs" />
+    <Compile Remove="MicrosoftExtensionsDI\RequestExceptionActionProcessorStrategy.cs" />
+    <Compile Remove="Pipeline\IRequestExceptionAction.cs" />
+    <Compile Remove="Pipeline\IRequestExceptionHandler.cs" />
+    <Compile Remove="Pipeline\RequestExceptionHandlerState.cs" />
+    <Compile Remove="Pipeline\RequestExceptionProcessorBehavior.cs" />
+    <Compile Remove="Pipeline\RequestPreProcessorBehavior.cs" />
+    <Compile Remove="Wrappers\RequestHandlerWrapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\assets\logo\gradient_128x128.png">
+      <Pack>true</Pack>
+      <Link>Assets\gradient_128x128.png</Link>
+    </None>
   </ItemGroup>
 
 </Project>

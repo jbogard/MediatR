@@ -13,7 +13,7 @@ using Wrappers;
 /// <summary>
 /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
 /// </summary>
-public class Mediator : IMediator
+public sealed class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly INotificationPublisher _publisher;

@@ -19,7 +19,7 @@ namespace MediatR.Benchmarks
 
             services.AddSingleton(TextWriter.Null);
 
-            services.AddMediatR(cfg =>
+            services.ConfigureMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssemblyContaining(typeof(Ping));
                 cfg.AddOpenBehavior(typeof(GenericPipelineBehavior<,>));

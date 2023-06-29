@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Threading.Tasks;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
@@ -22,36 +22,68 @@ class Program
     private static IMediator BuildMediator(WrappingWriter writer)
     {
         var serviceContainer = new ServiceContainer(ContainerOptions.Default.WithMicrosoftSettings());
-        serviceContainer.Register<IMediator, Mediator>();            
-        serviceContainer.RegisterInstance<TextWriter>(writer);
-
-        serviceContainer.RegisterAssembly(typeof(Ping).GetTypeInfo().Assembly, (serviceType, implementingType) =>
-            serviceType.IsConstructedGenericType &&
-            (
-                serviceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
-                serviceType.GetGenericTypeDefinition() == typeof(INotificationHandler<>)
-            ));
-                    
-        serviceContainer.RegisterOrdered(typeof(IPipelineBehavior<,>),
-            new[]
-            {
-                typeof(RequestPreProcessorBehavior<,>),
-                typeof(RequestPostProcessorBehavior<,>),
-                typeof(GenericPipelineBehavior<,>)
-            }, type => null);
-
-            
-        serviceContainer.RegisterOrdered(typeof(IRequestPostProcessor<,>),
-            new[]
-            {
-                typeof(GenericRequestPostProcessor<,>),
-                typeof(ConstrainedRequestPostProcessor<,>)
-            }, type => null);
-                   
-        serviceContainer.Register(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
+        serviceContainer
+            .ConfigureMediatR(config =>
+                {
+                    config.RegisterServicesFromAssemblyContaining<Ping>();
+                })
+            .RegisterInstance<TextWriter>(writer);
 
         var services = new ServiceCollection();
         var provider = serviceContainer.CreateServiceProvider(services);
+        serviceContainer.Compile();
         return provider.GetRequiredService<IMediator>(); 
     }
+}
+
+internal static class ServiceContainerExtension
+{
+    public static ServiceContainer ConfigureMediatR(this ServiceContainer serviceContainer, Action<MediatRServiceConfiguration<ServiceContainer>> configuration)
+    {
+        var dependencyInjectionConfiguration = new DependencyInjectionRegistrarAdapter<ServiceContainer>(
+            serviceContainer,
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerContainerLifetime()),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerRequestLifeTime()),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerContainerLifetime()),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerRequestLifeTime()),
+            (container, serviceType, implementationType) =>
+            {
+                if (!container.ServiceExists(serviceType, implementationType))
+                {
+                    container.Register(serviceType, implementationType, new PerContainerLifetime());
+                }
+            },
+            (container, serviceType, implementationType) =>
+            {
+                if (!container.ServiceExists(serviceType, implementationType))
+                {
+                    container.Register(serviceType, implementationType, new PerRequestLifeTime());
+                }
+            },
+            (container, serviceType, implementationType) =>
+            {
+                if (!container.ServiceExists(serviceType, implementationType))
+                {
+                    container.Register(serviceType, implementationType, new PerRequestLifeTime());
+                }
+            },
+            (container, serviceType, implementationType) =>
+            {
+                if (!container.ServiceExists(serviceType, implementationType))
+                {
+                    container.Register(serviceType, implementationType, new PerContainerLifetime());
+                }
+            },
+            (container, fromType, toType) => container.Register(toType, fromType, new PerContainerLifetime()),
+            (container, serviceType, instance) => container.RegisterInstance(serviceType, instance));
+
+        MediatRConfigurator.ConfigureMediatR(dependencyInjectionConfiguration, configuration);
+
+        return serviceContainer;
+    }
+
+    private static bool ServiceExists(this IServiceRegistry container, Type serviceType, Type implementingType) =>
+        container.AvailableServices.Any(serviceRegistration =>
+            serviceRegistration.ServiceType == serviceType &&
+            serviceRegistration.ImplementingType == implementingType);
 }

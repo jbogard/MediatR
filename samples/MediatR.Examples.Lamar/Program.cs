@@ -2,7 +2,12 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Lamar;
-using MediatR.Pipeline;
+using Lamar.IoC.Instances;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.MicrosoftDICExtensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MediatR.Examples.Lamar;
 
@@ -20,37 +25,39 @@ class Program
     {
         var container = new Container(cfg =>
         {
-            cfg.Scan(scanner =>
+            cfg.ConfigureMediatR(config =>
             {
-                scanner.AssemblyContainingType<Ping>();
-                scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
-                scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
-                scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<>));
-                scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionHandler<,,>));
+                config.RegisterServicesFromAssemblyContaining<Ping>();
             });
-
-            //Pipeline
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionActionProcessorBehavior<,>));
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPreProcessorBehavior<,>));
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestPostProcessorBehavior<,>));
-            cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(GenericPipelineBehavior<,>));
-            cfg.For(typeof(IRequestPreProcessor<>)).Add(typeof(GenericRequestPreProcessor<>));
-            cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(GenericRequestPostProcessor<,>));
-            cfg.For(typeof(IRequestPostProcessor<,>)).Add(typeof(ConstrainedRequestPostProcessor<,>));
-
-            //Constrained notification handlers
-            cfg.For(typeof(INotificationHandler<>)).Add(typeof(ConstrainedPingedHandler<>));
-
-            // This is the default but let's be explicit. At most we should be container scoped.
-            cfg.For<IMediator>().Use<Mediator>().Transient();
 
             cfg.For<TextWriter>().Use(writer);
         });
 
-
         var mediator = container.GetInstance<IMediator>();
 
         return mediator;
+    }
+}
+
+internal static class ServiceRegistrarExtension
+{
+    public static ServiceRegistry ConfigureMediatR(this ServiceRegistry serviceRegistry, Action<MediatRServiceConfiguration<ServiceRegistry>> configuration)
+    {
+        var dependencyRegistrarConfiguration = new DependencyInjectionRegistrarAdapter<ServiceRegistry>(
+            serviceRegistry,
+            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
+            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Transient(),
+            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
+            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
+            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton)),
+            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Transient)),
+            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Transient)),
+            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton)),
+            (registry, fromType, toType) => registry.For(toType).Use(fromType),
+            (registry, serviceType, instance) => registry.For(serviceType).Use(new ObjectInstance(serviceType, instance)));
+
+        MediatRConfigurator.ConfigureMediatR(dependencyRegistrarConfiguration, configuration);
+
+        return serviceRegistry;
     }
 }

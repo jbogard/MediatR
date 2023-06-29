@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,10 +13,10 @@ class Program
 
         services.AddSingleton<Publisher>();
 
-        services.AddTransient<INotificationHandler<Pinged>>(sp => new SyncPingedHandler("1"));
-        services.AddTransient<INotificationHandler<Pinged>>(sp => new AsyncPingedHandler("2"));
-        services.AddTransient<INotificationHandler<Pinged>>(sp => new AsyncPingedHandler("3"));
-        services.AddTransient<INotificationHandler<Pinged>>(sp => new SyncPingedHandler("4"));
+        services.AddTransient<INotificationHandler<Pinged>>(_ => new SyncPingedHandler("1"));
+        services.AddTransient<INotificationHandler<Pinged>>(_ => new AsyncPingedHandler("2"));
+        services.AddTransient<INotificationHandler<Pinged>>(_ => new AsyncPingedHandler("3"));
+        services.AddTransient<INotificationHandler<Pinged>>(_ => new SyncPingedHandler("4"));
 
         var provider = services.BuildServiceProvider();
 
@@ -30,7 +31,7 @@ class Program
 
             try
             {
-                await publisher.Publish(pinged, strategy);
+                await publisher.Publish(pinged, strategy, CancellationToken.None);
             }
             catch (Exception ex)
             {

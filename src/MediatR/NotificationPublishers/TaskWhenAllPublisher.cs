@@ -8,11 +8,7 @@ namespace MediatR.NotificationPublishers;
 /// <summary>
 /// Uses Task.WhenAll with the list of Handler tasks:
 /// <code>
-/// var tasks = handlers
-///                .Select(handler => handler.Handle(notification, cancellationToken))
-///                .ToList();
-/// 
-/// return Task.WhenAll(tasks);
+/// Task.WhenAll(notificationHandlers.Select(h => h.Handle(notification, cancellationToken)));
 /// </code>
 /// </summary>
 public class TaskWhenAllPublisher : INotificationPublisher

@@ -21,3 +21,21 @@ public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TR
         return response;
     }
 }
+
+public class GenericPipelineBehavior<TRequest> : IPipelineBehavior<TRequest>
+    where TRequest : IRequest
+{
+    private readonly TextWriter _writer;
+
+    public GenericPipelineBehavior(TextWriter writer)
+    {
+        _writer = writer;
+    }
+
+    public async ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
+    {
+        await _writer.WriteLineAsync("-- Handling Request");
+        await next(request, cancellationToken);
+        await  _writer.WriteLineAsync("-- Finished Request");
+    }
+}

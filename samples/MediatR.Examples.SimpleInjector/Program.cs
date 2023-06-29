@@ -1,15 +1,11 @@
-using System.IO;
 using System.Threading.Tasks;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using MediatR.DependencyInjection;
+using SimpleInjector;
 
 namespace MediatR.Examples.SimpleInjector;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using global::SimpleInjector;
 
 internal static class Program
 {
@@ -24,20 +20,9 @@ internal static class Program
     private static IMediator BuildMediator(WrappingWriter writer)
     {
         var container = new Container();
-
         var services = new ServiceCollection();
 
-        services
-            .AddSimpleInjector(container);
-
-        var assemblies = GetAssemblies().ToArray();
-        container.RegisterSingleton<IMediator, Mediator>();
-        container.Register(typeof(IRequestHandler<,>), assemblies);
-
-        RegisterHandlers(container, typeof(INotificationHandler<>), assemblies);
-        RegisterHandlers(container, typeof(IRequestExceptionAction<,>), assemblies);
-        RegisterHandlers(container, typeof(IRequestExceptionHandler<,,>), assemblies);
-        RegisterHandlers(container, typeof(IStreamRequestHandler<,>), assemblies);
+        services.AddSimpleInjector(container);
 
         container.Register(() => (TextWriter) writer, Lifestyle.Singleton);
 
@@ -57,7 +42,7 @@ internal static class Program
             typeof(GenericStreamPipelineBehavior<,>)
         });
 
-        var serviceProvider = services.BuildServiceProvider().UseSimpleInjector(container);
+        services.BuildServiceProvider().UseSimpleInjector(container);
 
         container.RegisterInstance<IServiceProvider>(container);
 
@@ -65,22 +50,27 @@ internal static class Program
 
         return mediator;
     }
+}
 
-    private static void RegisterHandlers(Container container, Type collectionType, Assembly[] assemblies)
+internal static class ContainerExtension
+{
+    public static Container ConfigureMediarR(this Container containerInstance, Action<MediatRServiceConfiguration<Container>> configuration)
     {
-        // we have to do this because by default, generic type definitions (such as the Constrained Notification Handler) won't be registered
-        var handlerTypes = container.GetTypesToRegister(collectionType, assemblies, new TypesToRegisterOptions
-        {
-            IncludeGenericTypeDefinitions = true,
-            IncludeComposites = false,
-        });
+        var dependencyRegistrarationConfiguration = new DependencyInjectionRegistrarAdapter<Container>(
+            containerInstance,
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Singleton),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Transient),
+            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Singleton),
+            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Transient),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Singleton),
+            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Transient),
+            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Transient),
+            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Singleton),
+            (container, fromType, toType) => container.Register(toType, fromType, Lifestyle.Singleton),
+            (container, serviceType, instance) => container.RegisterInstance(serviceType, instance));
 
-        container.Collection.Register(collectionType, handlerTypes);
-    }
+        MediatRConfigurator.ConfigureMediatR(dependencyRegistrarationConfiguration, configuration);
 
-    private static IEnumerable<Assembly> GetAssemblies()
-    {
-        yield return typeof(IMediator).GetTypeInfo().Assembly;
-        yield return typeof(Ping).GetTypeInfo().Assembly;
+        return containerInstance;
     }
 }
