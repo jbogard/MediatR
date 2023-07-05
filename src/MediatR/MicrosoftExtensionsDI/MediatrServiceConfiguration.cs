@@ -48,6 +48,11 @@ public class MediatRServiceConfiguration
     public List<ServiceDescriptor> BehaviorsToRegister { get; } = new();
 
     /// <summary>
+    /// List of stream behaviors to register in specific order
+    /// </summary>
+    public List<ServiceDescriptor> StreamBehaviorsToRegister { get; } = new();
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>
@@ -137,6 +142,30 @@ public class MediatRServiceConfiguration
         {
             BehaviorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
         }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Register a closed stream behavior type
+    /// </summary>
+    /// <typeparam name="TServiceType">Closed stream behavior interface type</typeparam>
+    /// <typeparam name="TImplementationType">Closed stream behavior implementation type</typeparam>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddStreamBehavior<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        => AddStreamBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+    
+    /// <summary>
+    /// Register a closed stream behavior type
+    /// </summary>
+    /// <param name="serviceType">Closed stream behavior interface type</param>
+    /// <param name="implementationType">Closed stream behavior implementation type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddStreamBehavior(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        StreamBehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
         return this;
     }
