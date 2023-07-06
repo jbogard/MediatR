@@ -235,7 +235,7 @@ public class PipelineTests
         }
     }
 
-    public class PingPongGenericExceptionAction : IRequestExceptionAction<Ping>
+    public class PingPongGenericExceptionAction : IRequestExceptionAction<Ping, Exception>
     {
         private readonly Logger _output;
 
@@ -301,7 +301,7 @@ public class PipelineTests
         }
     }
 
-    public class PingPongGenericExceptionHandler : IRequestExceptionHandler<Ping, Pong>
+    public class PingPongGenericExceptionHandler : IRequestExceptionHandler<Ping, Pong, Exception>
     {
         private readonly Logger _output;
 

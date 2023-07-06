@@ -25,7 +25,7 @@ class Program
                 scanner.AssemblyContainingType<Ping>();
                 scanner.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
                 scanner.ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>));
-                scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<>));
+                scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<,>));
                 scanner.ConnectImplementationsToTypesClosing(typeof(IRequestExceptionHandler<,,>));
             });
 

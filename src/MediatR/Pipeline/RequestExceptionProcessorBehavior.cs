@@ -11,8 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/>
-///     or <see cref="RequestExceptionHandler{TRequest,TResponse}"/> instances
+/// Behavior for executing all <see cref="IRequestExceptionHandler{TRequest,TResponse,TException}"/> instances
 ///     after an exception is thrown by the following pipeline steps
 /// </summary>
 /// <typeparam name="TRequest">Request type</typeparam>

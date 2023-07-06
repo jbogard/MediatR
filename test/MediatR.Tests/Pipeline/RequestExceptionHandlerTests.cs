@@ -35,7 +35,7 @@ public class RequestExceptionHandlerTests
         }
     }
 
-    public class GenericPingExceptionHandler : IRequestExceptionHandler<Ping, Pong>
+    public class GenericPingExceptionHandler : IRequestExceptionHandler<Ping, Pong, Exception>
     {
         public int ExecutionCount { get; private set; }
 
@@ -56,25 +56,29 @@ public class RequestExceptionHandlerTests
         }
     }
 
-    public class PingPongExceptionHandler : RequestExceptionHandler<Ping, Pong>
+    public class PingPongExceptionHandler : IRequestExceptionHandler<Ping, Pong, Exception>
     {
-        protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
+        public Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken token)
         {
             state.SetHandled(new Pong() { Message = exception.Message + " Handled"});
+            
+            return Task.CompletedTask;
         }
     }
 
-    public class PingPongExceptionHandlerNotHandled : RequestExceptionHandler<Ping, Pong>
+    public class PingPongExceptionHandlerNotHandled : IRequestExceptionHandler<Ping, Pong, Exception>
     {
-        protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
+        public Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken token)
         {
             request.Message = exception.Message + " Not Handled";
+            
+            return Task.CompletedTask;
         }
     }
 
-    public class PingPongThrowingExceptionHandler : RequestExceptionHandler<Ping, Pong>
+    public class PingPongThrowingExceptionHandler : IRequestExceptionHandler<Ping, Pong, Exception>
     {
-        protected override void Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state)
+        public Task Handle(Ping request, Exception exception, RequestExceptionHandlerState<Pong> state, CancellationToken token)
         {
             throw new ApplicationException("Surprise!");
         }
@@ -148,7 +152,7 @@ public class RequestExceptionHandlerTests
         var container = new Container(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionHandler<Ping, Pong>>().Use(genericPingExceptionHandler);
+            cfg.For<IRequestExceptionHandler<Ping, Pong, Exception>>().Use(genericPingExceptionHandler);
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionProcessorBehavior<,>));
             cfg.For<IMediator>().Use<Mediator>();
         });

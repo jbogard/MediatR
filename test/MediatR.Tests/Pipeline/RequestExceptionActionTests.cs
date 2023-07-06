@@ -49,7 +49,7 @@ public class RequestExceptionActionTests
         }
     }
 
-    public class GenericExceptionAction<TRequest> : IRequestExceptionAction<TRequest> where TRequest : notnull
+    public class GenericExceptionAction<TRequest> : IRequestExceptionAction<TRequest, Exception> where TRequest : notnull
     {
         public int ExecutionCount { get; private set; }
 
@@ -126,7 +126,7 @@ public class RequestExceptionActionTests
         var container = new Container(cfg =>
         {
             cfg.For<IRequestHandler<Ping, Pong>>().Use<PingHandler>();
-            cfg.For<IRequestExceptionAction<Ping>>().Use(_ => genericExceptionAction);
+            cfg.For<IRequestExceptionAction<Ping, Exception>>().Use(_ => genericExceptionAction);
             cfg.For(typeof(IPipelineBehavior<,>)).Add(typeof(RequestExceptionActionProcessorBehavior<,>));
             cfg.For<IMediator>().Use<Mediator>();
         });
