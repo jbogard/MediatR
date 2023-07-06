@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MediatR.Examples.ExceptionHandler;
 
-public class LogExceptionAction : IRequestExceptionAction<Ping>
+public class LogExceptionAction : IRequestExceptionAction<Ping, Exception>
 {
     private readonly TextWriter _writer;
 

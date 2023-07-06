@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace MediatR.Examples.ExceptionHandler;
 
-public class CommonExceptionHandler : AsyncRequestExceptionHandler<PingResource, Pong>
+public class CommonExceptionHandler : IRequestExceptionHandler<PingResource, Pong, Exception>
 {
     private readonly TextWriter _writer;
 
     public CommonExceptionHandler(TextWriter writer) => _writer = writer;
 
-    protected override async Task Handle(PingResource request,
+    public async Task Handle(PingResource request,
         Exception exception,
         RequestExceptionHandlerState<Pong> state,
         CancellationToken cancellationToken)
