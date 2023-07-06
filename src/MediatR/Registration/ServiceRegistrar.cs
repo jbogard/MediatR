@@ -227,6 +227,11 @@ public static class ServiceRegistrar
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
+        } 
+        
+        foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
+        {
+            services.TryAddEnumerable(serviceDescriptor);
         }
 
         // Use built-in Microsoft TryAddEnumerable method, we do want to register our Pre/Post processor behavior,

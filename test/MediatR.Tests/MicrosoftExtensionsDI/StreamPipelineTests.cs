@@ -84,4 +84,38 @@ public class StreamPipelineTests
             "Outer after"
         });
     }
+   
+    [Fact]
+    public async Task Should_register_and_wrap_with_behavior()
+    {
+        var output = new Logger();
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(output);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddStreamBehavior<IStreamPipelineBehavior<StreamPing, Pong>, OuterBehavior>();
+            cfg.AddStreamBehavior<IStreamPipelineBehavior<StreamPing, Pong>, InnerBehavior>();
+        });
+        var provider = services.BuildServiceProvider();
+
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        var stream = mediator.CreateStream(new StreamPing { Message = "Ping" });
+
+        await foreach (var response in stream)
+        {
+            response.Message.ShouldBe("Ping Pang");
+        }
+
+        output.Messages.ShouldBe(new[]
+        {
+            "Outer before",
+            "Inner before",
+            "Handler",
+            "Inner after",
+            "Outer after"
+        });
+    }
+
 }
