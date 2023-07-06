@@ -582,9 +582,10 @@ public class PipelineTests
     {
         var cfg = new MediatRServiceConfiguration();
         cfg.AddOpenBehavior(typeof(OpenBehavior<,>));
-        cfg.AddOpenBehavior(typeof(OpenStreamBehavior<,>));
+        cfg.AddOpenStreamBehavior(typeof(OpenStreamBehavior<,>));
 
-        cfg.BehaviorsToRegister.Count.ShouldBe(2);
+        cfg.BehaviorsToRegister.Count.ShouldBe(1);
+        cfg.StreamBehaviorsToRegister.Count.ShouldBe(1);
 
         cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
         cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(OpenBehavior<,>));
@@ -592,11 +593,11 @@ public class PipelineTests
         cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
 
-        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
-        cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OpenStreamBehavior<,>));
-        cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
-        cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
-        cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        cfg.StreamBehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(OpenStreamBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
     }
 
     [Fact]
@@ -604,8 +605,10 @@ public class PipelineTests
     {
         var cfg = new MediatRServiceConfiguration();
         cfg.AddOpenBehavior(typeof(MultiOpenBehavior<,>), ServiceLifetime.Singleton);
+        cfg.AddOpenStreamBehavior(typeof(MultiOpenBehavior<,>), ServiceLifetime.Singleton);
 
-        cfg.BehaviorsToRegister.Count.ShouldBe(2);
+        cfg.BehaviorsToRegister.Count.ShouldBe(1);
+        cfg.StreamBehaviorsToRegister.Count.ShouldBe(1);
 
         cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
         cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(MultiOpenBehavior<,>));
@@ -613,10 +616,10 @@ public class PipelineTests
         cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Singleton);
 
-        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
-        cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(MultiOpenBehavior<,>));
-        cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
-        cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
-        cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Singleton);
+        cfg.StreamBehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(MultiOpenBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Singleton);
     }
 }

@@ -131,11 +131,11 @@ public class MediatRServiceConfiguration
         }
 
         var implementedGenericInterfaces = openBehaviorType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
-        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IPipelineBehavior<,>) || i == typeof(IStreamPipelineBehavior<,>)));
+        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IPipelineBehavior<,>)));
 
         if (implementedOpenBehaviorInterfaces.Count == 0)
         {
-            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IPipelineBehavior<,>).FullName} or {typeof(IStreamPipelineBehavior<,>).FullName}");
+            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IPipelineBehavior<,>).FullName}");
         }
 
         foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
@@ -169,4 +169,35 @@ public class MediatRServiceConfiguration
 
         return this;
     }
+    
+    /// <summary>
+    /// Registers an open stream behavior type against the <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviorType">An open generic stream behavior type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenStreamBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        if (!openBehaviorType.IsGenericType)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
+        }
+
+        var implementedGenericInterfaces = openBehaviorType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
+        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IStreamPipelineBehavior<,>)));
+
+        if (implementedOpenBehaviorInterfaces.Count == 0)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IStreamPipelineBehavior<,>).FullName}");
+        }
+
+        foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
+        {
+            StreamBehaviorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
+        }
+
+        return this;
+    }
+
+
 }
