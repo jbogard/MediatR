@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using MediatR;
 using MediatR.NotificationPublishers;
+using MediatR.Pipeline;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -51,6 +52,16 @@ public class MediatRServiceConfiguration
     /// List of stream behaviors to register in specific order
     /// </summary>
     public List<ServiceDescriptor> StreamBehaviorsToRegister { get; } = new();
+
+    /// <summary>
+    /// List of request pre processors to register in specific order
+    /// </summary>
+    public List<ServiceDescriptor> RequestPreProcessorsToRegister { get; } = new();
+
+    /// <summary>
+    /// List of request post processors to register in specific order
+    /// </summary>
+    public List<ServiceDescriptor> RequestPostProcessorsToRegister { get; } = new();
 
     /// <summary>
     /// Register various handlers from assembly containing given type
@@ -194,6 +205,113 @@ public class MediatRServiceConfiguration
         foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
         {
             StreamBehaviorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
+        }
+
+        return this;
+    }
+
+
+    /// <summary>
+    /// Register a closed request pre processor type
+    /// </summary>
+    /// <typeparam name="TServiceType">Closed request pre processor interface type</typeparam>
+    /// <typeparam name="TImplementationType">Closed request pre processor implementation type</typeparam>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddRequestPreProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        => AddRequestPreProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+    
+    /// <summary>
+    /// Register a closed request pre processor type
+    /// </summary>
+    /// <param name="serviceType">Closed request pre processor interface type</param>
+    /// <param name="implementationType">Closed request pre processor implementation type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddRequestPreProcessor(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        RequestPreProcessorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
+
+        return this;
+    }
+    
+    /// <summary>
+    /// Registers an open request pre processor type against the <see cref="IRequestPreProcessor{TRequest}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviorType">An open generic request pre processor type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenRequestPreProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        if (!openBehaviorType.IsGenericType)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
+        }
+
+        var implementedGenericInterfaces = openBehaviorType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
+        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IRequestPreProcessor<>)));
+
+        if (implementedOpenBehaviorInterfaces.Count == 0)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IRequestPreProcessor<>).FullName}");
+        }
+
+        foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
+        {
+            RequestPreProcessorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
+        }
+
+        return this;
+    }
+    
+    /// <summary>
+    /// Register a closed request post processor type
+    /// </summary>
+    /// <typeparam name="TServiceType">Closed request post processor interface type</typeparam>
+    /// <typeparam name="TImplementationType">Closed request post processor implementation type</typeparam>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddRequestPostProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        => AddRequestPreProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
+    
+    /// <summary>
+    /// Register a closed request post processor type
+    /// </summary>
+    /// <param name="serviceType">Closed request post processor interface type</param>
+    /// <param name="implementationType">Closed request post processor implementation type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddRequestPostProcessor(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        RequestPostProcessorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
+
+        return this;
+    }
+    
+    /// <summary>
+    /// Registers an open request post processor type against the <see cref="IRequestPostProcessor{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviorType">An open generic request post processor type</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenRequestPostProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        if (!openBehaviorType.IsGenericType)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
+        }
+
+        var implementedGenericInterfaces = openBehaviorType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
+        var implementedOpenBehaviorInterfaces = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IRequestPostProcessor<,>)));
+
+        if (implementedOpenBehaviorInterfaces.Count == 0)
+        {
+            throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IRequestPostProcessor<,>).FullName}");
+        }
+
+        foreach (var openBehaviorInterface in implementedOpenBehaviorInterfaces)
+        {
+            RequestPostProcessorsToRegister.Add(new ServiceDescriptor(openBehaviorInterface, openBehaviorType, serviceLifetime));
         }
 
         return this;

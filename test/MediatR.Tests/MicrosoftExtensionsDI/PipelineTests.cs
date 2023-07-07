@@ -351,9 +351,12 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddTransient<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
-        services.AddTransient<IPipelineBehavior<Ping, Pong>, InnerBehavior>();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
+            cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, InnerBehavior>();
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -366,15 +369,7 @@ public class PipelineTests
         {
             "Outer before",
             "Inner before",
-            "First concrete pre processor",
-            "Next concrete pre processor",
-            "First pre processor",
-            "Next pre processor",
             "Handler",
-            "First concrete post processor",
-            "Next concrete post processor",
-            "First post processor",
-            "Next post processor",
             "Inner after",
             "Outer after"
         });
@@ -408,27 +403,30 @@ public class PipelineTests
         {
             "Outer generic before",
             "Inner generic before",
-            "First concrete pre processor",
-            "Next concrete pre processor",
-            "First pre processor",
-            "Next pre processor",
             "Handler",
-            "First concrete post processor",
-            "Next concrete post processor",
-            "First post processor",
-            "Next post processor",
             "Inner generic after",
             "Outer generic after",
         });
     }
 
     [Fact]
-    public async Task Should_pick_up_pre_and_post_processors()
+    public async Task Should_register_pre_and_post_processors()
     {
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, FirstConcretePreProcessor>();
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, NextConcretePreProcessor>();
+            cfg.AddOpenRequestPreProcessor(typeof(FirstPreProcessor<>));
+            cfg.AddOpenRequestPreProcessor(typeof(NextPreProcessor<>));
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, FirstConcretePostProcessor>();
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, NextConcretePostProcessor>();
+            cfg.AddOpenRequestPostProcessor(typeof(FirstPostProcessor<,>));
+            cfg.AddOpenRequestPostProcessor(typeof(NextPostProcessor<,>));
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -508,10 +506,21 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(OuterBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(InnerBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstrainedBehavior<,>));
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddOpenBehavior(typeof(OuterBehavior<,>));
+            cfg.AddOpenBehavior(typeof(InnerBehavior<,>));
+            cfg.AddOpenBehavior(typeof(ConstrainedBehavior<,>));
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, FirstConcretePreProcessor>();
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, NextConcretePreProcessor>();
+            cfg.AddOpenRequestPreProcessor(typeof(FirstPreProcessor<>));
+            cfg.AddOpenRequestPreProcessor(typeof(NextPreProcessor<>));
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, FirstConcretePostProcessor>();
+            cfg.AddRequestPreProcessor<IRequestPostProcessor<Ping, Pong>, NextConcretePostProcessor>();
+            cfg.AddOpenRequestPostProcessor(typeof(FirstPostProcessor<,>));
+            cfg.AddOpenRequestPostProcessor(typeof(NextPostProcessor<,>));
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -522,21 +531,21 @@ public class PipelineTests
 
         output.Messages.ShouldBe(new[]
         {
-            "Outer generic before",
-            "Inner generic before",
-            "Constrained before",
             "First concrete pre processor",
             "Next concrete pre processor",
             "First pre processor",
             "Next pre processor",
+            "Outer generic before",
+            "Inner generic before",
+            "Constrained before",
             "Handler",
+            "Constrained after",
+            "Inner generic after",
+            "Outer generic after",
             "First concrete post processor",
             "Next concrete post processor",
             "First post processor",
-            "Next post processor",
-            "Constrained after",
-            "Inner generic after",
-            "Outer generic after"
+            "Next post processor"
         });
 
         output.Messages.Clear();
@@ -547,15 +556,15 @@ public class PipelineTests
 
         output.Messages.ShouldBe(new[]
         {
-            "Outer generic before",
-            "Inner generic before",
             "First pre processor",
             "Next pre processor",
+            "Outer generic before",
+            "Inner generic before",
             "Handler",
-            "First post processor",
-            "Next post processor",
             "Inner generic after",
-            "Outer generic after"
+            "Outer generic after",
+            "First post processor",
+            "Next post processor"
         });
     }
 

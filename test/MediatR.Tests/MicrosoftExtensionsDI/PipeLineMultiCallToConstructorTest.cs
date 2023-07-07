@@ -81,7 +81,11 @@ public class PipelineMultiCallToConstructorTests
 
         services.AddSingleton(output);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstructorTestBehavior<,>));
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddOpenBehavior(typeof(ConstructorTestBehavior<,>));
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -93,11 +97,7 @@ public class PipelineMultiCallToConstructorTests
         output.Messages.ShouldBe(new[]
         {
             "ConstructorTestBehavior before",
-            "First pre processor",
-            "Next pre processor",
             "Handler",
-            "First post processor",
-            "Next post processor",
             "ConstructorTestBehavior after"
         });
         ConstructorTestHandler.ConstructorCallCount.ShouldBe(1);
