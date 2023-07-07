@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
@@ -49,6 +50,46 @@ public class PipelineTests
             _output.Messages.Add("Inner after");
 
             return response;
+        }
+    }
+   
+    public class OuterStreamBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public OuterStreamBehavior(Logger output)
+        {
+            _output = output;
+        }
+
+        public async IAsyncEnumerable<Pong> Handle(Ping request, StreamHandlerDelegate<Pong> next, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Outer before");
+            await foreach (var item in next().WithCancellation(cancellationToken))
+            {
+                yield return item;
+            }
+            _output.Messages.Add("Outer after");
+        }
+    }
+
+    public class InnerStreamBehavior : IStreamPipelineBehavior<Ping, Pong>
+    {
+        private readonly Logger _output;
+
+        public InnerStreamBehavior(Logger output)
+        {
+            _output = output;
+        }
+
+        public async IAsyncEnumerable<Pong> Handle(Ping request, StreamHandlerDelegate<Pong> next, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            _output.Messages.Add("Inner before");
+            await foreach (var item in next().WithCancellation(cancellationToken))
+            {
+                yield return item;
+            }
+            _output.Messages.Add("Inner after");
         }
     }
 
@@ -351,9 +392,12 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddTransient<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
-        services.AddTransient<IPipelineBehavior<Ping, Pong>, InnerBehavior>();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, OuterBehavior>();
+            cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, InnerBehavior>();
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -366,15 +410,7 @@ public class PipelineTests
         {
             "Outer before",
             "Inner before",
-            "First concrete pre processor",
-            "Next concrete pre processor",
-            "First pre processor",
-            "Next pre processor",
             "Handler",
-            "First concrete post processor",
-            "Next concrete post processor",
-            "First post processor",
-            "Next post processor",
             "Inner after",
             "Outer after"
         });
@@ -408,27 +444,30 @@ public class PipelineTests
         {
             "Outer generic before",
             "Inner generic before",
-            "First concrete pre processor",
-            "Next concrete pre processor",
-            "First pre processor",
-            "Next pre processor",
             "Handler",
-            "First concrete post processor",
-            "Next concrete post processor",
-            "First post processor",
-            "Next post processor",
             "Inner generic after",
             "Outer generic after",
         });
     }
 
     [Fact]
-    public async Task Should_pick_up_pre_and_post_processors()
+    public async Task Should_register_pre_and_post_processors()
     {
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, FirstConcretePreProcessor>();
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, NextConcretePreProcessor>();
+            cfg.AddOpenRequestPreProcessor(typeof(FirstPreProcessor<>));
+            cfg.AddOpenRequestPreProcessor(typeof(NextPreProcessor<>));
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, FirstConcretePostProcessor>();
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, NextConcretePostProcessor>();
+            cfg.AddOpenRequestPostProcessor(typeof(FirstPostProcessor<,>));
+            cfg.AddOpenRequestPostProcessor(typeof(NextPostProcessor<,>));
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -508,10 +547,21 @@ public class PipelineTests
         var output = new Logger();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(output);
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(OuterBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(InnerBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ConstrainedBehavior<,>));
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddOpenBehavior(typeof(OuterBehavior<,>));
+            cfg.AddOpenBehavior(typeof(InnerBehavior<,>));
+            cfg.AddOpenBehavior(typeof(ConstrainedBehavior<,>));
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, FirstConcretePreProcessor>();
+            cfg.AddRequestPreProcessor<IRequestPreProcessor<Ping>, NextConcretePreProcessor>();
+            cfg.AddOpenRequestPreProcessor(typeof(FirstPreProcessor<>));
+            cfg.AddOpenRequestPreProcessor(typeof(NextPreProcessor<>));
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, FirstConcretePostProcessor>();
+            cfg.AddRequestPostProcessor<IRequestPostProcessor<Ping, Pong>, NextConcretePostProcessor>();
+            cfg.AddOpenRequestPostProcessor(typeof(FirstPostProcessor<,>));
+            cfg.AddOpenRequestPostProcessor(typeof(NextPostProcessor<,>));
+        });
         var provider = services.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -522,21 +572,21 @@ public class PipelineTests
 
         output.Messages.ShouldBe(new[]
         {
-            "Outer generic before",
-            "Inner generic before",
-            "Constrained before",
             "First concrete pre processor",
             "Next concrete pre processor",
             "First pre processor",
             "Next pre processor",
+            "Outer generic before",
+            "Inner generic before",
+            "Constrained before",
             "Handler",
+            "Constrained after",
+            "Inner generic after",
+            "Outer generic after",
             "First concrete post processor",
             "Next concrete post processor",
             "First post processor",
-            "Next post processor",
-            "Constrained after",
-            "Inner generic after",
-            "Outer generic after"
+            "Next post processor"
         });
 
         output.Messages.Clear();
@@ -547,15 +597,15 @@ public class PipelineTests
 
         output.Messages.ShouldBe(new[]
         {
-            "Outer generic before",
-            "Inner generic before",
             "First pre processor",
             "Next pre processor",
+            "Outer generic before",
+            "Inner generic before",
             "Handler",
-            "First post processor",
-            "Next post processor",
             "Inner generic after",
-            "Outer generic after"
+            "Outer generic after",
+            "First post processor",
+            "Next post processor"
         });
     }
 
@@ -599,7 +649,92 @@ public class PipelineTests
         cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
     }
+    
+    [Fact]
+    public void Should_handle_inferred_behavior_registration()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddBehavior<InnerBehavior>();
+        cfg.AddBehavior(typeof(OuterBehavior));
 
+        cfg.BehaviorsToRegister.Count.ShouldBe(2);
+
+        cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(InnerBehavior));
+        cfg.BehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OuterBehavior));
+        cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+    }
+
+        
+    [Fact]
+    public void Should_handle_inferred_stream_behavior_registration()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddStreamBehavior<InnerStreamBehavior>();
+        cfg.AddStreamBehavior(typeof(OuterStreamBehavior));
+
+        cfg.StreamBehaviorsToRegister.Count.ShouldBe(2);
+
+        cfg.StreamBehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(InnerStreamBehavior));
+        cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        cfg.StreamBehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OuterStreamBehavior));
+        cfg.StreamBehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.StreamBehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+    }
+    
+    [Fact]
+    public void Should_handle_inferred_pre_processor_registration()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddRequestPreProcessor<FirstConcretePreProcessor>();
+        cfg.AddRequestPreProcessor(typeof(NextConcretePreProcessor));
+
+        cfg.RequestPreProcessorsToRegister.Count.ShouldBe(2);
+
+        cfg.RequestPreProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPreProcessor<>));
+        cfg.RequestPreProcessorsToRegister[0].ImplementationType.ShouldBe(typeof(FirstConcretePreProcessor));
+        cfg.RequestPreProcessorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.RequestPreProcessorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.RequestPreProcessorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        cfg.RequestPreProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPreProcessor<>));
+        cfg.RequestPreProcessorsToRegister[1].ImplementationType.ShouldBe(typeof(NextConcretePreProcessor));
+        cfg.RequestPreProcessorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.RequestPreProcessorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.RequestPreProcessorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+    }
+    
+    [Fact]
+    public void Should_handle_inferred_post_processor_registration()
+    {
+        var cfg = new MediatRServiceConfiguration();
+        cfg.AddRequestPostProcessor<FirstConcretePostProcessor>();
+        cfg.AddRequestPostProcessor(typeof(NextConcretePostProcessor));
+
+        cfg.RequestPostProcessorsToRegister.Count.ShouldBe(2);
+
+        cfg.RequestPostProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPostProcessor<,>));
+        cfg.RequestPostProcessorsToRegister[0].ImplementationType.ShouldBe(typeof(FirstConcretePostProcessor));
+        cfg.RequestPostProcessorsToRegister[0].ImplementationFactory.ShouldBeNull();
+        cfg.RequestPostProcessorsToRegister[0].ImplementationInstance.ShouldBeNull();
+        cfg.RequestPostProcessorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        cfg.RequestPostProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPostProcessor<,>));
+        cfg.RequestPostProcessorsToRegister[1].ImplementationType.ShouldBe(typeof(NextConcretePostProcessor));
+        cfg.RequestPostProcessorsToRegister[1].ImplementationFactory.ShouldBeNull();
+        cfg.RequestPostProcessorsToRegister[1].ImplementationInstance.ShouldBeNull();
+        cfg.RequestPostProcessorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+    }
+    
     [Fact]
     public void Should_handle_open_behaviors_registration_from_a_single_type()
     {

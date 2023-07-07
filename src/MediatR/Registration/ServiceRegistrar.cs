@@ -18,16 +18,12 @@ public static class ServiceRegistrar
         ConnectImplementationsToTypesClosing(typeof(IRequestHandler<>), services, assembliesToScan, false, configuration);
         ConnectImplementationsToTypesClosing(typeof(INotificationHandler<>), services, assembliesToScan, true, configuration);
         ConnectImplementationsToTypesClosing(typeof(IStreamRequestHandler<,>), services, assembliesToScan, false, configuration);
-        ConnectImplementationsToTypesClosing(typeof(IRequestPreProcessor<>), services, assembliesToScan, true, configuration);
-        ConnectImplementationsToTypesClosing(typeof(IRequestPostProcessor<,>), services, assembliesToScan, true, configuration);
         ConnectImplementationsToTypesClosing(typeof(IRequestExceptionHandler<,,>), services, assembliesToScan, true, configuration);
         ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<,>), services, assembliesToScan, true, configuration);
 
         var multiOpenInterfaces = new[]
         {
             typeof(INotificationHandler<>),
-            typeof(IRequestPreProcessor<>),
-            typeof(IRequestPostProcessor<,>),
             typeof(IRequestExceptionHandler<,,>),
             typeof(IRequestExceptionAction<,>)
         };
@@ -224,6 +220,19 @@ public static class ServiceRegistrar
 
         services.TryAdd(notificationPublisherServiceDescriptor);
 
+        // Register pre processors, then post processors, then behaviors
+        if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
+        {
+            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
+            services.TryAddEnumerable(serviceConfiguration.RequestPreProcessorsToRegister);
+        }
+
+        if (serviceConfiguration.RequestPostProcessorsToRegister.Any())
+        {
+            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>), ServiceLifetime.Transient));
+            services.TryAddEnumerable(serviceConfiguration.RequestPostProcessorsToRegister);
+        }
+
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
@@ -233,11 +242,6 @@ public static class ServiceRegistrar
         {
             services.TryAddEnumerable(serviceDescriptor);
         }
-
-        // Use built-in Microsoft TryAddEnumerable method, we do want to register our Pre/Post processor behavior,
-        // even if (a more concrete) registration for IPipelineBehavior<,> already exists. But only once.
-        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPreProcessorBehavior<,>), typeof(IRequestPreProcessor<>));
-        RegisterBehaviorIfImplementationsExist(services, typeof(RequestPostProcessorBehavior<,>), typeof(IRequestPostProcessor<,>));
 
         if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
         {
