@@ -64,25 +64,26 @@ This registers:
 - `IRequestHandler<>` concrete implementations as transient
 - `INotificationHandler<>` concrete implementations as transient
 - `IStreamRequestHandler<>` concrete implementations as transient
-- `IRequestPreProcessor<>` concrete implementations as transient
-- `IRequestPostProcessor<,>` concrete implementations as transient
 - `IRequestExceptionHandler<,,>` concrete implementations as transient
 - `IRequestExceptionAction<,>)` concrete implementations as transient
 
 This also registers open generic implementations for:
 
 - `INotificationHandler<>`
-- `IRequestPreProcessor<>`
-- `IRequestPostProcessor<,>`
 - `IRequestExceptionHandler<,,>`
 - `IRequestExceptionAction<,>`
 
-To register behaviors:
+To register behaviors, stream behaviors, pre/post processors:
 
 ```csharp
 services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Startup).Assembly);
-    cfg.AddBehavior<IPipelineBehavior<Ping, Pong>, PingPongBehavior>();
+    cfg.AddBehavior<PingPongBehavior>();
+    cfg.AddStreamBehavior<PingPongStreamBehavior>();
+    cfg.AddRequestPreProcessor<PingPreProcessor>();
+    cfg.AddRequestPostProcessor<PingPongPostProcessor>();
     cfg.AddOpenBehavior(typeof(GenericBehavior<,>));
     });
 ```
+
+With additional methods for open generics and overloads for explicit service types.
