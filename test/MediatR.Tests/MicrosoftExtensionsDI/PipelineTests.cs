@@ -361,6 +361,11 @@ public class PipelineTests
         public Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken) => next();
     }
 
+    public class ThrowingBehavior : IPipelineBehavior<Ping, Pong>
+    {
+        public Task<Pong> Handle(Ping request, RequestHandlerDelegate<Pong> next, CancellationToken cancellationToken) => throw new Exception(request.Message);
+    }
+
     public class NotAnOpenStreamBehavior : IStreamPipelineBehavior<Ping, Pong>
     {
         public IAsyncEnumerable<Pong> Handle(Ping request, StreamHandlerDelegate<Pong> next, CancellationToken cancellationToken) => next();
@@ -525,6 +530,27 @@ public class PipelineTests
     }
 
     [Fact]
+    public void Should_handle_exceptions_from_behaviors()
+    {
+        var output = new Logger();
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(output);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.AddBehavior<ThrowingBehavior>();
+        });
+        var provider = services.BuildServiceProvider();
+
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        Should.Throw<Exception>(async () => await mediator.Send(new Ping {Message = "Ping"}));
+
+        output.Messages.ShouldContain("Ping Logged by Generic Type");
+        output.Messages.ShouldContain("Logging generic exception");
+    }
+
+    [Fact]
     public void Should_pick_up_exception_actions()
     {
         var output = new Logger();
@@ -648,6 +674,16 @@ public class PipelineTests
         cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
+
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
     
     [Fact]
@@ -659,16 +695,26 @@ public class PipelineTests
 
         cfg.BehaviorsToRegister.Count.ShouldBe(2);
 
-        cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IPipelineBehavior<Ping, Pong>));
         cfg.BehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(InnerBehavior));
         cfg.BehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.BehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.BehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
-        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IPipelineBehavior<,>));
+        cfg.BehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IPipelineBehavior<Ping, Pong>));
         cfg.BehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OuterBehavior));
         cfg.BehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
         cfg.BehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
         cfg.BehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
 
         
@@ -681,16 +727,26 @@ public class PipelineTests
 
         cfg.StreamBehaviorsToRegister.Count.ShouldBe(2);
 
-        cfg.StreamBehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[0].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<Ping, Pong>));
         cfg.StreamBehaviorsToRegister[0].ImplementationType.ShouldBe(typeof(InnerStreamBehavior));
         cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
-        cfg.StreamBehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<,>));
+        cfg.StreamBehaviorsToRegister[1].ServiceType.ShouldBe(typeof(IStreamPipelineBehavior<Ping, Pong>));
         cfg.StreamBehaviorsToRegister[1].ImplementationType.ShouldBe(typeof(OuterStreamBehavior));
         cfg.StreamBehaviorsToRegister[1].ImplementationFactory.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[1].ImplementationInstance.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
     
     [Fact]
@@ -702,16 +758,26 @@ public class PipelineTests
 
         cfg.RequestPreProcessorsToRegister.Count.ShouldBe(2);
 
-        cfg.RequestPreProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPreProcessor<>));
+        cfg.RequestPreProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPreProcessor<Ping>));
         cfg.RequestPreProcessorsToRegister[0].ImplementationType.ShouldBe(typeof(FirstConcretePreProcessor));
         cfg.RequestPreProcessorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.RequestPreProcessorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.RequestPreProcessorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
-        cfg.RequestPreProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPreProcessor<>));
+        cfg.RequestPreProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPreProcessor<Ping>));
         cfg.RequestPreProcessorsToRegister[1].ImplementationType.ShouldBe(typeof(NextConcretePreProcessor));
         cfg.RequestPreProcessorsToRegister[1].ImplementationFactory.ShouldBeNull();
         cfg.RequestPreProcessorsToRegister[1].ImplementationInstance.ShouldBeNull();
         cfg.RequestPreProcessorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
     
     [Fact]
@@ -723,16 +789,26 @@ public class PipelineTests
 
         cfg.RequestPostProcessorsToRegister.Count.ShouldBe(2);
 
-        cfg.RequestPostProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPostProcessor<,>));
+        cfg.RequestPostProcessorsToRegister[0].ServiceType.ShouldBe(typeof(IRequestPostProcessor<Ping, Pong>));
         cfg.RequestPostProcessorsToRegister[0].ImplementationType.ShouldBe(typeof(FirstConcretePostProcessor));
         cfg.RequestPostProcessorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.RequestPostProcessorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.RequestPostProcessorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Transient);
-        cfg.RequestPostProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPostProcessor<,>));
+        cfg.RequestPostProcessorsToRegister[1].ServiceType.ShouldBe(typeof(IRequestPostProcessor<Ping, Pong>));
         cfg.RequestPostProcessorsToRegister[1].ImplementationType.ShouldBe(typeof(NextConcretePostProcessor));
         cfg.RequestPostProcessorsToRegister[1].ImplementationFactory.ShouldBeNull();
         cfg.RequestPostProcessorsToRegister[1].ImplementationInstance.ShouldBeNull();
         cfg.RequestPostProcessorsToRegister[1].Lifetime.ShouldBe(ServiceLifetime.Transient);
+        
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
     
     [Fact]
@@ -756,5 +832,15 @@ public class PipelineTests
         cfg.StreamBehaviorsToRegister[0].ImplementationFactory.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].ImplementationInstance.ShouldBeNull();
         cfg.StreamBehaviorsToRegister[0].Lifetime.ShouldBe(ServiceLifetime.Singleton);
+        
+        var services = new ServiceCollection();
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        Should.NotThrow(() =>
+        {
+            services.AddMediatR(cfg);
+            services.BuildServiceProvider();
+        });
     }
 }
