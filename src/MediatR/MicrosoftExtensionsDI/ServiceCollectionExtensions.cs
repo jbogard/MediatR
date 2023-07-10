@@ -30,14 +30,26 @@ public static class ServiceCollectionExtensions
 
         configuration.Invoke(serviceConfig);
 
-        if (!serviceConfig.AssembliesToRegister.Any())
+        return services.AddMediatR(serviceConfig);
+    }
+    
+    /// <summary>
+    /// Registers handlers and mediator types from the specified assemblies
+    /// </summary>
+    /// <param name="services">Service collection</param>
+    /// <param name="configuration">Configuration options</param>
+    /// <returns>Service collection</returns>
+    public static IServiceCollection AddMediatR(this IServiceCollection services, 
+        MediatRServiceConfiguration configuration)
+    {
+        if (!configuration.AssembliesToRegister.Any())
         {
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");
         }
 
-        ServiceRegistrar.AddMediatRClasses(services, serviceConfig);
+        ServiceRegistrar.AddMediatRClasses(services, configuration);
 
-        ServiceRegistrar.AddRequiredServices(services, serviceConfig);
+        ServiceRegistrar.AddRequiredServices(services, configuration);
 
         return services;
     }

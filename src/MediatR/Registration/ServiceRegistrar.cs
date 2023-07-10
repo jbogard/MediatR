@@ -138,7 +138,7 @@ public static class ServiceRegistrar
         }
     }
 
-    private static bool CouldCloseTo(this Type openConcretion, Type closedInterface)
+    internal static bool CouldCloseTo(this Type openConcretion, Type closedInterface)
     {
         var openInterface = closedInterface.GetGenericTypeDefinition();
         var arguments = closedInterface.GenericTypeArguments;
@@ -161,7 +161,7 @@ public static class ServiceRegistrar
         return type.IsGenericTypeDefinition || type.ContainsGenericParameters;
     }
 
-    private static IEnumerable<Type> FindInterfacesThatClose(this Type pluggedType, Type templateType)
+    internal static IEnumerable<Type> FindInterfacesThatClose(this Type pluggedType, Type templateType)
     {
         return FindInterfacesThatClosesCore(pluggedType, templateType).Distinct();
     }
@@ -221,6 +221,17 @@ public static class ServiceRegistrar
         services.TryAdd(notificationPublisherServiceDescriptor);
 
         // Register pre processors, then post processors, then behaviors
+        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
+        {
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
+        }
+        else
+        {
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
+        }
+
         if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
         {
             services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
@@ -241,17 +252,6 @@ public static class ServiceRegistrar
         foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
-        }
-
-        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
-        {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
-        }
-        else
-        {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
         }
     }
 

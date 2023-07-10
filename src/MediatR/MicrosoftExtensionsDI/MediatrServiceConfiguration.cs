@@ -5,6 +5,7 @@ using System.Reflection;
 using MediatR;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
+using MediatR.Registration;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -133,15 +134,14 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        var implementedGenericInterfaces = implementationType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
-        var implementedBehaviorTypes = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IPipelineBehavior<,>)));
+        var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IPipelineBehavior<,>)).ToList();
 
-        if (implementedBehaviorTypes.Count == 0)
+        if (implementedGenericInterfaces.Count == 0)
         {
             throw new InvalidOperationException($"{implementationType.Name} must implement {typeof(IPipelineBehavior<,>).FullName}");
         }
 
-        foreach (var implementedBehaviorType in implementedBehaviorTypes)
+        foreach (var implementedBehaviorType in implementedGenericInterfaces)
         {
             BehaviorsToRegister.Add(new ServiceDescriptor(implementedBehaviorType, implementationType, serviceLifetime));
         }
@@ -233,15 +233,14 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        var implementedGenericInterfaces = implementationType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
-        var implementedBehaviorTypes = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IStreamPipelineBehavior<,>)));
+        var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IStreamPipelineBehavior<,>)).ToList();
 
-        if (implementedBehaviorTypes.Count == 0)
+        if (implementedGenericInterfaces.Count == 0)
         {
             throw new InvalidOperationException($"{implementationType.Name} must implement {typeof(IStreamPipelineBehavior<,>).FullName}");
         }
 
-        foreach (var implementedBehaviorType in implementedBehaviorTypes)
+        foreach (var implementedBehaviorType in implementedGenericInterfaces)
         {
             StreamBehaviorsToRegister.Add(new ServiceDescriptor(implementedBehaviorType, implementationType, serviceLifetime));
         }
@@ -320,15 +319,14 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        var implementedGenericInterfaces = implementationType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
-        var implementedPreProcessorTypes = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IRequestPreProcessor<>)));
+        var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPreProcessor<>)).ToList();
 
-        if (implementedPreProcessorTypes.Count == 0)
+        if (implementedGenericInterfaces.Count == 0)
         {
             throw new InvalidOperationException($"{implementationType.Name} must implement {typeof(IRequestPreProcessor<>).FullName}");
         }
 
-        foreach (var implementedPreProcessorType in implementedPreProcessorTypes)
+        foreach (var implementedPreProcessorType in implementedGenericInterfaces)
         {
             RequestPreProcessorsToRegister.Add(new ServiceDescriptor(implementedPreProcessorType, implementationType, serviceLifetime));
         }
@@ -406,15 +404,14 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
-        var implementedGenericInterfaces = implementationType.GetInterfaces().Where(i => i.IsGenericType).Select(i => i.GetGenericTypeDefinition());
-        var implementedPostProcessorTypes = new HashSet<Type>(implementedGenericInterfaces.Where(i => i == typeof(IRequestPostProcessor<,>)));
+        var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPostProcessor<,>)).ToList();
 
-        if (implementedPostProcessorTypes.Count == 0)
+        if (implementedGenericInterfaces.Count == 0)
         {
             throw new InvalidOperationException($"{implementationType.Name} must implement {typeof(IRequestPostProcessor<,>).FullName}");
         }
 
-        foreach (var implementedPostProcessorType in implementedPostProcessorTypes)
+        foreach (var implementedPostProcessorType in implementedGenericInterfaces)
         {
             RequestPostProcessorsToRegister.Add(new ServiceDescriptor(implementedPostProcessorType, implementationType, serviceLifetime));
         }
