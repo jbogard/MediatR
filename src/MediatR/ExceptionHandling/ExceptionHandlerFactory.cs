@@ -23,7 +23,7 @@ internal sealed class ExceptionHandlerFactory
     private static Type[]? GenericHandlerTypeCache;
 
     private readonly Func<(Type RequestType, Type ExceptionType), RequestExceptionActionHandler> _requestActionHandlerFactory;
-    private readonly Func<(Type RequestType, Type ExceptionType), RequestExceptionRequestHandler> _requestHandlerfactory;
+    private readonly Func<(Type RequestType, Type ExceptionType), RequestExceptionRequestHandler> _requestHandlerFactory;
     private readonly Func<(Type RequestType, Type ResponseType, Type ExceptionType), RequestResponseExceptionActionHandler> _requestResponseActionHandlerFactory;
     private readonly Func<(Type RequestType, Type ResponseType, Type ExceptionType), RequestResponseExceptionRequestHandler> _requestResponseHandlerFactory;
 
@@ -41,7 +41,7 @@ internal sealed class ExceptionHandlerFactory
             return (RequestExceptionActionHandler) Activator.CreateInstance(genericRequestExceptionHandler, creationArgs)!;
         };
 
-        _requestHandlerfactory = tuple =>
+        _requestHandlerFactory = tuple =>
         {
             TryInitGenericHandlerTypeCache();
             GenericHandlerTypeCache![0] = tuple.RequestType;
@@ -78,7 +78,7 @@ internal sealed class ExceptionHandlerFactory
         RequestExceptionActionHandlers.GetOrAdd((requestType, exceptionType), _requestActionHandlerFactory);
 
     public RequestExceptionRequestHandler CreateRequestExceptionRequestHandler(Type requestType, Type exceptionType) =>
-        RequestExceptionRequestHandlers.GetOrAdd((requestType, exceptionType), _requestHandlerfactory);
+        RequestExceptionRequestHandlers.GetOrAdd((requestType, exceptionType), _requestHandlerFactory);
 
     public RequestResponseExceptionActionHandler CreateRequestResponseExceptionActionHandler(Type requestType, Type responseType, Type exceptionType) =>
         RequestResponseExceptionActionHandlers.GetOrAdd((requestType, responseType, exceptionType), _requestResponseActionHandlerFactory);

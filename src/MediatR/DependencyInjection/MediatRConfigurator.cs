@@ -29,9 +29,9 @@ public static class MediatRConfigurator
         }
 
         var scanner = new AssemblyScanner<TRegistrar>(configuration);
-        scanner.ScanAssembliesAndRegisterServices();
+        scanner.RegisterMediatRServices();
         
-        InternalServiceRegistrar.AddInternals(configuration);
+        InternalServiceRegistrar.AddInternalServiceTypes(configuration);
 
         return configuration.DependencyInjectionRegistrarAdapter.Registrar;
     }

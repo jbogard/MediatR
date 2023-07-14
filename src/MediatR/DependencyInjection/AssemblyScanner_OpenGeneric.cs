@@ -1,97 +1,117 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MediatR.Abstraction.Behaviors;
 using MediatR.Abstraction.ExceptionHandler;
 using MediatR.Abstraction.Handlers;
+using MediatR.Abstraction.Pipeline;
 
 namespace MediatR.DependencyInjection;
 
 internal partial struct AssemblyScanner<TRegistrar>
 {
-    private void AddSingleArityTypeVariants(List<Type> typeVariants, TypeWrapper typeWrapper)
+    private void AddGenericTypeVariants(TypeWrapper typeWrapper, List<Type> typeVariants)
     {
-        var genericArgsCache = new Type[1];
+        foreach (var openGenericInterface in typeWrapper.OpenGenericInterfaces.OrderByDescending(static tuple => tuple.OpenGenericInterface.GenericTypeArguments.Length))
+        {
+            AddNotificationVariants(typeWrapper, openGenericInterface, typeVariants);
+        }
+    }
 
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces,typeof(INotificationHandler<>)) > 0)
+    private void AddNotificationVariants(TypeWrapper typeWrapper, (Type Interface, Type OpenGenericInterface) openGenericInterface, List<Type> typeVariants)
+    {
+        if (openGenericInterface.OpenGenericInterface != typeof(INotificationHandler<>) &&
+            typeWrapper.GenericTypeArguments?.Length > 1)
         {
-            ResolveGenericType(_notifications);
+            return;
         }
-        else if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestHandler<>)) > 0)
+
+        foreach (var notification in _notifications)
         {
-            ResolveGenericType(_requests);
+            _genericHandlerTypeCache[0] = notification.Type;
+            var concreteType = CreateGenericType(typeWrapper, _genericRequestHandlerTypeCache);
+            if (concreteType is not null)
+            {
+                typeVariants.Add(concreteType);
+            }
         }
-        else if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IPipelineBehavior<>)) > 0 &&
-                 _configuration.BehaviorsToRegister.All(i => i.ImplementingType != typeWrapper.Type ||
-                                                             i.ServiceType.Contains(typeof(IPipelineBehavior<>))))
+    }
+
+    private void AddRequestTypeVariants((Type Interface, Type OpenGenericInterface) openGenericInterface, TypeWrapper typeWrapper, List<Type> typeVariants)
+    {
+        if (typeWrapper.GenericTypeArguments!.Length > 2)
         {
-            ResolveGenericType(_requests);
+            return;
+        }
+    }
+
+    private void AddRequestTypeVariants(List<Type> typeVariants, TypeWrapper typeWrapper)
+    {
+        var genericHandlerTypeCache = _genericHandlerTypeCache;
+        var genericRequestHandlerTypeCache = _genericRequestHandlerTypeCache;
+        var typeComparer = _typeComparer;
+
+        foreach (var openGenericInterfaceImpl in typeWrapper.OpenGenericInterfaces)
+        {
+            if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestHandler<>))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IPipelineBehavior<>) &&
+                     !_configuration.BehaviorsToRegister.Any(i => i.Key == typeWrapper.Type &&
+                                                                  Array.BinarySearch(i.Value, typeof(IPipelineBehavior<>), typeComparer) >= 0))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestPreProcessor<>))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestPostProcessor<>))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestExceptionHandler<>))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestExceptionAction<>))
+            {
+                ResolveGenericType(_requests);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestExceptionHandler<,>))
+            {
+                ResolveGenericExceptionHandlerType(this, _configuration, _requests, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestExceptionAction<,>))
+            {
+                ResolveGenericExceptionHandlerType(this, _configuration, _requests, openGenericInterfaceImpl);
+            }
         }
 
         void ResolveGenericType(TypeWrapper[] messages)
         {
             foreach (var message in messages)
             {
-                genericArgsCache[0] = message.Type;
-                var result = CreateGenericType(typeWrapper, genericArgsCache);
+                genericHandlerTypeCache[0] = message.Type;
+                var result = CreateGenericType(typeWrapper, genericHandlerTypeCache);
                 if (result is not null)
                 {
                     typeVariants.Add(result);
                 }
             }
         }
-    }
 
-    private void AddRequestTypeVariants(List<Type> typeVariants, TypeWrapper typeWrapper)
-    {
-        var genericTypeCache = new Type[2];
-
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestHandler<,>)) > 0)
-        {
-            ResolveGenericType(_requestResponses);
-        }
-        else if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IStreamRequestHandler<,>)) > 0)
-        {
-            ResolveGenericType(_streamRequests);
-        }
-
-        void ResolveGenericType((TypeWrapper, Type)[] messages)
-        {
-            foreach (var (request, response) in messages)
-            {
-                genericTypeCache[0] = request.Type;
-                genericTypeCache[1] = response;
-                var result = CreateGenericType(typeWrapper, genericTypeCache);
-                if (result is not null)
-                {
-                    typeVariants.Add(result);
-                }
-            }
-        }
-    }
-
-    private void AddHandlerExceptionHandler(List<Type> typeVariants, TypeWrapper typeWrapper, MediatRServiceConfiguration configuration)
-    {
-        var genericTypeCache = new Type[2];
-
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestExceptionHandler<,>)) > 0)
-        {
-            ResolveGenericType(_requests);
-        }
-        else if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestExceptionAction<,>)) > 0)
-        {
-            ResolveGenericType(_requests);
-        }
-
-        void ResolveGenericType(TypeWrapper[] requests)
+        void ResolveGenericExceptionHandlerType(AssemblyScanner<TRegistrar> scanner, MediatRServiceConfiguration<TRegistrar> configuration, TypeWrapper[] requests, (Type, Type) interfaceImpl)
         {
             foreach (var request in requests)
             {
                 foreach (var exceptionType in configuration.ExceptionTypes)
                 {
-                    genericTypeCache[0] = request.Type;
-                    genericTypeCache[1] = exceptionType;
-                    var result = CreateGenericType(typeWrapper, genericTypeCache);
+                    genericRequestHandlerTypeCache[0] = request.Type;
+                    genericRequestHandlerTypeCache[1] = exceptionType;
+                    var result = scanner.CreateGenericType(typeWrapper, genericRequestHandlerTypeCache, interfaceImpl);
                     if (result is not null)
                     {
                         typeVariants.Add(result);
@@ -101,52 +121,83 @@ internal partial struct AssemblyScanner<TRegistrar>
         }
     }
 
-    private void AddRequestExceptionHandler(List<Type> typeVariants, TypeWrapper typeWrapper, MediatRServiceConfiguration configuration)
+    private void AddRequestResponseTypeVariants(List<Type> typeVariants, TypeWrapper typeWrapper)
     {
-        var genericTypeCache = new Type[3];
+        var typeComparer = _typeComparer;
 
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestResponseExceptionHandler<,,>)) > 0)
+        foreach (var openGenericInterfaceImpl in typeWrapper.OpenGenericInterfaces)
         {
-            ResolveGenericType(_requestResponses);
-        }
-        else if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IRequestResponseExceptionAction<,,>)) > 0)
-        {
-            ResolveGenericType(_requestResponses);
-        }
-
-        void ResolveGenericType((TypeWrapper, Type)[] requestsResponse)
-        {
-            foreach (var (request, response) in requestsResponse)
+            if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionHandler<,,>))
             {
-                foreach (var exceptionType in configuration.ExceptionTypes)
-                {
-                    genericTypeCache[0] = request.Type;
-                    genericTypeCache[1] = response;
-                    genericTypeCache[2] = exceptionType;
-                    var result = CreateGenericType(typeWrapper, genericTypeCache);
-                    if (result is not null)
-                    {
-                        typeVariants.Add(result);
-                    }
-                }
+                ResolveExceptionRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionAction<,,>))
+            {
+                ResolveExceptionRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestHandler<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IPipelineBehavior<,>) &&
+                     !_configuration.BehaviorsToRegister.Any(i => i.Key == typeWrapper.Type && 
+                                                                  Array.BinarySearch(i.Value, typeof(IPipelineBehavior<,>), typeComparer) >= 0))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestPreProcessor<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestPostProcessor<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionAction<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionHandler<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionAction<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
             }
         }
     }
 
-    private void AddRequestPipelineBehaviors(List<Type> typeVariants, TypeWrapper typeWrapper)
+    private void AddStreamRequestTypeVariants(List<Type> typeVariants, TypeWrapper typeWrapper)
     {
-        var genericTypeCache = new Type[1];
-
-        // Check if the type has any Request behaviors and if the type if already added to the behaviors and contains the IPipelineBehavior interface.
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IPipelineBehavior<>)) <= 0 &&
-            _configuration.BehaviorsToRegister.All(i => i.ImplementingType != typeWrapper.Type ||
-                                                        !i.ServiceType.Contains(typeof(IPipelineBehavior<>))))
-            return;
-
-        foreach (var request in _requests)
+        var typeComparer = _typeComparer;
+        
+        foreach (var openGenericInterfaceImpl in typeWrapper.OpenGenericInterfaces)
         {
-            genericTypeCache[0] = request.Type;
-            var result = CreateGenericType(typeWrapper, genericTypeCache);
+            if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IStreamRequestHandler<,>))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _streamRequests, openGenericInterfaceImpl);
+            }
+            else if (openGenericInterfaceImpl.OpenGenericInterface == typeof(IStreamPipelineBehavior<,>) && 
+                     !_configuration.BehaviorsToRegister.Any(i => i.Key == typeWrapper.Type && 
+                                                                  Array.BinarySearch(i.Value, typeof(IPipelineBehavior<,>), typeComparer) >= 0))
+            {
+                ResolveRequestResponseType(typeWrapper, typeVariants, _requestResponses, openGenericInterfaceImpl);
+            }
+        }
+    }
+
+    private void ResolveRequestResponseType(
+        TypeWrapper typeWrapper,
+        List<Type> typeVariants,
+        (TypeWrapper, Type)[] messages,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl)
+    {
+        foreach (var (request, response) in messages)
+        {
+            _genericRequestHandlerTypeCache[0] = request.Type;
+            _genericRequestHandlerTypeCache[1] = response;
+            var result = CreateGenericType(typeWrapper, _genericRequestHandlerTypeCache, interfaceImpl);
             if (result is not null)
             {
                 typeVariants.Add(result);
@@ -154,49 +205,102 @@ internal partial struct AssemblyScanner<TRegistrar>
         }
     }
 
-    private void AddRequestResponsePipelineBehaviors(List<Type> typeVariants, TypeWrapper typeWrapper)
+    private void ResolveExceptionRequestType(
+        TypeWrapper typeWrapper,
+        List<Type> typeVariants,
+        TypeWrapper[] messages,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl)
     {
-        var genericTypeCache = new Type[2];
-
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IPipelineBehavior<,>)) > 0 &&
-            _configuration.BehaviorsToRegister.All(t => t.ImplementingType != typeWrapper.Type ||
-                                                        t.ServiceType.Contains(typeof(IPipelineBehavior<,>))))
+        if (interfaceImpl.Interface.GetGenericArguments()[1].GUID == Guid.Empty)
         {
-            ResolveGenericType(_requestResponses);
+            
         }
+    }
 
-        if (Array.BinarySearch(typeWrapper.OpenGenericInterfaces, typeof(IStreamPipelineBehavior<,>)) > 0 &&
-            _configuration.BehaviorsToRegister.All(t => t.ImplementingType != typeWrapper.Type ||
-                                                        t.ServiceType.Contains(typeof(IStreamPipelineBehavior<,>))))
+    private void ResolveExceptionRequestResponseType(
+        TypeWrapper typeWrapper,
+        List<Type> typeVariants,
+        (TypeWrapper, Type)[] messages,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl)
+    {
+        if (interfaceImpl.Interface.GetGenericArguments()[2].GUID == Guid.Empty)
         {
-            ResolveGenericType(_streamRequests);
-        }
-        
-        void ResolveGenericType((TypeWrapper, Type)[] requestResponse)
-        {
-            foreach (var (request, response) in requestResponse)
+            foreach (var (request, response) in messages)
             {
-                genericTypeCache[0] = request.Type;
-                genericTypeCache[1] = response;
-                var result = CreateGenericType(typeWrapper, genericTypeCache);
-                if (result is not null)
+                foreach (var exceptionType in _configuration.ExceptionTypes)
                 {
-                    typeVariants.Add(result);
+                    _genericRequestExceptionHandlerTypeCache[0] = request.Type;
+                    _genericRequestExceptionHandlerTypeCache[1] = response;
+                    _genericRequestExceptionHandlerTypeCache[2] = exceptionType;
+                    CreateType(this, _genericRequestExceptionHandlerTypeCache);
                 }
+            }
+        }
+        else
+        {
+            foreach (var (request, response) in messages)
+            {
+                _genericRequestExceptionHandlerTypeCache[0] = request.Type;
+                _genericRequestExceptionHandlerTypeCache[1] = response;
+                CreateType(this, _genericRequestExceptionHandlerTypeCache);
+            }
+        }
+
+        void CreateType(AssemblyScanner<TRegistrar> scanner, Type[] typeArgsCache)
+        {
+            var result = scanner.CreateGenericType(typeWrapper, typeArgsCache, interfaceImpl);
+            if (result is not null)
+            {
+                typeVariants.Add(result);
             }
         }
     }
 
-    private static Type? CreateGenericType(TypeWrapper type, Type[] parameter)
+    private Type? CreateGenericType(TypeWrapper typeWrapper, Type[] parameters, (Type Interface, Type OpenGenericInterface) openGenericInterfaceImpl)
     {
-        try
+        const int MaxSupportedOpenGenerics = 3;
+        var typeWrapperGenericArguments = typeWrapper.Type.GetGenericArguments();
+        if (typeWrapperGenericArguments.Length == parameters.Length)
         {
-            return type.Type.MakeGenericType(parameter);
+            return CreateGenericType(typeWrapper, parameters);
         }
-        catch (ArgumentException)
+
+        if (typeWrapperGenericArguments.Length > MaxSupportedOpenGenerics)
         {
-            // We should only catch the exception for not matching the generic constrains.
-            return null;
+            if (_configuration.ThrowOnNotSupportedOpenGenerics)
+            {
+                ThrowInvalidOpenGenericException(typeWrapper.Type);
+            }
+            else
+            {
+                return null;
+            }
         }
+
+        var interfaceGenericParameter = openGenericInterfaceImpl.Interface.GetGenericArguments();
+        var newTypeGenericParameter = new Type[typeWrapperGenericArguments.Length];
+        var newTypeGenericParameterCounter = 0;
+
+        Debug.Assert(interfaceGenericParameter.Length == parameters.Length, $"The interface implementation open generic parameter must match the provided {nameof(parameters)}");
+
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var interfaceImplArg = interfaceGenericParameter[i];
+            var parameterArg = parameters[i];
+
+            // An Empty guid means that the interfaceImplArg is a generic placeholder type for any type.
+            if (interfaceImplArg.GUID == Guid.Empty)
+            {
+                newTypeGenericParameter[newTypeGenericParameterCounter] = parameterArg;
+                newTypeGenericParameterCounter++;
+            }
+        }
+
+        Debug.Assert(newTypeGenericParameterCounter > typeWrapper.Type.GenericTypeArguments.Length, "Can not have more generic type parameter than the original type.");
+
+        return CreateGenericType(typeWrapper, newTypeGenericParameter);
     }
+
+    private static void ThrowInvalidOpenGenericException(Type type) =>
+        throw new InvalidOperationException($"The type '{type}' has more then the max allowed open generic parameters.");
 }

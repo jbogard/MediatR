@@ -6,11 +6,20 @@ using MediatR.Abstraction.ExceptionHandler;
 using MediatR.Abstraction.Handlers;
 using MediatR.Abstraction.Pipeline;
 
-namespace MediatR.DependencyInjection;
+namespace MediatR.DependencyInjection.AssemblyScanner;
 
-internal partial struct AssemblyScanner<TRegistrar>
+// Improve more. Single loop!!!!!!!!!!!!!!!!!!!!!
+internal static class InterfaceRegistrar<TRegistrar>
 {
-    private void AddExceptionHandingInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
+    public static void AddInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant, AssemblyScannerContext<TRegistrar> context)
+    {
+        AddHandlerInterfaces(implementingInterfaces, typeVariant);
+        AddProcessorInterfaces(implementingInterfaces, typeVariant);
+        AddExceptionHandingInterfaces(implementingInterfaces, typeVariant);
+        AddPipelineInterfaces(implementingInterfaces, typeVariant, context);
+    }
+    
+    private static void AddExceptionHandingInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
     {
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestExceptionAction<,>), implementingInterfaces, false);
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestExceptionHandler<,>), implementingInterfaces, true);
@@ -18,7 +27,7 @@ internal partial struct AssemblyScanner<TRegistrar>
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestResponseExceptionHandler<,,>), implementingInterfaces, true);
     }
 
-    private void AddProcessorInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
+    private static void AddProcessorInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
     {
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestPreProcessor<>), implementingInterfaces, false);
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestPreProcessor<,>), implementingInterfaces, false);
@@ -26,7 +35,7 @@ internal partial struct AssemblyScanner<TRegistrar>
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestPostProcessor<,>), implementingInterfaces, false);
     }
 
-    private void AddHandlerInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
+    private static void AddHandlerInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
     {
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(INotificationHandler<>), implementingInterfaces, false);
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IRequestHandler<>), implementingInterfaces, true);
@@ -34,11 +43,11 @@ internal partial struct AssemblyScanner<TRegistrar>
         AddNoneGenericInterfaceImplementations(typeVariant, typeof(IStreamRequestHandler<,>), implementingInterfaces, true);
     }
 
-    private void AddPipelineInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant)
+    private static void AddPipelineInterfaces(List<(Type, bool)> implementingInterfaces, Type typeVariant, AssemblyScannerContext<TRegistrar> context)
     {
-        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IPipelineBehavior<>), implementingInterfaces, false);
-        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IPipelineBehavior<,>), implementingInterfaces, false);
-        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IStreamPipelineBehavior<,>), implementingInterfaces, false);
+        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IPipelineBehavior<>), implementingInterfaces, false, context);
+        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IPipelineBehavior<,>), implementingInterfaces, false, context);
+        AddNoneGenericPipelineInterfaceImplementations(typeVariant, typeof(IStreamPipelineBehavior<,>), implementingInterfaces, false, context);
     }
 
     private static void AddNoneGenericInterfaceImplementations(
@@ -54,23 +63,22 @@ internal partial struct AssemblyScanner<TRegistrar>
                     t.GetGenericTypeDefinition() == openGenericInterface)
                 .Select(t => (t, mustBeSingleRegistration)));
 
-    private void AddNoneGenericPipelineInterfaceImplementations(
+    private static void AddNoneGenericPipelineInterfaceImplementations(
         Type typeVariant,
         Type openGenericPipelines,
         List<(Type, bool)> implementingInterfaces,
-        bool mustBeSingleRegistration)
+        bool mustBeSingleRegistration,
+        AssemblyScannerContext<TRegistrar> context)
     {
-        var config = _configuration;
-        var typeComparer = _typeComparer;
+        var config = context.Configuration;
+        var typeComparer = context.TypeComparerInstance;
 
-        implementingInterfaces.AddRange(
-            typeVariant.GetInterfaces()
-                .Where(t =>
-                    !t.ContainsGenericParameters &&
-                    t.IsGenericType &&
-                    t.GetGenericTypeDefinition() == openGenericPipelines &&
-                    !IsPreRegisteredBehavior(typeVariant, t))
-                .Select(t => (t, mustBeSingleRegistration)));
+        var noneGenericInter = Array.FindAll(typeVariant.GetInterfaces(), t =>
+            !t.ContainsGenericParameters &&
+            t.IsGenericType &&
+            t.GetGenericTypeDefinition() == openGenericPipelines &&
+            !IsPreRegisteredBehavior(typeVariant, t));
+        implementingInterfaces.AddRange(Array.ConvertAll(noneGenericInter, t => (t, mustBeSingleRegistration)));
 
         bool IsPreRegisteredBehavior(Type type, Type interfaceType)
         {

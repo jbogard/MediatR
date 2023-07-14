@@ -11,83 +11,57 @@ namespace MediatR.MicrosoftDICExtensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
+    private static MediatRMicrosoftDicConfiguration config = null!;
+    
     /// <summary>
     /// Registers handlers and mediator types from the specified assemblies
     /// </summary>
     /// <param name="serviceCollection">Service collection</param>
     /// <param name="configuration">The action used to configure the options</param>
     /// <returns>Service collection</returns>
-    public static IServiceCollection ConfigureMediatR(this IServiceCollection serviceCollection, Action<MediatRServiceConfiguration<IServiceCollection>> configuration)
+    public static IServiceCollection ConfigureMediatR(this IServiceCollection serviceCollection, Action<MediatRMicrosoftDicConfiguration> configuration)
     {
         var adapter = new DependencyInjectionRegistrarAdapter<IServiceCollection>(
             serviceCollection,
-            SingletonOnlyOnce,
-            SelfSingletonOnlyOnce,
-            SelfOpenGenericSingletonOnlyOnce,
-            Instance,
-            Mapping,
-            MappingOnlyOnce,
-            OpenGenericMapping,
-            OpenGenericMappingOnlyOnce,
-            Transient,
-            TransientOpenGeneric,
-            TransientOnlyOnce,
-            TransientOpenGenericOnlyOnce);
-
-        var config = new MediatRServiceConfiguration<IServiceCollection>(adapter);
-
+            RegisterSingletonOnlyOnce,
+            RegisterSelfSingleton,
+            RegisterInstance,
+            RegisterMapping,
+            RegisterMappingOnlyOnce,
+            RegisterTransient,
+            RegisterTransientOnlyOnce
+        );
+        
+        config = new MediatRMicrosoftDicConfiguration(adapter);
+        
         configuration(config);
         
         MediatRConfigurator.ConfigureMediatR(config);
 
         return serviceCollection;
     }
-
-    private static void SingletonOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementationType) =>
-        serviceCollection.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton));
-    private static void SelfSingletonOnlyOnce(IServiceCollection serviceCollection, Type serviceType) =>
-        serviceCollection.TryAddSingleton(serviceType);
-    private static void SelfOpenGenericSingletonOnlyOnce(IServiceCollection serviceCollection, Type serviceType) =>
-        serviceCollection.TryAddSingleton(serviceType);
-    private static void Instance(IServiceCollection serviceCollection, Type serviceType, object instance) =>
+    
+    private static void RegisterSingletonOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
+        serviceCollection.TryAddEnumerable(new ServiceDescriptor(implementingType, serviceType, ServiceLifetime.Singleton));
+    private static void RegisterSelfSingleton(IServiceCollection serviceCollection, Type serviceType) =>
+        serviceCollection.AddSingleton(serviceType, serviceType);
+    private static void RegisterInstance(IServiceCollection serviceCollection, Type serviceType, object instance) =>
         serviceCollection.AddSingleton(serviceType, instance);
-    private static void Mapping(IServiceCollection serviceCollection, Type fromType, Type toType) =>
-        serviceCollection.AddSingleton(toType, sp => sp.GetRequiredService(fromType));
-    private static void MappingOnlyOnce(IServiceCollection serviceCollection, Type fromType, Type toType) =>
-        serviceCollection.TryAddEnumerable(toType, fromType, new ServiceDescriptor(toType, sp => sp.GetRequiredService(fromType), ServiceLifetime.Singleton));
-    private static void OpenGenericMapping(IServiceCollection serviceCollection, Type fromType, Type[] toTypes)
-    {
-        if (toTypes.Length is not 1)
-        {
-            throw new InvalidOperationException($"The type '{fromType}' has multiple open generic interfaces '{string.Join<Type>(", ", toTypes)}' which are not supported by service collection  to be registered as such.");
-        }
-
-        serviceCollection.AddSingleton(toTypes[0], fromType);
-    }
-    private static void OpenGenericMappingOnlyOnce(IServiceCollection serviceCollection, Type fromType, Type[] toType)
-    {
-        if (toType.Length is not 1)
-        {
-            throw new InvalidOperationException($"The type '{fromType}' has multiple open generic interfaces '{string.Join<Type>(", ", toType)}' which are not supported by service collection to be registered as such.");
-        }
-
-        serviceCollection.TryAddEnumerable(new ServiceDescriptor(toType[0], fromType, ServiceLifetime.Singleton));
-    }
-    private static void Transient(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
+    private static void RegisterMapping(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
+        serviceCollection.Add(new ServiceDescriptor(serviceType, sp => sp.GetService(implementingType), config.MappingServiceLifetime));
+    private static void RegisterMappingOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
+        serviceCollection.TryAddEnumerable(implementingType, new ServiceDescriptor(serviceType, sp => sp.GetService(implementingType), config.MappingServiceLifetime));
+    private static void RegisterTransient(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
         serviceCollection.AddTransient(serviceType, implementingType);
-    private static void TransientOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
-        serviceCollection.TryAddEnumerable(new ServiceDescriptor(serviceType, implementingType, ServiceLifetime.Transient));
-    private static void TransientOpenGeneric(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
-        serviceCollection.AddTransient(serviceType, implementingType);
-    private static void TransientOpenGenericOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
-        serviceCollection.TryAddEnumerable(new ServiceDescriptor(serviceType, implementingType, ServiceLifetime.Transient));
+    private static void RegisterTransientOnlyOnce(IServiceCollection serviceCollection, Type serviceType, Type implementingType) =>
+        serviceCollection.TryAddTransient(serviceType, implementingType);
 
-    private static void TryAddEnumerable(this IServiceCollection serviceCollection, Type serviceType, Type implementingType, ServiceDescriptor serviceDescriptor)
+    private static void TryAddEnumerable(this IServiceCollection serviceCollection, Type implementingType, ServiceDescriptor serviceDescriptor)
     {
         for (var i = 0; i < serviceCollection.Count; i++)
         {
             var existingDescriptor = serviceCollection[i];
-            if (existingDescriptor.ServiceType == serviceType && existingDescriptor.GetImplementationType() == implementingType)
+            if (existingDescriptor.ServiceType == serviceDescriptor.ServiceType && existingDescriptor.GetImplementationType() == implementingType)
             {
                 return;
             }

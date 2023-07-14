@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using MediatR.Abstraction;
 using MediatR.Abstraction.Behaviors;
@@ -31,6 +30,14 @@ public abstract class MediatRServiceConfiguration
     public RegistrationOptions RegistrationOptions { get; set; } = RegistrationOptions.SingletonAndMapped;
 
     /// <summary>
+    /// Gets or sets a value indicating whenever the Assembly Scanner should throw on not supported open generic types. Default is <c>true</c>.
+    /// <remarks>
+    /// A not supported open generic type is when the open generic parameter number exceeds 3.
+    /// </remarks>
+    /// </summary>
+    public bool ThrowOnNotSupportedOpenGenerics { get; set; } = true;
+
+    /// <summary>
     /// Request exception action processor strategy. Default value is <see cref="DependencyInjection.RequestExceptionActionProcessorStrategy.ApplyForAllExceptions"/>
     /// </summary>
     public RequestExceptionActionProcessorStrategy RequestExceptionActionProcessorStrategy { get; set; } = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
@@ -46,9 +53,9 @@ public abstract class MediatRServiceConfiguration
     /// <summary>
     /// List of behaviors to register in specific order
     /// </summary>
-    public List<(Type ImplementingType, Type[] ServiceType)> BehaviorsToRegister { get; } = new();
+    public Dictionary<Type, Type[]> BehaviorsToRegister { get; } = new();
 
-    internal List<Assembly> AssembliesToRegister { get; } = new();
+    internal HashSet<Assembly> AssembliesToRegister { get; } = new();
     
     /// <summary>
     /// Register various handlers from assembly containing given type
@@ -80,7 +87,7 @@ public abstract class MediatRServiceConfiguration
     /// <param name="assemblies">Assemblies to scan</param>
     /// <returns>This</returns>
     public void RegisterServicesFromAssemblies(params Assembly[] assemblies) =>
-        AssembliesToRegister.AddRange(assemblies);
+        AssembliesToRegister.UnionWith(assemblies);
 
     /// <summary>
     /// Register a closed behavior type
@@ -98,7 +105,7 @@ public abstract class MediatRServiceConfiguration
     /// <param name="implementationTypes">Closed behavior implementation type</param>
     /// <returns>This</returns>
     public void AddBehavior(Type serviceType, params Type[] implementationTypes) =>
-        BehaviorsToRegister.Add((serviceType, implementationTypes));
+        BehaviorsToRegister.Add(serviceType, implementationTypes);
 
     /// <summary>
     /// Registers an open behavior type against the <see cref="IPipelineBehavior{TRequest}"/> open generic interface type
@@ -112,16 +119,25 @@ public abstract class MediatRServiceConfiguration
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
         }
 
-        var openGenericInterfaces = openBehaviorType.GetInterfaces()
-            .Where(i => i.ContainsGenericParameters && i.GetGenericArguments().Length is 2)
-            .ToArray();
-        var allPipelines = Array.FindAll(openGenericInterfaces, i => i == typeof(IPipelineBehavior<>) || i == typeof(IPipelineBehavior<,>) || i == typeof(IStreamPipelineBehavior<,>));
-        
+        var allPipelines = Array.FindAll(openBehaviorType.GetInterfaces(), OpenGenericPipelineBehaviorFilter);
+            
         if (allPipelines.Length is 0)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must implement {typeof(IPipelineBehavior<>).FullName} or {typeof(IPipelineBehavior<,>).FullName} or {typeof(IStreamPipelineBehavior<,>).FullName}");
         }
 
-        BehaviorsToRegister.Add((openBehaviorType, allPipelines));
+        BehaviorsToRegister.Add(openBehaviorType, allPipelines);
+    }
+
+    private static bool OpenGenericPipelineBehaviorFilter(Type interfaceImp)
+    {
+        if (!interfaceImp.ContainsGenericParameters && interfaceImp.GetGenericArguments().Length is not 2)
+        {
+            return false;
+        }
+
+        return interfaceImp == typeof(IPipelineBehavior<>) ||
+               interfaceImp == typeof(IPipelineBehavior<,>) ||
+               interfaceImp == typeof(IStreamPipelineBehavior<,>);
     }
 }

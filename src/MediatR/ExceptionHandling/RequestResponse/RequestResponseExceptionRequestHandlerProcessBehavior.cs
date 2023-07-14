@@ -10,9 +10,9 @@ internal sealed class RequestResponseExceptionRequestHandlerProcessBehavior<TReq
 {
     private static readonly Type ResponseType = typeof(TResponse);
     private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.MessageTypeHierarchyFactory(typeof(TRequest));
-    
+
     private readonly ExceptionHandlerFactory _factory;
-    
+
     public RequestResponseExceptionRequestHandlerProcessBehavior(ExceptionHandlerFactory factory) =>
         _factory = factory;
 

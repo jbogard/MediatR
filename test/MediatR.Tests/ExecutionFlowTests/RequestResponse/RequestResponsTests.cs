@@ -163,7 +163,6 @@ internal sealed class RequestResponsTests
         response.Should().NotBeNull();
     }
 
-    [Ignore("Issue in ServiceCollection Can not be tested right now. Issue: https://github.com/dotnet/runtime/issues/87746")]
     [Test]
     public async Task PublishRequest_HandlerFailsWithAccessViolationException_ExceptionGetsAcedOnAndHandled()
     {
@@ -185,16 +184,15 @@ internal sealed class RequestResponsTests
         var action = provider.GetRequiredService<RequestResponseAction>();
         var exceptionHandler = provider.GetRequiredService<RequestResponseExceptionHandler>();
 
-        // the registration with Service Collection does not support then currently see Issue: https://github.com/dotnet/runtime/issues/87746
-        // var openGenericAction = provider.GetRequiredService<OpenGenericRequestResponseAction<AccessViolationRequest, Response>>();
-        // var openGenericHandler = provider.GetRequiredService<OpenGenericAccessViolationExceptionHandler<AccessViolationRequest, Response>>();
+        var openGenericAction = provider.GetRequiredService<OpenGenericRequestResponseAction<AccessViolationRequest, Response>>();
+        var openGenericHandler = provider.GetRequiredService<OpenGenericAccessViolationExceptionHandler<AccessViolationRequest, Response>>();
 
         action.GeneralExceptionActionCalls.Should().Be(0);
         action.InvalidOperationExceptionActionCalls.Should().Be(0);
         exceptionHandler.GeneralExceptionHandlerCalls.Should().Be(0);
         exceptionHandler.InvalidOperationExceptionHandlerCalls.Should().Be(0);
-        // openGenericAction.Calls.Should().Be(1);
-        // openGenericHandler.Calls.Should().Be(1);
+        openGenericAction.Calls.Should().Be(1);
+        openGenericHandler.Calls.Should().Be(1);
         response.Should().NotBeNull();
     }
 

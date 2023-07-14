@@ -1,5 +1,5 @@
-﻿using MediatR.Abstraction;
-using MediatR.Abstraction.Behaviors;
+﻿using System;
+using MediatR.Abstraction;
 using MediatR.ExceptionHandling;
 using MediatR.Pipeline.Request;
 using MediatR.Pipeline.RequestResponse;
@@ -9,7 +9,7 @@ namespace MediatR.DependencyInjection;
 
 internal static class InternalServiceRegistrar
 {
-    public static void AddInternals<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
+    public static void AddInternalServiceTypes<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
     {
         var adapter = configuration.DependencyInjectionRegistrarAdapter;
 
@@ -28,31 +28,32 @@ internal static class InternalServiceRegistrar
         adapter.RegisterSelfSingletonOnlyOnce(adapter.Registrar, typeof(SubscriptionFactory));
     }
 
-    public static void RegisterInternalProcessorPipelines<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
-    {
-        var adapter = configuration.DependencyInjectionRegistrarAdapter;
-        
-        adapter.Register(configuration, typeof(RequestProcessorBehavior<>), new []{ typeof(IPipelineBehavior<>) }, false);
-        adapter.Register(configuration, typeof(RequestResponseProcessorBehavior<,>), new []{ typeof(IPipelineBehavior<,>) }, false);
-    }
+    public static Type[] GetInternalProcessorPipelines() =>
+        new[]
+        {
+            typeof(RequestProcessorBehavior<>),
+            typeof(RequestResponseProcessorBehavior<,>)
+        };
 
-    public static void RegisterInternalExceptionHandlingPipelines<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
+    public static Type[] GetInternalExceptionHandlingPipelines<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
     {
-        var adapter = configuration.DependencyInjectionRegistrarAdapter;
-        
         if (configuration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
         {
-            adapter.Register(configuration, typeof(RequestExceptionActionProcessorBehavior<>), new []{ typeof(IPipelineBehavior<>) }, false);
-            adapter.Register(configuration, typeof(RequestExceptionHandlerProcessBehavior<>), new []{ typeof(IPipelineBehavior<>) }, false);
-            adapter.Register(configuration, typeof(RequestResponseExceptionActionProcessBehavior<,>), new []{ typeof(IPipelineBehavior<,>) }, false);
-            adapter.Register(configuration, typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>), new []{ typeof(IPipelineBehavior<,>) }, false);
+            return new[]
+            {
+                typeof(RequestExceptionActionProcessorBehavior<>),
+                typeof(RequestExceptionHandlerProcessBehavior<>),
+                typeof(RequestResponseExceptionActionProcessBehavior<,>),
+                typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>)
+            };
         }
-        else
+
+        return new[]
         {
-            adapter.Register(configuration, typeof(RequestExceptionHandlerProcessBehavior<>), new[] {typeof(IPipelineBehavior<>)}, false);
-            adapter.Register(configuration, typeof(RequestExceptionActionProcessorBehavior<>), new[] {typeof(IPipelineBehavior<>)}, false);
-            adapter.Register(configuration, typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>), new[] {typeof(IPipelineBehavior<,>)}, false);
-            adapter.Register(configuration, typeof(RequestResponseExceptionActionProcessBehavior<,>), new[] {typeof(IPipelineBehavior<,>)}, false);
-        }
+            typeof(RequestExceptionHandlerProcessBehavior<>),
+            typeof(RequestExceptionActionProcessorBehavior<>),
+            typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>),
+            typeof(RequestResponseExceptionActionProcessBehavior<,>)
+        };
     }
 }
