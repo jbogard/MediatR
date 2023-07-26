@@ -11,19 +11,19 @@ internal sealed class RequestResponseHandler :
 {
     public int Calls { get; private set; }
 
-    public Task<Response> Handle(RequestResponse request, CancellationToken cancellationToken)
+    public ValueTask<Response> Handle(RequestResponse request, CancellationToken cancellationToken)
     {
         Calls++;
 
         if (request is RootRequestResponse rootRequestResponse)
         {
-            return Task.FromResult(rootRequestResponse.Response);
+            return ValueTask.FromResult(rootRequestResponse.Response);
         }
         
-        return Task.FromResult(new Response());
+        return ValueTask.FromResult(new Response());
     }
 
-    public Task<Response> Handle(ThrowingExceptionRequest request, CancellationToken cancellationToken) => throw request.Exception;
+    public ValueTask<Response> Handle(ThrowingExceptionRequest request, CancellationToken cancellationToken) => throw request.Exception;
 
-    public Task<Response> Handle(AccessViolationRequest request, CancellationToken cancellationToken) => throw request.AccessViolationException;
+    public ValueTask<Response> Handle(AccessViolationRequest request, CancellationToken cancellationToken) => throw request.AccessViolationException;
 }

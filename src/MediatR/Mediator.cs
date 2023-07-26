@@ -35,7 +35,7 @@ internal sealed class Mediator : IMediator
         _notificationPublisher = notificationPublisher;
     }
 
-    public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse>? request, CancellationToken cancellationToken = default)
+    public ValueTask<TResponse> SendAsync<TResponse>(IRequest<TResponse>? request, CancellationToken cancellationToken = default)
     {
         if (request is null)
         {
@@ -46,7 +46,7 @@ internal sealed class Mediator : IMediator
             .HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
-    public Task SendAsync<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
+    public ValueTask SendAsync<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
         where TRequest : IRequest
     {
         if (request is null)

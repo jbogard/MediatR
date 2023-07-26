@@ -40,7 +40,7 @@ internal readonly ref struct AssemblyScanner
     public void ScanForMediatRServices<TRegistrar, TConfiguration>(DependencyInjectionRegistrarAdapter<TRegistrar, TConfiguration> adapter)
         where TConfiguration : MediatRServiceConfiguration
     {
-        foreach (var processorPipeline in InternalServiceRegistrar.GetInternalProcessorPipelines(_typesToScan, _configuration, _typeComparer))
+        foreach (var processorPipeline in InternalServiceRegistrar.GetInternalProcessorPipelines(_typesToScan, _typeComparer, _configuration))
         {
             var wrapper = new TypeWrapper(processorPipeline);
             ScanTypeForRelevantInterfaces(wrapper, _serviceInterfaceArrayBuilder, _configuration);

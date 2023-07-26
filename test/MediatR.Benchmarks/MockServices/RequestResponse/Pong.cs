@@ -1,5 +1,5 @@
 ﻿namespace MediatR.Benchmarks.MockServices.RequestResponse;
 
-internal sealed class Pong
+public sealed class Pong
 {
 }

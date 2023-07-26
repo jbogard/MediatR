@@ -18,18 +18,18 @@ internal sealed class CachingRequestProcessorBehavior<TRequest> : IPipelineBehav
         _postProcessors = serviceProvider.GetServices<IRequestPostProcessor<TRequest>>();
     }
 
-    public async Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
+    public async ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
     {
         foreach (var requestPreProcessor in _preProcessors)
         {
-            await requestPreProcessor.Process(request, cancellationToken);
+            await requestPreProcessor.Process(request, cancellationToken).ConfigureAwait(false);
         }
 
-        await next(request, cancellationToken);
+        await next(request, cancellationToken).ConfigureAwait(false);
 
         foreach (var requestPostProcessor in _postProcessors)
         {
-            await requestPostProcessor.Process(request, cancellationToken);
+            await requestPostProcessor.Process(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

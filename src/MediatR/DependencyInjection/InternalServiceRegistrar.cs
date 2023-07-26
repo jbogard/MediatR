@@ -27,7 +27,7 @@ internal static class InternalServiceRegistrar
             adapter.RegisterInstance(typeof(INotificationPublisher), configuration.NotificationPublisher);
     }
 
-    public static IEnumerable<Type> GetInternalProcessorPipelines(TypeWrapper[] typeWrappers, MediatRServiceConfiguration configuration, IComparer<Type> comparer)
+    public static IEnumerable<Type> GetInternalProcessorPipelines(TypeWrapper[] typeWrappers, IComparer<Type> comparer, MediatRServiceConfiguration configuration)
     {
         if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestPreProcessor<>), typeof(IRequestPostProcessor<>)))
             if (configuration.EnableCachingOfHandlers)

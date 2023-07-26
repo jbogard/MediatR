@@ -18,7 +18,7 @@ internal sealed class RequestResponseExceptionRequestHandlerProcessBehavior<TReq
     public RequestResponseExceptionRequestHandlerProcessBehavior(IServiceProvider serviceProvider) =>
         _serviceProvider = serviceProvider;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -32,25 +32,14 @@ internal sealed class RequestResponseExceptionRequestHandlerProcessBehavior<TReq
             {
                 foreach (var messageType in RequestResponseTypeHierarchy)
                 {
-                    if (state.IsHandled)
-                    {
-                        break;
-                    }
-
                     var handler = ExceptionHandlerFactory.CreateRequestResponseExceptionRequestHandler(messageType, ResponseType, exceptionType);
                     await handler.Handle(request, exception, state, _serviceProvider, cancellationToken);
-                }
 
-                if (state.IsHandled)
-                {
-                    break;
+                    if (state.IsHandled)
+                    {
+                        return state.Response;
+                    }
                 }
-            }
-
-            if (state.IsHandled)
-            {
-                // The null value must be managed by the user but is also annotated from the response type if it can be null.
-                return state.Response!;
             }
 
             throw;

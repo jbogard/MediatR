@@ -15,7 +15,7 @@ internal sealed class RequestExceptionActionProcessorBehavior<TRequest> : IPipel
     public RequestExceptionActionProcessorBehavior(IServiceProvider serviceProvider) =>
         _serviceProvider = serviceProvider;
 
-    public async Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
+    public async ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -28,7 +28,7 @@ internal sealed class RequestExceptionActionProcessorBehavior<TRequest> : IPipel
                 foreach (var messageType in RequestExceptionType)
                 {
                     var handler = ExceptionHandlerFactory.CreateRequestExceptionActionHandler(messageType, exceptionType);
-                    await handler.HandleAsync(request, exception, _serviceProvider, cancellationToken);
+                    await handler.HandleAsync(request, exception, _serviceProvider, cancellationToken).ConfigureAwait(false);
                 }
             }
 

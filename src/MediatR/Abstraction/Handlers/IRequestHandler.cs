@@ -17,7 +17,7 @@ public interface IRequestHandler<in TRequest, TResponse>
     /// <param name="request">The request</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Response from the request</returns>
-    Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
+    ValueTask<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -33,5 +33,5 @@ public interface IRequestHandler<in TRequest>
     /// <param name="request">The request</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Response from the request</returns>
-    Task Handle(TRequest request, CancellationToken cancellationToken);
+    ValueTask Handle(TRequest request, CancellationToken cancellationToken);
 }

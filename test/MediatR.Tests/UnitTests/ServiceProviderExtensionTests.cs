@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using FluentAssertions;
 using MediatR.Abstraction;
-using MediatR.MicrosoftDiCExtensions;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 

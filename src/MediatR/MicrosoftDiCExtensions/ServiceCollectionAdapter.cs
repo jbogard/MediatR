@@ -94,7 +94,6 @@ internal sealed class ServiceCollectionAdapter : DependencyInjectionRegistrarAda
         // Service Collection only supports ONE open generic singleton instance with one open generic service.
         // Because the mapping is only used for the OneInstanceForeachService checking the last registration is sufficient to figure out if we can register the service.
         // If this method is used somewhere else this implementation needs to be check and eventually adapted.
-
         var lastRegisteredService = Registrar[Registrar.Count - 1];
 
         // Check if the last registration was a mapping registration with the same implementation type but different service type.

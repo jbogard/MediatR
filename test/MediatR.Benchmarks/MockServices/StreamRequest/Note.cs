@@ -1,5 +1,5 @@
 ﻿namespace MediatR.Benchmarks.MockServices.StreamRequest;
 
-internal sealed class Note
+public sealed class Note
 {
 }

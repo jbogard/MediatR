@@ -10,7 +10,7 @@ internal sealed class GenericPipelineHandler<TRequest, TResponse> : IPipelineBeh
 {
     public int Calls { get; set; }
     public Action InvocationValidation { get; set; } = () => { };
-    public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         InvocationValidation();
         Calls++;

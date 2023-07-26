@@ -10,12 +10,9 @@ public class GenericPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TR
 {
     private readonly TextWriter _writer;
 
-    public GenericPipelineBehavior(TextWriter writer)
-    {
-        _writer = writer;
-    }
+    public GenericPipelineBehavior(TextWriter writer) => _writer = writer;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         await _writer.WriteLineAsync("-- Handling Request Response");
         var response = await next(request, cancellationToken);
@@ -29,12 +26,9 @@ public class GenericPipelineBehavior<TRequest> : IPipelineBehavior<TRequest>
 {
     private readonly TextWriter _writer;
 
-    public GenericPipelineBehavior(TextWriter writer)
-    {
-        _writer = writer;
-    }
+    public GenericPipelineBehavior(TextWriter writer) => _writer = writer;
 
-    public async Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
+    public async ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
     {
         await _writer.WriteLineAsync("-- Handling Request");
         await next(request, cancellationToken);

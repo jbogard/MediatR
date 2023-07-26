@@ -11,7 +11,7 @@ namespace MediatR.Subscriptions.Requests;
 internal sealed class TransientRequestHandler<TRequest> : RequestHandler
     where TRequest : IRequest
 {
-    public override Task HandleAsync<TMethodRequest>(TMethodRequest request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public override ValueTask HandleAsync<TMethodRequest>(TMethodRequest request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         Debug.Assert(typeof(TRequest).IsAssignableFrom(typeof(TMethodRequest)), "request type must be an inherited type of method request type.");
 

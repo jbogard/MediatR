@@ -13,18 +13,18 @@ internal sealed class TransientRequestResponseProcessorBehavior<TRequest, TRespo
 
     public TransientRequestResponseProcessorBehavior(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         foreach (var requestPreProcessor in _serviceProvider.GetServices<IRequestPreProcessor<TRequest, TResponse>>())
         {
-            await requestPreProcessor.Process(request, cancellationToken);
+            await requestPreProcessor.Process(request, cancellationToken).ConfigureAwait(false);
         }
 
         var response = await next(request, cancellationToken).ConfigureAwait(false);
 
         foreach (var requestPostProcessor in _serviceProvider.GetServices<IRequestPostProcessor<TRequest, TResponse>>())
         {
-            await requestPostProcessor.Process(request, response, cancellationToken);
+            await requestPostProcessor.Process(request, response, cancellationToken).ConfigureAwait(false);
         }
 
         return response;

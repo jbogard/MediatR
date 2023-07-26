@@ -6,7 +6,7 @@ namespace MediatR.Benchmarks.MockServices.RequestResponse;
 
 internal sealed class PingHandler : IRequestHandler<Ping, Pong>
 {
-    private static readonly Task<Pong> Response = Task.FromResult(new Pong());
+    private static readonly ValueTask<Pong> Response = ValueTask.FromResult(new Pong());
 
-    public Task<Pong> Handle(Ping request, CancellationToken cancellationToken) => Response;
+    public ValueTask<Pong> Handle(Ping request, CancellationToken cancellationToken) => Response;
 }

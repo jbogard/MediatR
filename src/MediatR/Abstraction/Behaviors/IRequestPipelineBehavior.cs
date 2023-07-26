@@ -7,7 +7,7 @@ namespace MediatR.Abstraction.Behaviors;
 /// Represents an async continuation for the next task to execute in the pipeline
 /// </summary>
 /// <typeparam name="TRequest">Request type.</typeparam>
-public delegate Task RequestHandlerDelegate<in TRequest>(TRequest request, CancellationToken cancellationToken)
+public delegate ValueTask RequestHandlerDelegate<in TRequest>(TRequest request, CancellationToken cancellationToken)
     where TRequest : IRequest;
 
 /// <summary>
@@ -24,5 +24,5 @@ public interface IPipelineBehavior<TRequest>
     /// <param name="request">Incoming request</param>
     /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken);
+    ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken);
 }

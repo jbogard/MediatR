@@ -8,7 +8,7 @@ internal sealed class RequestChangingPipelineHandler : IPipelineBehavior<Request
 {
     public int Calls { get; set; }
     
-    public Task<Response> Handle(RequestResponse request, RequestHandlerDelegate<RequestResponse, Response> next, CancellationToken cancellationToken)
+    public ValueTask<Response> Handle(RequestResponse request, RequestHandlerDelegate<RequestResponse, Response> next, CancellationToken cancellationToken)
     {
         Calls++;
         

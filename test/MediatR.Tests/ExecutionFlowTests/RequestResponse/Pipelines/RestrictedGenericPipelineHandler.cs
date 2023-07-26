@@ -9,7 +9,7 @@ internal sealed class RestrictedGenericPipelineHandler<TRequest, TResponse> : IP
 {
     public int Calls { get; set; }
 
-    public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         Calls++;
         return next(request, cancellationToken);

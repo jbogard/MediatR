@@ -39,11 +39,11 @@ public sealed class MediatRTests
     public void DefaultMediatR_PublishedNullRequestResponse_ThrowsArgumentNullException()
     {
         // Arrange
-        
+
         // Act
         var act = () => _sut.SendAsync<Response>(null!);
         
         // Assert
-        act.Should().ThrowExactlyAsync<ArgumentNullException>().WithMessage("*request*");
+        act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");
     }
 }

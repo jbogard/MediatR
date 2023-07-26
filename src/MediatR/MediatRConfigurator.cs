@@ -22,7 +22,7 @@ public static class MediatRConfigurator
         where TConfiguration : MediatRServiceConfiguration
     {
         configuration.Validate();
-        
+
         SubscriptionFactory.Initialize(configuration);
         ExceptionHandlerFactory.Initialize(configuration);
 

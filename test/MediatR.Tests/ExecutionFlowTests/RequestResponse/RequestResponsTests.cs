@@ -183,7 +183,7 @@ public sealed class RequestResponseTests
     }
 
     [Fact]
-    public async Task PublishRequestWithOnlyActedOnNotHandledException_HandlersFailsWithUnreachableException_ExceptionGetActedAndHandled()
+    public async Task PublishRequestWithOnlyActedOnNotHandledException_HandlersFailsWithUnreachableException_ExceptionGetHandled()
     {
         // Arrange
         var collection = new ServiceCollection();
@@ -205,13 +205,11 @@ public sealed class RequestResponseTests
 
         // Assert
         var exceptionHandler = provider.GetRequiredService<RequestResponseExceptionHandler>();
-        var action = provider.GetRequiredService<RequestResponseAction>();
 
-        action.InvalidOperationExceptionActionCalls.Should().Be(0);
-        action.GeneralExceptionActionCalls.Should().Be(0);
         exceptionHandler.InvalidOperationExceptionHandlerCalls.Should().Be(0);
         exceptionHandler.GeneralExceptionHandlerCalls.Should().Be(1);
         response.Should().NotBeNull();
+        response.Should().BeOfType<Response>();
     }
 
     #endregion

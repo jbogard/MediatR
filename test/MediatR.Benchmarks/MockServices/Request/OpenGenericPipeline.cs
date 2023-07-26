@@ -7,6 +7,6 @@ namespace MediatR.Benchmarks.MockServices.Request;
 internal sealed class OpenGenericPipeline<TRequest> : IPipelineBehavior<TRequest>
     where TRequest : IRequest
 {
-    public Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken) =>
+    public ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken) =>
         next(request, cancellationToken);
 }

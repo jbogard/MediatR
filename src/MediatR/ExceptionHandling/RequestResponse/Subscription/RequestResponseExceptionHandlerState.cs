@@ -10,11 +10,11 @@ public sealed class RequestResponseExceptionHandlerState<TResponse>
     /// Gets the value indicating whenever the exception was handled by a handler or not.
     /// </summary>
     public bool IsHandled { get; private set; }
-    
+
     /// <summary>
     /// Gets the response when handled; else null.
     /// </summary>
-    public TResponse? Response { get; private set; }
+    public TResponse Response { get; private set; } = default!;
 
     /// <summary>
     /// Sets the exception as handled.

@@ -16,7 +16,7 @@ public interface ISender
     /// <param name="request">Request object</param>
     /// <param name="cancellationToken">Optional cancellation token</param>
     /// <returns>A task that represents the send operation. The task result contains the handler response</returns>
-    Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
+    ValueTask<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Asynchronously send a request to a single handler with no response
@@ -24,7 +24,7 @@ public interface ISender
     /// <param name="request">Request object</param>
     /// <param name="cancellationToken">Optional cancellation token</param>
     /// <returns>A task that represents the send operation.</returns>
-    Task SendAsync<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
+    ValueTask SendAsync<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
         where TRequest : IRequest;
 
     /// <summary>

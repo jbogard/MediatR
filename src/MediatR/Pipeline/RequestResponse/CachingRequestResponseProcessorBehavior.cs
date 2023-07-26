@@ -18,18 +18,18 @@ internal sealed class CachingRequestResponseProcessorBehavior<TRequest, TRespons
         _postProcessors = serviceProvider.GetServices<IRequestPostProcessor<TRequest, TResponse>>();
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         foreach (var requestPreProcessor in _preProcessors)
         {
-            await requestPreProcessor.Process(request, cancellationToken);
+            await requestPreProcessor.Process(request, cancellationToken).ConfigureAwait(false);
         }
 
         var response = await next(request, cancellationToken).ConfigureAwait(false);
 
         foreach (var requestPostProcessor in _postProcessors)
         {
-            await requestPostProcessor.Process(request, response, cancellationToken);
+            await requestPostProcessor.Process(request, response, cancellationToken).ConfigureAwait(false);
         }
 
         return response;

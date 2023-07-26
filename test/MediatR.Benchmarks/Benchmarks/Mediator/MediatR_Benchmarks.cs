@@ -1,17 +1,17 @@
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using MediatR;
 using MediatR.Abstraction;
 using MediatR.Benchmarks.MockServices.Notification;
 using MediatR.Benchmarks.MockServices.Request;
 using MediatR.Benchmarks.MockServices.StreamRequest;
+using MediatR.DependencyInjection.ConfigurationBase;
 using MediatR.MicrosoftDiCExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Benchmarks.Mediator;
 
 [MemoryDiagnoser]
-public class Benchmarks
+public class MediatR_Benchmarks
 {
     private readonly Ping _request = new();
     private readonly PingNotification _notification = new();
@@ -23,13 +23,15 @@ public class Benchmarks
     [Params(1, 50)]
     public int Times { get; set; }
 
-    public Benchmarks()
+    public MediatR_Benchmarks()
     {
         var collection = new ServiceCollection();
 
         collection.AddMediatR(conf =>
         {
-            conf.RegisterServicesFromAssemblyContaining<Benchmarks>();
+            conf.RegisterServicesFromAssemblyContaining<MediatR_Benchmarks>();
+            conf.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            conf.EnableCachingOfHandlers = true;
         });
 
         var provider = collection.BuildServiceProvider();

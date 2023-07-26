@@ -8,9 +8,9 @@ internal sealed class BaseRequestResponseHandler : IRequestHandler<RequestRespon
 {
     public int Calls { get; set; }
 
-    public Task<BaseResponse> Handle(RequestResponse request, CancellationToken cancellationToken)
+    public ValueTask<BaseResponse> Handle(RequestResponse request, CancellationToken cancellationToken)
     {
         Calls++;
-        return Task.FromResult<BaseResponse>(new Response());
+        return ValueTask.FromResult<BaseResponse>(new Response());
     }
 }

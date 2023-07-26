@@ -17,7 +17,7 @@ internal sealed class RequestResponseExceptionActionProcessBehavior<TRequest, TR
     public RequestResponseExceptionActionProcessBehavior(IServiceProvider serviceProvider) =>
         _serviceProvider = serviceProvider;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -30,7 +30,7 @@ internal sealed class RequestResponseExceptionActionProcessBehavior<TRequest, TR
                 foreach (var messageType in RequestResponseTypeHierarchy)
                 {
                     var handler = ExceptionHandlerFactory.CreateRequestResponseExceptionActionHandler(messageType, ResponseType, exceptionType);
-                    await handler.Handle<TRequest, TResponse>(request, exception, _serviceProvider, cancellationToken);
+                    await handler.Handle<TRequest, TResponse>(request, exception, _serviceProvider, cancellationToken).ConfigureAwait(false);
                 }
             }
 

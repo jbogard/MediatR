@@ -14,7 +14,7 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
     private IRequestHandler<TRequest, TResponse>? _cachedHandler;
     private IPipelineBehavior<TRequest, TResponse>[]? _cachedBehaviors;
 
-    public override Task<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public override ValueTask<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), "Response and method response must always be the same type.");
 
@@ -27,7 +27,7 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        return Unsafe.As<Task<TMethodResponse>>(handler((TRequest) request, cancellationToken));
+        return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(ref Unsafe.AsRef(handler((TRequest) request, cancellationToken)));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
