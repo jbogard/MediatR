@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction;
-using MediatR.Abstraction.Behaviors;
 using MediatR.Subscriptions;
+using MediatR.Subscriptions.Notifications;
+using MediatR.Subscriptions.Requests;
+using MediatR.Subscriptions.StreamingRequests;
 
 namespace MediatR;
 
 /// <summary>
 /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
 /// </summary>
-public sealed class Mediator : IMediator
+internal sealed class Mediator : IMediator
 {
     private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new();
     private static readonly ConcurrentDictionary<Type, RequestHandler> _requestHandlers = new();
@@ -20,76 +22,40 @@ public sealed class Mediator : IMediator
     private static readonly ConcurrentDictionary<Type, StreamRequestHandler> _streamRequestHandlers = new();
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly Func<Type, NotificationHandler> _notificationFactory;
-    private readonly Func<Type, RequestHandler> _requestFactory;
-    private readonly Func<Type, Type, RequestResponseHandler> _requestResponseFactory;
-    private readonly Func<Type, Type, StreamRequestHandler> _streamRequestFactory;
+    private readonly INotificationPublisher _notificationPublisher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Mediator"/> class.
     /// </summary>
     /// <param name="serviceProvider">Service provider. Can be a scoped or root provider</param>
-    public Mediator(IServiceProvider serviceProvider)
+    /// <param name="notificationPublisher">Notification publisher.</param>
+    public Mediator(IServiceProvider serviceProvider, INotificationPublisher notificationPublisher)
     {
         _serviceProvider = serviceProvider;
-
-        var factory = serviceProvider.GetRequiredService<SubscriptionFactory>();
-        _notificationFactory = factory.CreateNotificationHandler;
-        _requestFactory = factory.CreateRequestHandler;
-        _requestResponseFactory = factory.CreateRequestResponseHandler;
-        _streamRequestFactory = factory.CreateStreamRequestHandler;
+        _notificationPublisher = notificationPublisher;
     }
 
-    public ValueTask<TResponse> Send<TRequest, TResponse>(TRequest? request, CancellationToken cancellationToken = default)
-        where TRequest : IRequest<TResponse>
+    public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse>? request, CancellationToken cancellationToken = default)
     {
         if (request is null)
         {
-            return ThrowArgumentNullRef<ValueTask<TResponse>>(nameof(request));
+            ThrowArgumentNull(nameof(request));
         }
 
-        var behaviors = _serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
-        RequestHandlerDelegate<TRequest, TResponse> handler = Handle;
-        for (var i = behaviors.Length - 1; i >= 0; i--)
-        {
-            var next = handler;
-            var behavior = behaviors[i];
-            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
-        }
-
-        return handler(request, cancellationToken);
-
-        ValueTask<TResponse> Handle(TRequest handlerRequest, CancellationToken token)
-        {
-            return _requestResponseHandlers.GetOrAdd(typeof(TRequest), requestType => _requestResponseFactory(requestType, typeof(TResponse)))
-                .HandleAsync<TRequest, TResponse>(handlerRequest, token);
-        }
+        return _requestResponseHandlers.GetOrAdd(request!.GetType(),static req => SubscriptionFactory.CreateRequestResponseHandler(req, typeof(TResponse)))
+            .HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
-    public ValueTask Send<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
+    public Task SendAsync<TRequest>(TRequest? request, CancellationToken cancellationToken = default)
         where TRequest : IRequest
     {
         if (request is null)
         {
-            return ThrowArgumentNullRef<ValueTask>(nameof(request));
+            ThrowArgumentNull(nameof(request));
         }
 
-        var behaviors = _serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
-        RequestHandlerDelegate<TRequest> handler = Handle;
-        for (var i = behaviors.Length - 1; i >= 0; i--)
-        {
-            var next = handler;
-            var behavior = behaviors[i];
-            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
-        }
-
-        return handler(request, cancellationToken);
-
-        ValueTask Handle(TRequest handlerRequest, CancellationToken token)
-        {
-            return _requestHandlers.GetOrAdd(typeof(TRequest), _requestFactory)
-                .HandleAsync(handlerRequest, token);
-        }
+        return _requestHandlers.GetOrAdd(request!.GetType(), SubscriptionFactory.CreateRequestHandler)
+            .HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
     public void Publish<TNotification>(TNotification? notification, CancellationToken cancellationToken = default)
@@ -97,42 +63,23 @@ public sealed class Mediator : IMediator
     {
         if (notification is null)
         {
-            ThrowArgumentNullRef<int>(nameof(notification));
-            return;
+            ThrowArgumentNull(nameof(notification));
         }
 
-        _notificationHandlers.GetOrAdd(typeof(TNotification), _notificationFactory)
-            .Handle(notification, cancellationToken);
+        _notificationHandlers.GetOrAdd(notification!.GetType(), SubscriptionFactory.CreateNotificationHandler)
+            .Handle(notification, _serviceProvider, _notificationPublisher, cancellationToken);
     }
 
-    public IAsyncEnumerable<TResponse> CreateStream<TRequest, TResponse>(TRequest? request, CancellationToken cancellationToken = default)
-        where TRequest : IStreamRequest<TResponse>
+    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse>? request, CancellationToken cancellationToken = default)
     {
         if (request is null)
         {
-            return ThrowArgumentNullRef<IAsyncEnumerable<TResponse>>(nameof(request));
+            ThrowArgumentNull(nameof(request));
         }
 
-        var behaviors = _serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
-        StreamHandlerNext<TRequest, TResponse> handler = Handle;
-        for (var i = behaviors.Length - 1; i >= 0; i--)
-        {
-            var next = handler;
-            var behavior = behaviors[i];
-            handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
-        }
-
-        return handler(request, cancellationToken);
-
-        IAsyncEnumerable<TResponse> Handle(TRequest handlerRequest, CancellationToken token)
-        {
-            return _streamRequestHandlers.GetOrAdd(typeof(TRequest), (requestType) => _streamRequestFactory(requestType, typeof(TResponse)))
-                .Handle<TRequest, TResponse>(handlerRequest, token);
-        }
+        return _streamRequestHandlers.GetOrAdd(request!.GetType(), static req => SubscriptionFactory.CreateStreamRequestHandler(req, typeof(TResponse)))
+            .Handle(request, _serviceProvider, cancellationToken);
     }
 
-    // The exception throwing was moved to this function to reduce the JIT output per function that would throw an exception.
-    // This reduces the JIT output which then reduces the instruction that needs to be loaded which makes the function faster.
-    // And because throwing an exception is really slow one more method call or less doesn't make much of a difference.
-    private static T ThrowArgumentNullRef<T>(string message) => throw new ArgumentNullException(message);
+    private static void ThrowArgumentNull(string message) => throw new ArgumentNullException(message);
 }

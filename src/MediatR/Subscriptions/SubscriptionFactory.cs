@@ -1,72 +1,79 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using MediatR.Abstraction;
+using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.Subscriptions.Notifications;
+using MediatR.Subscriptions.Requests;
+using MediatR.Subscriptions.StreamingRequests;
 
 namespace MediatR.Subscriptions;
 
-internal sealed class SubscriptionFactory
+internal static class SubscriptionFactory
 {
-    private static readonly Type GenericNotificationHandlerType = typeof(NotificationHandler<>);
-    private static readonly Type GenericRequestHandlerType = typeof(RequestHandler<>);
-    private static readonly Type GenericRequestResponseHandlerType = typeof(RequestResponseHandler<,>);
-    private static readonly Type GenericStreamRequestHandlerType = typeof(StreamRequestHandler<,>);
+    private static Type genericNotificationHandlerType = typeof(TransientNotificationHandler<>);
+    private static Type genericRequestHandlerType = typeof(TransientRequestHandler<>);
+    private static Type genericRequestResponseHandlerType = typeof(TransientRequestResponseHandler<,>);
+    private static Type genericStreamRequestHandlerType = typeof(TransientStreamRequestHandler<,>);
 
     [ThreadStatic]
-    private static Type[]? GenericRequestTypeCache;
+    private static Type[]? genericRequestTypeCache;
 
     [ThreadStatic]
-    private static Type[]? GenericHandlerTypeCache;
+    private static Type[]? genericHandlerTypeCache;
 
-    private readonly object[] _creationArgs;
-    private readonly object[] _notificationArgs;
-
-    public SubscriptionFactory(IServiceProvider serviceProvider, INotificationPublisher notificationPublisher)
+    public static void Initialize(MediatRServiceConfiguration configuration)
     {
-        _creationArgs = new object[] { serviceProvider };
-        _notificationArgs = new object[] { serviceProvider, notificationPublisher };
+        if (configuration.EnableCachingOfHandlers)
+        {
+            genericNotificationHandlerType = typeof(CachedNotificationHandler<>);
+            genericRequestHandlerType = typeof(CachedRequestHandler<>);
+            genericRequestResponseHandlerType = typeof(CachedRequestResponseHandler<,>);
+            genericStreamRequestHandlerType = typeof(CachedStreamRequestHandler<,>);
+        }
     }
 
-    public NotificationHandler CreateNotificationHandler(Type notificationType)
+    public static NotificationHandler CreateNotificationHandler(Type notificationType)
     {
         TryInitHandlerThreadStaticTypeCache();
-        GenericHandlerTypeCache![0] = notificationType;
-        var notificationHandlerType = GenericNotificationHandlerType.MakeGenericType(GenericHandlerTypeCache);
+        genericHandlerTypeCache![0] = notificationType;
+        var notificationHandlerType = genericNotificationHandlerType.MakeGenericType(genericHandlerTypeCache);
 
-        return (NotificationHandler) Activator.CreateInstance(notificationHandlerType, _notificationArgs)!;
+        return (NotificationHandler) Activator.CreateInstance(notificationHandlerType)!;
     }
 
-    public RequestHandler CreateRequestHandler(Type requestType)
+    public static RequestHandler CreateRequestHandler(Type requestType)
     {
         TryInitHandlerThreadStaticTypeCache();
-        GenericHandlerTypeCache![0] = requestType;
-        var requestHandlerType = GenericRequestHandlerType.MakeGenericType(GenericHandlerTypeCache);
+        genericHandlerTypeCache![0] = requestType;
+        var requestHandlerType = genericRequestHandlerType.MakeGenericType(genericHandlerTypeCache);
 
-        return (RequestHandler) Activator.CreateInstance(requestHandlerType, _creationArgs)!;
+        return (RequestHandler) Activator.CreateInstance(requestHandlerType)!;
     }
 
-    public RequestResponseHandler CreateRequestResponseHandler(Type requestType, Type responseType)
+    public static RequestResponseHandler CreateRequestResponseHandler(Type requestType, Type responseType)
     {
         TryInitRequestThreadStaticTypeCache();
-        GenericRequestTypeCache![0] = requestType;
-        GenericRequestTypeCache[1] = responseType;
-        var requestResponseType = GenericRequestResponseHandlerType.MakeGenericType(GenericRequestTypeCache);
+        genericRequestTypeCache![0] = requestType;
+        genericRequestTypeCache[1] = responseType;
+        var requestResponseType = genericRequestResponseHandlerType.MakeGenericType(genericRequestTypeCache);
 
-        return (RequestResponseHandler) Activator.CreateInstance(requestResponseType, _creationArgs)!;
+        return (RequestResponseHandler) Activator.CreateInstance(requestResponseType)!;
     }
 
-    public StreamRequestHandler CreateStreamRequestHandler(Type requestType, Type responseType)
+    public static StreamRequestHandler CreateStreamRequestHandler(Type requestType, Type responseType)
     {
         TryInitRequestThreadStaticTypeCache();
-        GenericRequestTypeCache![0] = requestType;
-        GenericRequestTypeCache[1] = responseType;
-        var streamRequestType = GenericStreamRequestHandlerType.MakeGenericType(GenericRequestTypeCache);
+        genericRequestTypeCache![0] = requestType;
+        genericRequestTypeCache[1] = responseType;
+        var streamRequestType = genericStreamRequestHandlerType.MakeGenericType(genericRequestTypeCache);
 
-        return (StreamRequestHandler) Activator.CreateInstance(streamRequestType, _creationArgs)!;
+        return (StreamRequestHandler) Activator.CreateInstance(streamRequestType)!;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void TryInitRequestThreadStaticTypeCache() => GenericRequestTypeCache ??= new Type[2];
+    private static void TryInitRequestThreadStaticTypeCache() =>
+        genericRequestTypeCache ??= new Type[2];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void TryInitHandlerThreadStaticTypeCache() => GenericHandlerTypeCache ??= new Type[1];
+    private static void TryInitHandlerThreadStaticTypeCache() =>
+        genericHandlerTypeCache ??= new Type[1];
 }

@@ -4,9 +4,9 @@ using System.IO;
 using System.Threading.Tasks;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Stashbox.Lifetime;
+using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.Examples.Stashbox;
 
@@ -34,23 +34,44 @@ class Program
 
 internal static class StashboxContainerExtension
 {
-    public static IStashboxContainer ConfigureMediatR(this IStashboxContainer containerInstance, Action<MediatRServiceConfiguration<IStashboxContainer>> configuration)
+    public static IStashboxContainer ConfigureMediatR(this IStashboxContainer containerInstance, Action<StashBoxConfiguration> configuration)
     {
-        var dependencyInjectionResgistrarConfiguration = new DependencyInjectionRegistrarAdapter<IStashboxContainer>(
-            containerInstance,
-            (container, serviceType, implementationType) => container.RegisterSingleton(implementationType, serviceType),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.WithLifetime(Lifetimes.Transient)),
-            (container, serviceType, implementationType) => container.RegisterSingleton(implementationType, serviceType),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.WithLifetime(Lifetimes.Transient)),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.ReplaceExisting().WithLifetime(Lifetimes.Singleton)),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.ReplaceExisting().WithLifetime(Lifetimes.Transient)),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.ReplaceExisting().WithLifetime(Lifetimes.Transient)),
-            (container, serviceType, implementationType) => container.Register(implementationType, serviceType, options => options.ReplaceExisting().WithLifetime(Lifetimes.Singleton)),
-            (container, fromType, toType) => container.Register(fromType, toType, options => options.WithLifetime(Lifetimes.Singleton)),
-            (container, serviceType, instance) => container.RegisterInstance(instance, serviceType));
+        var config = new StashBoxConfiguration();
 
-        MediatRConfigurator.ConfigureMediatR(dependencyInjectionResgistrarConfiguration, configuration);
+        configuration(config);
+
+        var adapter = new StashBoxAdapter(containerInstance, config);
+
+        MediatRConfigurator.Configure(adapter, config);
 
         return containerInstance;
+    }
+
+    public sealed class StashBoxConfiguration : MediatRServiceConfiguration
+    {
+    }
+
+    internal sealed class StashBoxAdapter : DependencyInjectionRegistrarAdapter<IStashboxContainer, StashBoxConfiguration>
+    {
+        public StashBoxAdapter(IStashboxContainer registrar, StashBoxConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

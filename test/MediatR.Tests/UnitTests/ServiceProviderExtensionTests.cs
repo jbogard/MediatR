@@ -1,23 +1,39 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Collections.Generic;
+using FluentAssertions;
 using MediatR.Abstraction;
+using MediatR.MicrosoftDiCExtensions;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework;
+using Xunit;
 
-namespace MediatR.Tests.UnitTests;
+namespace MediatR.UnitTests;
 
-[TestFixture]
-internal sealed class ServiceProviderExtensionTests
+public sealed class ServiceProviderExtensionTests
 {
-    [Test]
+    [Fact]
     public void ServiceProvider_GetNotRegisteredService_ThrowsInvalidOperationException()
     {
         // Arrange
         var serviceProvider = Mock.Of<IServiceProvider>();
-        
+
         // Act
-        var act = () => ServiceProviderExtension.GetRequiredService<IMediator>(serviceProvider);
-        
+        var act = () => serviceProvider.GetRequiredService<IMediator>();
+    
         // Assert
         act.Should().ThrowExactly<InvalidOperationException>().WithMessage($"*{typeof(IMediator)}*");
+    }
+
+    [Fact]
+    public void ServiceProvider_GetMultipleServicesWithoutRegisteredServices_ReturnsEmptyArray()
+    {
+        // Arrange
+        var serviceProvider = Mock.Of<IServiceProvider>();
+
+        // Act
+        var services = serviceProvider.GetServices<ServiceProviderExtensionTests>();
+
+        // Assert
+        services.Should().BeEmpty();
     }
 }

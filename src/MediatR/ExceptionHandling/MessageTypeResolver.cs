@@ -15,7 +15,7 @@ internal static class MessageTypeResolver
     [ThreadStatic]
     private static List<Type>? arrayBuilder;
 
-    public static Type[] MessageTypeHierarchyFactory(Type? rootMessageType)
+    public static Type[] GetMessageTypeHierarchy(Type? rootMessageType)
     {
         arrayBuilder ??= new List<Type>();
 
@@ -33,19 +33,13 @@ internal static class MessageTypeResolver
     private static bool IsMessageType(Type type)
     {
         if (type == RequestType || type == NotificationType)
-        {
             return true;
-        }
 
-        if (type.IsGenericType)
-        {
-            var genericTypeDefinition = type.GetGenericTypeDefinition();
-            if (genericTypeDefinition == RequestResponseType || genericTypeDefinition == StreamRequestType)
-            {
-                return true;
-            }
-        }
+        if (!type.IsGenericType)
+            return false;
 
-        return false;
+        var genericTypeDefinition = type.GetGenericTypeDefinition();
+        return genericTypeDefinition == RequestResponseType ||
+               genericTypeDefinition == StreamRequestType;
     }
 }

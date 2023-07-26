@@ -2,21 +2,23 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction.Behaviors;
+using MediatR.ExceptionHandling.RequestResponse.Subscription;
 
-namespace MediatR.ExceptionHandling;
+namespace MediatR.ExceptionHandling.RequestResponse;
 
 internal sealed class RequestResponseExceptionRequestHandlerProcessBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
+    where TResponse : notnull
 {
     private static readonly Type ResponseType = typeof(TResponse);
-    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.MessageTypeHierarchyFactory(typeof(TRequest));
+    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.GetMessageTypeHierarchy(typeof(TRequest));
 
-    private readonly ExceptionHandlerFactory _factory;
+    private readonly IServiceProvider _serviceProvider;
 
-    public RequestResponseExceptionRequestHandlerProcessBehavior(ExceptionHandlerFactory factory) =>
-        _factory = factory;
+    public RequestResponseExceptionRequestHandlerProcessBehavior(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider;
 
-    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -35,8 +37,8 @@ internal sealed class RequestResponseExceptionRequestHandlerProcessBehavior<TReq
                         break;
                     }
 
-                    var handler = _factory.CreateRequestResponseExceptionRequestHandler(messageType, ResponseType, exceptionType);
-                    await handler.Handle(request, exception, state, cancellationToken);
+                    var handler = ExceptionHandlerFactory.CreateRequestResponseExceptionRequestHandler(messageType, ResponseType, exceptionType);
+                    await handler.Handle(request, exception, state, _serviceProvider, cancellationToken);
                 }
 
                 if (state.IsHandled)

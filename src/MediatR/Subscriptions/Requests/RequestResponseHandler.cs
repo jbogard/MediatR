@@ -1,10 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.Subscriptions;
+namespace MediatR.Subscriptions.Requests;
 
 internal abstract class RequestResponseHandler
 {
-    public abstract ValueTask<TMethodResponse> HandleAsync<TMethodRequest, TMethodResponse>(TMethodRequest request, CancellationToken cancellationToken)
-        where TMethodRequest : IRequest<TMethodResponse>;
+    public abstract Task<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken);
 }

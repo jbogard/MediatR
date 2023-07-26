@@ -14,7 +14,7 @@ public class ContravariantFilter : IHandlersFilter
 
         var genericType = service.GetGenericTypeDefinition();
         var genericArguments = genericType.GetGenericArguments();
-        return genericArguments.Count() == 1
+        return genericArguments.Length == 1
                && genericArguments.Single().GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant);
     }
 

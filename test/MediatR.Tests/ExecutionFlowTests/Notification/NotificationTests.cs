@@ -1,101 +1,126 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Linq;
+using FluentAssertions;
 using MediatR.Abstraction;
-using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
+using MediatR.Abstraction.Handlers;
+using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.MicrosoftDiCExtensions;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
-using NUnit.Framework;
+using Xunit;
 
-namespace MediatR.Tests.ExecutionFlowTests;
+namespace MediatR.ExecutionFlowTests.Notification;
 
-[TestFixture]
-internal sealed class NotificationTests
+public sealed class NotificationTests
 {
-    [Test]
+    [Fact]
     public void PublishNotification_WithDefaultPublisher_ExecutesAllNotificationTypeHandlers()
     {
         const string NotExplicitHandledMessage = "Notification was not handled.";
         // Arrange
         var collection = new ServiceCollection();
-        var provider = ConfigureMediator(collection).BuildServiceProvider();
-        var mediator = provider.GetRequiredService<IMediator>();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+        });
+        var provider = collection.BuildServiceProvider();
+
         var notification = new Notification
         {
             Message = NotExplicitHandledMessage
         };
-        
+
         // Act
-        mediator.Publish(notification);
-        
+        provider.GetRequiredService<IMediator>().Publish(notification);
+
         // Assert
         var baseHandler = provider.GetRequiredService<BaseNotificationHandler>();
         var multiHandler = provider.GetRequiredService<MultiNotificationHandler>();
+        var genericHandlerType = GetGenericNotificationHandler<Notification>(provider);
 
         notification.Message.Should().NotBe(NotExplicitHandledMessage);
         notification.Handlers.Should().Be(2);
-        baseHandler.Calls.Should().Be(0); // Must be never called because handled notification type is not the same as the published one.
-        multiHandler.Calls.Should().Be(1); // Handles only the final notification type.
-        notification.GenericHandlerType.Should().Be(typeof(GenericNotificationHandler<Notification>));
+
+        baseHandler.Calls.Should().Be(0);
+        multiHandler.Calls.Should().Be(1);
+        genericHandlerType.Calls.Should().Be(1);
     }
 
-    [Test]
-    public void PublishNotificationAsOtherType_WIthDefaultPublisher_ExecutesAllOtherTypedNotificationHandlers()
+    [Fact]
+    public void PublishNotification_WithCachedHandler_CreatesOnlyOnceHandlerInstance()
     {
         const string NotExplicitHandledMessage = "Notification was not handled.";
         // Arrange
         var collection = new ServiceCollection();
-        var provider = ConfigureMediator(collection).BuildServiceProvider();
-        var mediator = provider.GetRequiredService<IMediator>();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.EnableCachingOfHandlers = true;
+            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+        });
+        var provider = collection.BuildServiceProvider();
+
         var notification = new Notification
         {
             Message = NotExplicitHandledMessage
         };
         
+        var sut = provider.GetRequiredService<IMediator>();
+
         // Act
-        mediator.Publish<BaseNotification>(notification);
-        
+        sut.Publish(notification);
+        sut.Publish(notification);
+
         // Assert
         var baseHandler = provider.GetRequiredService<BaseNotificationHandler>();
         var multiHandler = provider.GetRequiredService<MultiNotificationHandler>();
+        var genericHandler = GetGenericNotificationHandler<Notification>(provider);
 
-        notification.Message.Should().Be(NotExplicitHandledMessage);
-        notification.Handlers.Should().Be(3);
-        baseHandler.Calls.Should().Be(1); // Must be called because is handled notification base type.
-        multiHandler.Calls.Should().Be(1); // Handles only the base notification type.
-        GenericNotificationHandler<BaseNotification>.Calls.Should().Be(1); // Must be called because is handled notification base type.
+        notification.Message.Should().NotBe(NotExplicitHandledMessage);
+        notification.Handlers.Should().Be(4);
+        genericHandler.Calls.Should().Be(2);
+        baseHandler.Calls.Should().Be(0);
+        multiHandler.Calls.Should().Be(2);
     }
-    
-    [Test]
-    public void PublishNotification_WIthTaskWhenAllPublisher_ExecutedAllHandlesAtOnce()
+
+    [Fact]
+    public void PublishNotification_WithTaskWhenAllPublisher_ExecutedAllHandlesAtOnce()
     {
         // Arrange
         var collection = new ServiceCollection();
         var expectedNotificationPublisher = new TaskWhenAllPublisher();
-        var provider = ConfigureMediator(collection, expectedNotificationPublisher).BuildServiceProvider();
+        var provider = collection.AddMediatR(cfg =>
+        {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.NotificationPublisher = expectedNotificationPublisher;
+            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+        }).BuildServiceProvider();
+
         var mediator = provider.GetRequiredService<IMediator>();
         var notification = new Notification
         {
             Message = "some Message"
         };
-        
+
         // Act
         mediator.Publish(notification);
-        
+
         // Assert
         var notificationPublisher = provider.GetRequiredService<INotificationPublisher>();
+        var genericNotificationHandler = GetGenericNotificationHandler<Notification>(provider);
+        var multiHandler = provider.GetRequiredService<MultiNotificationHandler>();
+
         notificationPublisher.Should().Be(expectedNotificationPublisher);
-        notification.GenericHandlerType.Should().Be(typeof(GenericNotificationHandler<Notification>));
         notification.Handlers.Should().Be(2);
+
+        genericNotificationHandler.Calls.Should().Be(1);
+        multiHandler.Calls.Should().Be(1);
     }
 
-    private static IServiceCollection ConfigureMediator(IServiceCollection serviceCollection, INotificationPublisher? notificationPublisher = null) =>
-        serviceCollection.ConfigureMediatR(c =>
-        {
-            c.RegisterServicesFromAssemblyContaining<NotificationTests>();
-            c.RegistrationOptions = RegistrationOptions.SingletonAndMapped;
-            if (notificationPublisher is not null)
-            {
-                c.NotificationPublisher = notificationPublisher;
-            }
-        });
+    private GenericNotificationHandler<TNotification> GetGenericNotificationHandler<TNotification>(IServiceProvider serviceProvider)
+        where TNotification : INotification =>
+        (GenericNotificationHandler<TNotification>) serviceProvider
+            .GetServices<INotificationHandler<TNotification>>()
+            .Single(t => t is GenericNotificationHandler<TNotification>);
 }

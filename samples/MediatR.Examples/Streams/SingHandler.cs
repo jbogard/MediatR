@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using MediatR.Abstraction.Handlers;
 
-namespace MediatR.Examples;
+namespace MediatR.Examples.Streams;
 
 public class SingHandler : IStreamRequestHandler<Sing, Song>
 {
@@ -15,7 +15,7 @@ public class SingHandler : IStreamRequestHandler<Sing, Song>
         _writer = writer;
     }
 
-    public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation]CancellationToken cancellationToken)
+    public async IAsyncEnumerable<Song> Handle(Sing request, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await _writer.WriteLineAsync($"--- Handled Sing: {request.Message}, Song");
         yield return new Song { Message = request.Message + "ing do" };

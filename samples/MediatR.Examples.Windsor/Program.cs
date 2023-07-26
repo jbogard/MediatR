@@ -1,17 +1,12 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
-using MediatR.Pipeline;
+using System;
+using Castle.Windsor;
+using MediatR.Abstraction;
+using MediatR.DependencyInjection;
+using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.Examples.Windsor;
-
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using Castle.MicroKernel;
-using Castle.MicroKernel.Registration;
-using Castle.Windsor;
 
 internal class Program
 {
@@ -27,24 +22,30 @@ internal class Program
     {
         var container = new WindsorContainer();
         container.Kernel.Resolver.AddSubResolver(new CollectionResolver(container.Kernel));
-        container.Kernel.AddHandlersFilter(new ContravariantFilter());
+
+        container.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<Ping>();
+        });
+        
+        // container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
         // *** The default lifestyle for Windsor is Singleton
         // *** If you are using ASP.net, it's better to register your services with 'Per Web Request LifeStyle'.
 
-        var fromAssemblyContainingPing = Classes.FromAssemblyContaining<Ping>();
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestExceptionProcessorBehavior<,>)));
-        container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestExceptionActionProcessorBehavior<,>)));
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestExceptionAction<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestExceptionHandler<,,>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IStreamRequestHandler<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestPreProcessor<>)).WithServiceAllInterfaces().AllowMultipleMatches());
-        container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestPostProcessor<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
-
-        container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
-        container.Register(Component.For<TextWriter>().Instance(writer));
+        // var fromAssemblyContainingPing = Classes.FromAssemblyContaining<Ping>();
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestHandler<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(INotificationHandler<>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestExceptionProcessorBehavior<,>)));
+        // container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestExceptionActionProcessorBehavior<,>)));
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestExceptionAction<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestExceptionHandler<,,>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IStreamRequestHandler<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestPreProcessor<>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        // container.Register(fromAssemblyContainingPing.BasedOn(typeof(IRequestPostProcessor<,>)).WithServiceAllInterfaces().AllowMultipleMatches());
+        //
+        // container.Register(Component.For<IMediator>().ImplementedBy<Mediator>());
+        // container.Register(Component.For<TextWriter>().Instance(writer));
         //container.Register(Component.For<ServiceFactory>().UsingFactoryMethod<ServiceFactory>(k => (type =>
         //{
         //    var enumerableType = type
@@ -72,103 +73,147 @@ internal class Program
         //})));
 
         //Pipeline
-        container.Register(Component.For(typeof(IStreamPipelineBehavior<,>)).ImplementedBy(typeof(GenericStreamPipelineBehavior<,>)));
-        container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));
-        container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPostProcessorBehavior<,>)).NamedAutomatically("PostProcessorBehavior"));
-        container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(GenericPipelineBehavior<,>)).NamedAutomatically("Pipeline"));
-        container.Register(Component.For(typeof(IRequestPreProcessor<>)).ImplementedBy(typeof(GenericRequestPreProcessor<>)).NamedAutomatically("PreProcessor"));
-        container.Register(Component.For(typeof(IRequestPostProcessor<,>)).ImplementedBy(typeof(GenericRequestPostProcessor<,>)).NamedAutomatically("PostProcessor"));
-        container.Register(Component.For(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>)).NamedAutomatically("ConstrainedRequestPostProcessor"));
-        container.Register(Component.For(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>)).NamedAutomatically("ConstrainedPingedHandler"));
+        // container.Register(Component.For(typeof(IStreamPipelineBehavior<,>)).ImplementedBy(typeof(GenericStreamPipelineBehavior<,>)));
+        // container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPreProcessorBehavior<,>)).NamedAutomatically("PreProcessorBehavior"));
+        // container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(RequestPostProcessorBehavior<,>)).NamedAutomatically("PostProcessorBehavior"));
+        // container.Register(Component.For(typeof(IPipelineBehavior<,>)).ImplementedBy(typeof(GenericPipelineBehavior<,>)).NamedAutomatically("Pipeline"));
+        // container.Register(Component.For(typeof(IRequestPreProcessor<>)).ImplementedBy(typeof(GenericRequestPreProcessor<>)).NamedAutomatically("PreProcessor"));
+        // container.Register(Component.For(typeof(IRequestPostProcessor<,>)).ImplementedBy(typeof(GenericRequestPostProcessor<,>)).NamedAutomatically("PostProcessor"));
+        // container.Register(Component.For(typeof(IRequestPostProcessor<,>), typeof(ConstrainedRequestPostProcessor<,>)).NamedAutomatically("ConstrainedRequestPostProcessor"));
+        // container.Register(Component.For(typeof(INotificationHandler<>), typeof(ConstrainedPingedHandler<>)).NamedAutomatically("ConstrainedPingedHandler"));
 
         var mediator = container.Resolve<IMediator>();
 
         return mediator;
     }
 
-    private static object ResolveRequestExceptionHandler(IKernel k, Type type, Type service, object resolvedType, Type[] genericArguments)
+    // private static object ResolveRequestExceptionHandler(IKernel k, Type type, Type service, object resolvedType, Type[] genericArguments)
+    // {
+    //     if (service == null
+    //     || genericArguments == null
+    //     || !service.IsInterface
+    //     || !service.IsGenericType
+    //     || !service.IsConstructedGenericType
+    //     || !(service.GetGenericTypeDefinition()
+    //     ?.IsAssignableTo(typeof(IRequestExceptionHandler<,,>)) ?? false)
+    //     || genericArguments.Length != 3)
+    //     {
+    //         return resolvedType;
+    //     }
+    //
+    //     var serviceFactory = k.Resolve<ServiceFactory>();
+    //     var baseRequestType = genericArguments[0].BaseType;
+    //     var response = genericArguments[1];
+    //     var exceptionType = genericArguments[2];
+    //
+    //     // Check if the base request type is valid
+    //     if (baseRequestType == null
+    //     || !baseRequestType.IsClass
+    //     || baseRequestType == typeof(object)
+    //     || ((!baseRequestType.GetInterfaces()
+    //         ?.Any(i => i.IsAssignableFrom(typeof(IRequest<>)))) ?? true))
+    //     {
+    //         return resolvedType;
+    //     }
+    //
+    //     var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(baseRequestType, response, exceptionType);
+    //     var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
+    //     Array resultArray = CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(type, resolvedType, serviceFactory, enumerableExceptionHandlerInterfaceType);
+    //
+    //     return resultArray;
+    // }
+    //
+    // private static object ResolveRequestExceptionAction(IKernel k, Type type, Type service, object resolvedType, Type[] genericArguments)
+    // {
+    //     if (service == null
+    //     || genericArguments == null
+    //     || !service.IsInterface
+    //     || !service.IsGenericType
+    //     || !service.IsConstructedGenericType
+    //     || !(service.GetGenericTypeDefinition()
+    //     ?.IsAssignableTo(typeof(IRequestExceptionAction<,>)) ?? false)
+    //     || genericArguments.Length != 2)
+    //     {
+    //         return resolvedType;
+    //     }
+    //
+    //     var serviceFactory = k.Resolve<ServiceFactory>();
+    //     var baseRequestType = genericArguments[0].BaseType;
+    //     var exceptionType = genericArguments[1];
+    //
+    //     // Check if the base request type is valid
+    //     if (baseRequestType == null
+    //     || !baseRequestType.IsClass
+    //     || baseRequestType == typeof(object)
+    //     || ((!baseRequestType.GetInterfaces()
+    //         ?.Any(i => i.IsAssignableFrom(typeof(IRequest<>)))) ?? true))
+    //     {
+    //         return resolvedType;
+    //     }
+    //
+    //     var exceptionHandlerInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(baseRequestType, exceptionType);
+    //     var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
+    //     Array resultArray = CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(type, resolvedType, serviceFactory, enumerableExceptionHandlerInterfaceType);
+    //
+    //     return resultArray;
+    // }
+    //
+    // private static Array CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(Type type, object resolvedType, ServiceFactory serviceFactory, Type enumerableExceptionHandlerInterfaceType)
+    // {
+    //     var firstArray = serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType) as Array;
+    //     Debug.Assert(firstArray != null, $"Array '{nameof(firstArray)}' should not be null because this method calls ResolveAll when a {typeof(IEnumerable<>).FullName} " +
+    //         $"is passed as argument in argument named '{nameof(type)}'");
+    //
+    //     var secondArray = resolvedType is Array ? resolvedType as Array : new[] { resolvedType };
+    //     Debug.Assert(secondArray != null, $"Array '{nameof(secondArray)}' should not be null because '{nameof(resolvedType)}' is an array or created as an array");
+    //
+    //     var resultArray = Array.CreateInstance(typeof(object), firstArray.Length + secondArray.Length);
+    //     Array.Copy(firstArray, resultArray, firstArray.Length);
+    //     Array.Copy(secondArray, 0, resultArray, firstArray.Length, secondArray.Length);
+    //     return resultArray;
+    // }
+}
+
+public static class WindsorExtension
+{
+    public static WindsorContainer AddMediatR(this WindsorContainer container, Action<WindsorConfiguration> configuration)
     {
-        if (service == null
-        || genericArguments == null
-        || !service.IsInterface
-        || !service.IsGenericType
-        || !service.IsConstructedGenericType
-        || !(service.GetGenericTypeDefinition()
-        ?.IsAssignableTo(typeof(IRequestExceptionHandler<,,>)) ?? false)
-        || genericArguments.Length != 3)
-        {
-            return resolvedType;
-        }
+        var config = new WindsorConfiguration();
 
-        var serviceFactory = k.Resolve<ServiceFactory>();
-        var baseRequestType = genericArguments[0].BaseType;
-        var response = genericArguments[1];
-        var exceptionType = genericArguments[2];
+        configuration(config);
 
-        // Check if the base request type is valid
-        if (baseRequestType == null
-        || !baseRequestType.IsClass
-        || baseRequestType == typeof(object)
-        || ((!baseRequestType.GetInterfaces()
-            ?.Any(i => i.IsAssignableFrom(typeof(IRequest<>)))) ?? true))
-        {
-            return resolvedType;
-        }
+        var adapter = new WindsorContainerAdapter(container, config);
+        
+        MediatRConfigurator.Configure(adapter, config);
 
-        var exceptionHandlerInterfaceType = typeof(IRequestExceptionHandler<,,>).MakeGenericType(baseRequestType, response, exceptionType);
-        var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-        Array resultArray = CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(type, resolvedType, serviceFactory, enumerableExceptionHandlerInterfaceType);
-
-        return resultArray;
+        return container;
+    }
+    
+    public sealed class WindsorConfiguration : MediatRServiceConfiguration
+    {
     }
 
-    private static object ResolveRequestExceptionAction(IKernel k, Type type, Type service, object resolvedType, Type[] genericArguments)
+    internal sealed class WindsorContainerAdapter : DependencyInjectionRegistrarAdapter<WindsorContainer, WindsorConfiguration>
     {
-        if (service == null
-        || genericArguments == null
-        || !service.IsInterface
-        || !service.IsGenericType
-        || !service.IsConstructedGenericType
-        || !(service.GetGenericTypeDefinition()
-        ?.IsAssignableTo(typeof(IRequestExceptionAction<,>)) ?? false)
-        || genericArguments.Length != 2)
+        public WindsorContainerAdapter(WindsorContainer registrar, WindsorConfiguration configuration)
+            : base(registrar, configuration)
         {
-            return resolvedType;
         }
 
-        var serviceFactory = k.Resolve<ServiceFactory>();
-        var baseRequestType = genericArguments[0].BaseType;
-        var exceptionType = genericArguments[1];
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
 
-        // Check if the base request type is valid
-        if (baseRequestType == null
-        || !baseRequestType.IsClass
-        || baseRequestType == typeof(object)
-        || ((!baseRequestType.GetInterfaces()
-            ?.Any(i => i.IsAssignableFrom(typeof(IRequest<>)))) ?? true))
-        {
-            return resolvedType;
-        }
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
 
-        var exceptionHandlerInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(baseRequestType, exceptionType);
-        var enumerableExceptionHandlerInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionHandlerInterfaceType);
-        Array resultArray = CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(type, resolvedType, serviceFactory, enumerableExceptionHandlerInterfaceType);
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
 
-        return resultArray;
-    }
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
 
-    private static Array CreateArraysOutOfResolvedTypeAndEnumerableInterfaceTypes(Type type, object resolvedType, ServiceFactory serviceFactory, Type enumerableExceptionHandlerInterfaceType)
-    {
-        var firstArray = serviceFactory.Invoke(enumerableExceptionHandlerInterfaceType) as Array;
-        Debug.Assert(firstArray != null, $"Array '{nameof(firstArray)}' should not be null because this method calls ResolveAll when a {typeof(IEnumerable<>).FullName} " +
-            $"is passed as argument in argument named '{nameof(type)}'");
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
 
-        var secondArray = resolvedType is Array ? resolvedType as Array : new[] { resolvedType };
-        Debug.Assert(secondArray != null, $"Array '{nameof(secondArray)}' should not be null because '{nameof(resolvedType)}' is an array or created as an array");
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
 
-        var resultArray = Array.CreateInstance(typeof(object), firstArray.Length + secondArray.Length);
-        Array.Copy(firstArray, resultArray, firstArray.Length);
-        Array.Copy(secondArray, 0, resultArray, firstArray.Length, secondArray.Length);
-        return resultArray;
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

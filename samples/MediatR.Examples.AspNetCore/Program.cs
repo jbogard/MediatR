@@ -1,9 +1,13 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using MediatR.Abstraction;
-using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
+using MediatR.Abstraction.Behaviors;
+using MediatR.Abstraction.Handlers;
+using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.Examples.Streams;
+using MediatR.MicrosoftDiCExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -23,12 +27,22 @@ public static class Program
         var services = new ServiceCollection();
 
         services.AddSingleton<TextWriter>(writer);
+        services.AddSingleton<IStreamRequestHandler<Sing, Song>, SingHandler>();
 
-        services.ConfigureMediatR(cfg =>
+        services.AddMediatR(cfg =>
         {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
             cfg.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly, typeof(Sing).Assembly);
         });
+
+        foreach (var service in services)
+        {
+            if (service.ServiceType == typeof(IPipelineBehavior<>))
+            {
+                Console.WriteLine(service.ImplementationType);
+            }
+        }
 
         var provider = services.BuildServiceProvider();
 

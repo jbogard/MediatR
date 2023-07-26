@@ -5,6 +5,7 @@ using MediatR.Abstraction;
 using MediatR.Examples.ExceptionHandler;
 using System.IO;
 using System.Threading.Tasks;
+using MediatR.Examples.Streams;
 
 namespace MediatR.Examples;
 
@@ -18,7 +19,7 @@ public static class Runner
         await writer.WriteLineAsync();
 
         await writer.WriteLineAsync("Sending Ping...");
-        var pong = await mediator.Send<Ping, Pong>(new Ping { Message = "Ping" });
+        var pong = await mediator.SendAsync(new Ping { Message = "Ping" });
         await writer.WriteLineAsync("Received: " + pong.Message);
         await writer.WriteLineAsync();
 
@@ -43,7 +44,7 @@ public static class Runner
         await writer.WriteLineAsync("Sending Jing...");
         try
         {
-            await mediator.Send(new Jing { Message = "Jing" });
+            await mediator.SendAsync(new Jing { Message = "Jing" });
         }
         catch (Exception e)
         {
@@ -59,7 +60,7 @@ public static class Runner
             try
             {
                 int i = 0;
-                await foreach (var s in mediator.CreateStream<Sing, Song>(new Sing { Message = "Sing" }))
+                await foreach (var s in mediator.CreateStream(new Sing { Message = "Sing" }))
                 {
                     if (i == 0) {
                         failedSing = !s.Message.Contains("Singing do");
@@ -188,7 +189,7 @@ public static class Runner
         await writer.WriteLineAsync("Checking handler to catch exact exception...");
         try
         {
-            await mediator.Send<PingProtectedResource, Pong>(new PingProtectedResource { Message = "Ping to protected resource" });
+            await mediator.SendAsync(new PingProtectedResource { Message = "Ping to protected resource" });
             isHandledCorrectly = IsExceptionHandledBy<ForbiddenException, AccessDeniedExceptionHandler>(writer);
         }
         catch (Exception e)
@@ -207,7 +208,7 @@ public static class Runner
         await writer.WriteLineAsync("Checking shared handler to catch exception by base type...");
         try
         {
-            await mediator.Send<PingResource, Pong>(new PingResource { Message = "Ping to missed resource" });
+            await mediator.SendAsync(new PingResource { Message = "Ping to missed resource" });
             isHandledCorrectly = IsExceptionHandledBy<ResourceNotFoundException, ConnectionExceptionHandler>(writer);
         }
         catch (Exception e)
@@ -226,8 +227,8 @@ public static class Runner
         await writer.WriteLineAsync("Checking base handler to catch any exception...");
         try
         {
-            await mediator.Send<PingResourceTimeout, Pong>(new PingResourceTimeout { Message = "Ping to ISS resource" });
-            isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, CommonExceptionHandler> (writer);
+            await mediator.SendAsync(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource" });
+            isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
         }
         catch (Exception e)
         {
@@ -246,13 +247,14 @@ public static class Runner
 
         try
         {
-            await mediator.Send<ExceptionHandler.Overrides.PingResourceTimeout, Pong>(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
+            await mediator.SendAsync(new ExceptionHandler.Overrides.PingResourceTimeout { Message = "Ping to ISS resource (preferred)" });
             isHandledCorrectly = IsExceptionHandledBy<TaskCanceledException, ExceptionHandler.Overrides.CommonExceptionHandler> (writer);
         }
         catch (Exception e)
         {
             await writer.WriteLineAsync(e.Message);
         }
+
         await writer.WriteLineAsync();
 
         return isHandledCorrectly;
@@ -266,7 +268,7 @@ public static class Runner
 
         try
         {
-            await mediator.Send<PingNewResource, Pong>(new PingNewResource { Message = "Ping to ISS resource (override)" });
+            await mediator.SendAsync(new PingNewResource { Message = "Ping to ISS resource (override)" });
             isHandledCorrectly = IsExceptionHandledBy<ServerException, ExceptionHandler.Overrides.ServerExceptionHandler> (writer);
         }
         catch (Exception e)
@@ -333,7 +335,7 @@ public sealed class WrappingWriter : TextWriter
         _innerWriter.Write(value);
     }
 
-    public override Task WriteLineAsync(string value)
+    public override Task WriteLineAsync(string? value)
     {
         _stringWriter.AppendLine(value);
         return _innerWriter.WriteLineAsync(value);

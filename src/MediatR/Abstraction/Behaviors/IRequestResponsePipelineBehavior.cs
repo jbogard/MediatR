@@ -8,7 +8,7 @@ namespace MediatR.Abstraction.Behaviors;
 /// </summary>
 /// <typeparam name="TRequest">Request type.</typeparam>
 /// <typeparam name="TResponse">Response type.</typeparam>
-public delegate ValueTask<TResponse> RequestHandlerDelegate<in TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+public delegate Task<TResponse> RequestHandlerDelegate<in TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
     where TRequest : IRequest<TResponse>;
 
 /// <summary>
@@ -26,5 +26,5 @@ public interface IPipelineBehavior<TRequest, TResponse>
     /// <param name="request">Incoming request</param>
     /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken);
+    Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken);
 }

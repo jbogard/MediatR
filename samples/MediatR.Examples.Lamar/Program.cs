@@ -5,7 +5,7 @@ using Lamar;
 using Lamar.IoC.Instances;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
+using MediatR.DependencyInjection.ConfigurationBase;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -41,23 +41,44 @@ class Program
 
 internal static class ServiceRegistrarExtension
 {
-    public static ServiceRegistry ConfigureMediatR(this ServiceRegistry serviceRegistry, Action<MediatRServiceConfiguration<ServiceRegistry>> configuration)
+    public static ServiceRegistry ConfigureMediatR(this ServiceRegistry serviceRegistry, Action<LamarConfiguration> configuration)
     {
-        var dependencyRegistrarConfiguration = new DependencyInjectionRegistrarAdapter<ServiceRegistry>(
-            serviceRegistry,
-            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
-            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Transient(),
-            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
-            (registry, serviceType, implementationType) => registry.For(serviceType).Use(implementationType).Singleton(),
-            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton)),
-            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Transient)),
-            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Transient)),
-            (registry, serviceType, implementationType) => registry.TryAddEnumerable(new ServiceDescriptor(serviceType, implementationType, ServiceLifetime.Singleton)),
-            (registry, fromType, toType) => registry.For(toType).Use(fromType),
-            (registry, serviceType, instance) => registry.For(serviceType).Use(new ObjectInstance(serviceType, instance)));
+        var config = new LamarConfiguration();
 
-        MediatRConfigurator.ConfigureMediatR(dependencyRegistrarConfiguration, configuration);
+        configuration(config);
+
+        var adapter = new LamarServiceRegistryAdapter(serviceRegistry, config);
+
+        MediatRConfigurator.Configure(adapter, config);
 
         return serviceRegistry;
+    }
+
+    public sealed class LamarConfiguration : MediatRServiceConfiguration
+    {
+    }
+
+    internal sealed class LamarServiceRegistryAdapter : DependencyInjectionRegistrarAdapter<ServiceRegistry, LamarConfiguration>
+    {
+        public LamarServiceRegistryAdapter(ServiceRegistry registrar, LamarConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR.ExceptionHandling;
+using MediatR.ExceptionHandling.Request.Subscription;
 
 namespace MediatR.Abstraction.ExceptionHandler;
 
@@ -23,13 +23,4 @@ public interface IRequestExceptionHandler<in TRequest, in TException>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An awaitable task</returns>
     Task Handle(TRequest request, TException exception, RequestExceptionHandlerState state, CancellationToken cancellationToken);
-}
-
-/// <summary>
-/// Defines the base exception handler for a request and response
-/// </summary>
-/// <typeparam name="TRequest">Request type</typeparam>
-public interface IRequestExceptionHandler<in TRequest> : IRequestExceptionHandler<TRequest, Exception>
-    where TRequest : IRequest
-{
 }

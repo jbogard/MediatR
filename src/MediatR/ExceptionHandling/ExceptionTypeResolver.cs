@@ -8,11 +8,11 @@ internal static class ExceptionTypeResolver
 {
     private static readonly Type ObjectType = typeof(object);
 
-    [ThreadStatic]
-    private static List<Type>? arrayBuilder;
-
     // Mapped the exception type with itself and the type hierarchy of the exception type.
     private static readonly ConcurrentDictionary<Type, Type[]> exceptionTypeHierarchy = new();
+
+    [ThreadStatic]
+    private static List<Type>? arrayBuilder;
 
     public static Type[] GetExceptionTypeHierarchy(Type rootExceptionType) =>
         exceptionTypeHierarchy.GetOrAdd(rootExceptionType, ExceptionHierarchyFactory);

@@ -1,9 +1,9 @@
 using BenchmarkDotNet.Running;
 
-namespace MediatR.Benchmarks
+namespace MediatR.Benchmarks;
+
+internal sealed class Program
 {
-    public class Program
-    {
-        public static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
-    }
+    public static void Main(string[] args) =>
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }

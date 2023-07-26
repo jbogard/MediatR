@@ -3,20 +3,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction.Behaviors;
 
-namespace MediatR.ExceptionHandling;
+namespace MediatR.ExceptionHandling.RequestResponse;
 
 internal sealed class RequestResponseExceptionActionProcessBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
+    where TResponse : notnull
 {
     private static readonly Type ResponseType = typeof(TResponse);
-    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.MessageTypeHierarchyFactory(typeof(TRequest));
-    
-    private readonly ExceptionHandlerFactory _factory;
+    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.GetMessageTypeHierarchy(typeof(TRequest));
 
-    public RequestResponseExceptionActionProcessBehavior(ExceptionHandlerFactory exceptionHandlerFactory) =>
-        _factory = exceptionHandlerFactory;
+    private readonly IServiceProvider _serviceProvider;
 
-    public async ValueTask<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+    public RequestResponseExceptionActionProcessBehavior(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider;
+
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -28,8 +29,8 @@ internal sealed class RequestResponseExceptionActionProcessBehavior<TRequest, TR
             {
                 foreach (var messageType in RequestResponseTypeHierarchy)
                 {
-                    var handler = _factory.CreateRequestResponseExceptionActionHandler(messageType, ResponseType, exceptionType);
-                    await handler.Handle(request, exception, cancellationToken);
+                    var handler = ExceptionHandlerFactory.CreateRequestResponseExceptionActionHandler(messageType, ResponseType, exceptionType);
+                    await handler.Handle<TRequest, TResponse>(request, exception, _serviceProvider, cancellationToken);
                 }
             }
 

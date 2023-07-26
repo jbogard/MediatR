@@ -6,7 +6,7 @@ using MediatR.Abstraction.ExceptionHandler;
 
 namespace MediatR.Examples.ExceptionHandler;
 
-public class LogExceptionAction : IRequestResponseExceptionAction<Ping, Pong>
+public class LogExceptionAction : IRequestResponseExceptionAction<Ping, Pong, Exception>
 {
     private readonly TextWriter _writer;
 

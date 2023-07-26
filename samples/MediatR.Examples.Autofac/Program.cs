@@ -1,12 +1,12 @@
 using Autofac.Extensions.DependencyInjection;
 using MediatR.Abstraction;
-using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using Autofac;
 using MediatR.DependencyInjection;
+using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.Examples.Autofac;
 
@@ -43,29 +43,44 @@ internal static class Program
 
 internal static class AutoFactBuilderExtension
 {
-    public static ContainerBuilder ConfigureMediatR(this ContainerBuilder builder, Action<MediatRServiceConfiguration<ContainerBuilder>> configuration)
+    public static ContainerBuilder ConfigureMediatR(this ContainerBuilder builder, Action<ContainerBuilderConfiguration> configuration)
     {
-        var dependencyResolver = new DependencyInjectionRegistrarAdapter<ContainerBuilder>(
-            builder,
-            (containerBuilder, serviceType, implementingType) => containerBuilder.RegisterType(implementingType).As(serviceType).SingleInstance().PreserveExistingDefaults(),
-            (containerBuilder, type) => containerBuilder.RegisterType(type).AsSelf().SingleInstance().PreserveExistingDefaults(),
-            (containerBuilder, type) => containerBuilder.RegisterGeneric(type).AsSelf().SingleInstance().IfNotRegistered(type),
-            (containerBuilder, type, instance) => containerBuilder.RegisterInstance(instance).As(type).SingleInstance().IfNotRegistered(type),
-            (containerBuilder, fromType, toType) => containerBuilder.Register(c => c.Resolve(fromType)).As(toType).SingleInstance(),
-            (containerBuilder, fromType, toType) => containerBuilder.Register(c => c.Resolve(fromType)).As(toType).SingleInstance().PreserveExistingDefaults(),
-            (containerBuilder, fromType, toType) => containerBuilder.RegisterGeneric((c, genericTypes) => c.Resolve(fromType.MakeGenericType(genericTypes))).As(toType).SingleInstance(),
-            (containerBuilder, fromType, toTypes) => containerBuilder.RegisterGeneric((c, genericTypeParameter) => c.Resolve(fromType.MakeGenericType(genericTypeParameter))).As(toTypes).SingleInstance(),
-            (containerBuilder, serviceType, implementingType) => containerBuilder.RegisterType(implementingType).As(serviceType).InstancePerRequest(),
-            (containerBuilder, serviceType, implementingType) => containerBuilder.RegisterGeneric(implementingType).As(serviceType).InstancePerRequest(),
-            (containerBuilder, serviceType, implementingType) => containerBuilder.RegisterType(implementingType).As(serviceType).InstancePerRequest().PreserveExistingDefaults(),
-            (containerBuilder, serviceType, implementingType) => containerBuilder.RegisterGeneric(implementingType).As(serviceType).InstancePerRequest().IfNotRegistered(serviceType));
-
-        var config = new MediatRServiceConfiguration<ContainerBuilder>(dependencyResolver);
-
-        configuration(config);
+        var config = new ContainerBuilderConfiguration();
         
-        MediatRConfigurator.ConfigureMediatR(config);
+        configuration(config);
+
+        var adapter = new ContainerBuilderAdapter(builder, config);
+        
+        MediatRConfigurator.Configure(adapter, config);
         
         return builder;
+    }
+
+    public sealed class ContainerBuilderConfiguration : MediatRServiceConfiguration
+    {
+    }
+
+    internal sealed class ContainerBuilderAdapter : DependencyInjectionRegistrarAdapter<ContainerBuilder, ContainerBuilderConfiguration>
+    {
+        public ContainerBuilderAdapter(ContainerBuilder registrar, ContainerBuilderConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

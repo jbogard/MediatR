@@ -2,9 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR.ExceptionHandling;
+namespace MediatR.ExceptionHandling.Request.Subscription;
 
-public abstract class RequestExceptionActionHandler
+internal abstract class RequestExceptionActionHandler
 {
-    public abstract Task HandleAsync(IRequest request, Exception exception, CancellationToken cancellationToken);
+    public abstract Task HandleAsync<TMethodRequest>(TMethodRequest request, Exception exception, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+        where TMethodRequest : IRequest;
 }

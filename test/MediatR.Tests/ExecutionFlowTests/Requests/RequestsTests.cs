@@ -1,6 +1,6 @@
-﻿namespace MediatR.Tests.ExecutionFlowTests;
+﻿namespace MediatR.ExecutionFlowTests.Requests;
 
 public class RequestsTests
 {
-    
+
 }

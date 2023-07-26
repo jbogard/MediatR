@@ -1,6 +1,6 @@
-﻿namespace MediatR.Tests.ExecutionFlowTests;
+﻿namespace MediatR.ExecutionFlowTests.StreamRequest;
 
 public class StreamRequestTests
 {
-    
+
 }

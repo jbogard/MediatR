@@ -1,35 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <Authors>Jimmy Bogard</Authors>
-    <Description>Contracts package for requests, responses, and notifications</Description>
-    <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <Features>strict</Features>
-    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageIcon>gradient_128x128.png</PackageIcon>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <Deterministic>true</Deterministic>
-    <Version>2.0.1</Version>
     <RootNamespace>MediatR</RootNamespace>
-
+    <AssemblyName>MediatR.Contracts</AssemblyName>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\..\assets\logo\gradient_128x128.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-  </ItemGroup>
 
 </Project>

@@ -8,13 +8,13 @@ namespace MediatR.NotificationPublishers;
 /// <summary>
 /// Awaits each notification handler in a single foreach loop:
 /// <code>
-/// foreach (var handler in handlers) {
+/// foreach (var handler in handlers)
 ///     await handler(notification, cancellationToken);
-/// }
 /// </code>
 /// </summary>
 public class ForeachAwaitPublisher : INotificationPublisher
 {
+    /// <inheritdoc />
     public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
         where TNotification : INotification
     {

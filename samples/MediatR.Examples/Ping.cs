@@ -2,5 +2,5 @@
 
 public class Ping : IRequest<Pong>
 {
-    public string Message { get; set; }
+    public required string Message { get; set; }
 }

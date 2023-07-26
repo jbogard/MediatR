@@ -1,59 +1,92 @@
 ﻿using System;
+using System.Collections.Generic;
 using MediatR.Abstraction;
-using MediatR.ExceptionHandling;
+using MediatR.Abstraction.ExceptionHandler;
+using MediatR.Abstraction.Processors;
+using MediatR.DependencyInjection.AssemblyScanner;
+using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.ExceptionHandling.Request;
+using MediatR.ExceptionHandling.RequestResponse;
 using MediatR.Pipeline.Request;
 using MediatR.Pipeline.RequestResponse;
-using MediatR.Subscriptions;
 
 namespace MediatR.DependencyInjection;
 
 internal static class InternalServiceRegistrar
 {
-    public static void AddInternalServiceTypes<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
+    public static void RegisterInternalServiceTypes<TRegistrar, TConfiguration>(
+        DependencyInjectionRegistrarAdapter<TRegistrar, TConfiguration> adapter,
+        MediatRServiceConfiguration configuration)
+        where TConfiguration : MediatRServiceConfiguration
     {
-        var adapter = configuration.DependencyInjectionRegistrarAdapter;
-
-        adapter.RegisterSingleton(typeof(Mediator), new[]{ typeof(IMediator), typeof(ISender), typeof(IPublisher) });
+        adapter.Register(configuration, typeof(Mediator), (typeof(IMediator), true), (typeof(ISender), true), (typeof(IPublisher), true));
 
         if (configuration.NotificationPublisherType is not null)
-        {
-            adapter.RegisterSingletonOnlyOnce(adapter.Registrar, typeof(INotificationPublisher), configuration.NotificationPublisherType);
-        }
+            adapter.Register(configuration, configuration.NotificationPublisherType, (typeof(INotificationPublisher), true));
         else
-        {
-            adapter.RegisterInstance(adapter.Registrar, typeof(INotificationPublisher), configuration.NotificationPublisher);
-        }
-
-        adapter.RegisterSelfSingletonOnlyOnce(adapter.Registrar, typeof(ExceptionHandlerFactory));
-        adapter.RegisterSelfSingletonOnlyOnce(adapter.Registrar, typeof(SubscriptionFactory));
+            adapter.RegisterInstance(typeof(INotificationPublisher), configuration.NotificationPublisher);
     }
 
-    public static Type[] GetInternalProcessorPipelines() =>
-        new[]
-        {
-            typeof(RequestProcessorBehavior<>),
-            typeof(RequestResponseProcessorBehavior<,>)
-        };
+    public static IEnumerable<Type> GetInternalProcessorPipelines(TypeWrapper[] typeWrappers, MediatRServiceConfiguration configuration, IComparer<Type> comparer)
+    {
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestPreProcessor<>), typeof(IRequestPostProcessor<>)))
+            if (configuration.EnableCachingOfHandlers)
+                yield return typeof(CachingRequestProcessorBehavior<>);
+            else
+                yield return typeof(TransientRequestProcessorBehavior<>);
 
-    public static Type[] GetInternalExceptionHandlingPipelines<TRegistrar>(MediatRServiceConfiguration<TRegistrar> configuration)
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestPreProcessor<,>), typeof(IRequestPostProcessor<,>)))
+            if (configuration.EnableCachingOfHandlers)
+                yield return typeof(CachingRequestResponseProcessorBehavior<,>);
+            else
+                yield return typeof(TransientRequestResponseProcessorBehavior<,>);
+    }
+
+    public static IEnumerable<Type> GetInternalExceptionHandlingPipelines(TypeWrapper[] typeWrappers, IComparer<Type> comparer, MediatRServiceConfiguration configuration)
     {
         if (configuration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
         {
-            return new[]
-            {
-                typeof(RequestExceptionActionProcessorBehavior<>),
-                typeof(RequestExceptionHandlerProcessBehavior<>),
-                typeof(RequestResponseExceptionActionProcessBehavior<,>),
-                typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>)
-            };
+            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionAction<,>)))
+                yield return typeof(RequestExceptionActionProcessorBehavior<>);
+
+            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionHandler<,>)))
+                yield return typeof(RequestExceptionHandlerProcessBehavior<>);
+
+            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionAction<,,>)))
+                yield return typeof(RequestResponseExceptionActionProcessBehavior<,>);
+
+            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionHandler<,,>)))
+                yield return typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>);
+
+            yield break;
         }
 
-        return new[]
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionHandler<,>)))
+            yield return typeof(RequestExceptionHandlerProcessBehavior<>);
+
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionAction<,>)))
+            yield return typeof(RequestExceptionActionProcessorBehavior<>);
+
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionHandler<,,>)))
+            yield return typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>);
+
+        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionAction<,,>)))
+            yield return typeof(RequestResponseExceptionActionProcessBehavior<,>);
+    }
+
+    private static bool HasRelevantImplementation(TypeWrapper[] wrappers, IComparer<Type> comparer, params Type[] handlingOpenGenericInterface)
+    {
+        foreach (var typeWrapper in wrappers)
         {
-            typeof(RequestExceptionHandlerProcessBehavior<>),
-            typeof(RequestExceptionActionProcessorBehavior<>),
-            typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>),
-            typeof(RequestResponseExceptionActionProcessBehavior<,>)
-        };
+            foreach (var (_, openGenericInterface) in typeWrapper.OpenGenericInterfaces)
+            {
+                if (Array.BinarySearch(handlingOpenGenericInterface, openGenericInterface, comparer) > -1)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

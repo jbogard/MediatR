@@ -22,15 +22,3 @@ public interface IRequestExceptionAction<in TRequest, in TException>
     /// <returns>An awaitable task</returns>
     Task Execute(TRequest request, TException exception, CancellationToken cancellationToken);
 }
-
-/// <summary>
-/// Defines the base exception action for a request.
-///     You do not need to register this interface explicitly
-///     with a container as it inherits from the base
-///     <see cref="IRequestExceptionAction{TRequest, TException}" /> interface.
-/// </summary>
-/// <typeparam name="TRequest">The type of failed request</typeparam>
-public interface IRequestExceptionAction<in TRequest> : IRequestExceptionAction<TRequest, Exception>
-    where TRequest : IRequest
-{
-}

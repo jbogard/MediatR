@@ -5,7 +5,7 @@ using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
+using MediatR.DependencyInjection.ConfigurationBase;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.DryIoc;
@@ -39,44 +39,43 @@ class Program
 
 internal static class DryIoCException
 {
-    public static IContainer ConfigureMediatR(this IContainer containerInstance, Action<MediatRServiceConfiguration<IContainer>> configuration)
+    public static IContainer ConfigureMediatR(this IContainer containerInstance, Action<DryIoCContainerConfiguration> configuration)
     {
-        var dependencyRegistrarAdapter = new DependencyInjectionRegistrarAdapter<IContainer>(
-            containerInstance,
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Reuse.Singleton),
-            (container, type) => container.Register(type, Reuse.Singleton, ifAlreadyRegistered: IfAlreadyRegistered.Keep),
-            (container, type) => container.Register(type, Reuse.Singleton, ifAlreadyRegistered: IfAlreadyRegistered.Keep),
-            (container, type, instance) => container.RegisterInstance(type, instance),
-            (container, fromType, toType) => container.RegisterMapping(toType, fromType),
-            (container, fromType, toType) => container.RegisterMapping(toType, fromType, IfAlreadyRegistered.Keep),
-            (container, fromType, toTypes) =>
-            {
-                foreach (var toType in toTypes)
-                {
-                    container.RegisterMapping(toType, fromType);
-                }
-            },
-            (container, fromType, toTypes) =>
-            {
-                foreach (var toType in toTypes)
-                {
-                    if (!container.IsRegistered(toType, condition: factory => factory.ImplementationType == fromType))
-                    {
-                        container.RegisterMapping(toType, fromType);
-                    }
-                }
-            },
-            (container, serviceType, implementingType) => container.Register(serviceType, implementingType, Reuse.Transient),
-            (container, serviceType, implementingType) => container.Register(serviceType, implementingType, Reuse.Transient),
-            (container, serviceType, implementingType) => container.Register(serviceType, implementingType, Reuse.Transient, ifAlreadyRegistered: IfAlreadyRegistered.Keep),
-            (container, serviceType, implementingType) => container.Register(serviceType, implementingType, Reuse.Transient, ifAlreadyRegistered: IfAlreadyRegistered.Keep));
-
-        var config = new MediatRServiceConfiguration<IContainer>(dependencyRegistrarAdapter);
-
+        var config = new DryIoCContainerConfiguration();
         configuration(config);
 
-        MediatRConfigurator.ConfigureMediatR(config);
+        var adapter = new DryIoCContainerAdapter(containerInstance, config);
+
+        MediatRConfigurator.Configure(adapter, config);
 
         return containerInstance;
+    }
+
+    public sealed class DryIoCContainerConfiguration : MediatRServiceConfiguration
+    {
+    }
+
+    internal sealed class DryIoCContainerAdapter : DependencyInjectionRegistrarAdapter<IContainer, DryIoCContainerConfiguration>
+    {
+        public DryIoCContainerAdapter(IContainer registrar, DryIoCContainerConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

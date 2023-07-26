@@ -1,22 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
-  </PropertyGroup>
-  <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <Configuration>Release</Configuration>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.6" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.6" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
   </ItemGroup>
+
 </Project>

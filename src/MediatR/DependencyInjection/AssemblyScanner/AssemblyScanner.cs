@@ -1,85 +1,204 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using MediatR.Abstraction.Behaviors;
+using MediatR.Abstraction.ExceptionHandler;
+using MediatR.Abstraction.Handlers;
+using MediatR.Abstraction.Processors;
+using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.DependencyInjection.AssemblyScanner;
 
-internal static class AssemblyScanner<TRegistrar>
+internal readonly ref struct AssemblyScanner
 {
-    public static void RegisterMediatRServices(AssemblyScannerContext<TRegistrar> context)
+    private readonly IComparer<Type> _typeComparer = Comparer<Type>.Create(static (x, y) => x.GUID.CompareTo(y.GUID));
+    private readonly List<(Type Interface, bool MustBeSingleRegistration)> _serviceInterfaceArrayBuilder = new();
+
+    private readonly TypeWrapper[] _typesToScan;
+    private readonly MediatRServiceConfiguration _configuration;
+
+    public AssemblyScanner(MediatRServiceConfiguration configuration)
     {
-        var implementingInterfaces = new List<(Type, bool)>();
-        var typeVariants = new List<Type>();
+        _configuration = configuration;
+        var typeToScanCache = new Dictionary<Type, TypeWrapper>();
+        var typeWrappers = new List<TypeWrapper>();
 
-        foreach (var internalProcessorPipeline in InternalServiceRegistrar.GetInternalProcessorPipelines())
+        foreach (var assembly in configuration.AssembliesToRegister)
         {
-            ScanTypeAndRegisterImplementations(new TypeWrapper(internalProcessorPipeline), typeVariants, implementingInterfaces, context);
+            foreach (var type in assembly.DefinedTypes)
+            {
+                if (!type.IsAbstract && !type.IsEnum && configuration.TypeEvaluator(type))
+                {
+                    var wrapper = TypeWrapper.Create(type, configuration.AssembliesToRegister, typeToScanCache);
+                    typeWrappers.Add(wrapper);
+                }
+            }
         }
 
-        foreach (var kvp in context.Configuration.BehaviorsToRegister)
+        _typesToScan = typeWrappers.ToArray();
+    }
+
+    public void ScanForMediatRServices<TRegistrar, TConfiguration>(DependencyInjectionRegistrarAdapter<TRegistrar, TConfiguration> adapter)
+        where TConfiguration : MediatRServiceConfiguration
+    {
+        foreach (var processorPipeline in InternalServiceRegistrar.GetInternalProcessorPipelines(_typesToScan, _configuration, _typeComparer))
         {
-            context.Configuration.DependencyInjectionRegistrarAdapter
-                .Register(context.Configuration, kvp.Key, kvp.Value, false);
+            var wrapper = new TypeWrapper(processorPipeline);
+            ScanTypeForRelevantInterfaces(wrapper, _serviceInterfaceArrayBuilder, _configuration);
+            RegisterServiceTypes(wrapper, _serviceInterfaceArrayBuilder.ToArray(), adapter, _configuration);
+            _serviceInterfaceArrayBuilder.Clear();
         }
 
-        foreach (var typeWrapper in context.TypesToScan)
+        _configuration.RequestBehaviors.Register(adapter, _configuration);
+        _configuration.RequestResponseBehaviors.Register(adapter, _configuration);
+        _configuration.StreamRequestBehaviors.Register(adapter, _configuration);
+        _configuration.RequestPreProcessors.Register(adapter, _configuration);
+        _configuration.RequestPostProcessors.Register(adapter, _configuration);
+        _configuration.RequestResponsePreProcessors.Register(adapter, _configuration);
+        _configuration.RequestResponsePostProcessors.Register(adapter, _configuration);
+
+        foreach (var typeWrapper in _typesToScan)
         {
-            if (typeWrapper.TypesInheritingThisType.Count > 0 || typeWrapper.Interfaces.Length is 0)
+            // Checking for inherited types that are inherited by anyone results in errors in the registration and should also not be expected by the user.
+            // Types with no interfaces can not have anything for us to look for.
+            // To improves performance skip these types.
+            if (typeWrapper.TypesInheritingThisType.Count is not 0 || typeWrapper.Interfaces.Length is 0)
                 continue;
 
-            ScanTypeAndRegisterImplementations(typeWrapper, typeVariants, implementingInterfaces, context);
+            ScanTypeForRelevantInterfaces(typeWrapper, _serviceInterfaceArrayBuilder, _configuration);
+
+            if (_serviceInterfaceArrayBuilder.Count > 0)
+            {
+                RegisterServiceTypes(typeWrapper, _serviceInterfaceArrayBuilder.ToArray(), adapter, _configuration);
+                _serviceInterfaceArrayBuilder.Clear();
+            }
         }
 
-        foreach (var exceptionHandlingPipeline in InternalServiceRegistrar.GetInternalExceptionHandlingPipelines(context.Configuration))
+        foreach (var exceptionHandlingPipeline in InternalServiceRegistrar.GetInternalExceptionHandlingPipelines(_typesToScan, _typeComparer, _configuration))
         {
-            ScanTypeAndRegisterImplementations(new TypeWrapper(exceptionHandlingPipeline), typeVariants, implementingInterfaces, context);
+            var wrapper = new TypeWrapper(exceptionHandlingPipeline);
+            ScanTypeForRelevantInterfaces(wrapper, _serviceInterfaceArrayBuilder, _configuration);
+            RegisterServiceTypes(wrapper, _serviceInterfaceArrayBuilder.ToArray(), adapter, _configuration);
+            _serviceInterfaceArrayBuilder.Clear();
+        }
+
+        InternalServiceRegistrar.RegisterInternalServiceTypes(adapter, _configuration);
+    }
+
+    private static void ScanTypeForRelevantInterfaces(in TypeWrapper typeWrapper, List<(Type, bool)> implementingInterface, MediatRServiceConfiguration configuration)
+    {
+        foreach (var interfaceImpl in typeWrapper.OpenGenericInterfaces)
+        {
+            ScanForHandlers(implementingInterface, interfaceImpl);
+            ScanForExceptionHandler(implementingInterface, interfaceImpl);
+            ScanForProcessors(implementingInterface, typeWrapper.Type, interfaceImpl, configuration);
+            ScanForBehaviors(implementingInterface, typeWrapper.Type, interfaceImpl, configuration);
         }
     }
 
-    private static void ScanTypeAndRegisterImplementations(TypeWrapper typeWrapper, List<Type> typeVariants, List<(Type, bool)> implementingInterfaces, AssemblyScannerContext<TRegistrar> context)
+    private static void RegisterServiceTypes<TRegistrar, TConfiguration>(
+        in TypeWrapper typeWrapper,
+        (Type, bool)[] implementingInterface,
+        DependencyInjectionRegistrarAdapter<TRegistrar, TConfiguration> adapter,
+        MediatRServiceConfiguration configuration)
+        where TConfiguration : MediatRServiceConfiguration
     {
         if (typeWrapper.IsOpenGeneric)
         {
-            AddRequestTypeVariants(typeVariants, typeWrapper);
-            AddRequestResponseTypeVariants(typeVariants, typeWrapper);
-            AddStreamRequestTypeVariants(typeVariants, typeWrapper);
+            adapter.RegisterOpenGeneric(configuration, typeWrapper.Type, implementingInterface);
         }
         else
         {
-            typeVariants.Add(typeWrapper.Type);
+            adapter.Register(configuration, typeWrapper.Type, implementingInterface);
         }
-
-        foreach (var typeVariant in typeVariants)
-        {
-            AddHandlerInterfaces(implementingInterfaces, typeVariant);
-            AddProcessorInterfaces(implementingInterfaces, typeVariant);
-            AddExceptionHandingInterfaces(implementingInterfaces, typeVariant);
-            AddPipelineInterfaces(implementingInterfaces, typeVariant);
-
-            RegisterType(typeVariant, implementingInterfaces.ToArray(), context);
-
-            implementingInterfaces.Clear();
-        }
-
-        typeVariants.Clear();
     }
 
-    private static void RegisterType(Type implementingType, (Type ImplementingInterface, bool MustBeSingleRegistration)[] implementingInterfaces, AssemblyScannerContext<TRegistrar> context)
+    private static void ScanForHandlers(
+        List<(Type Interface, bool MustBeSingleRegistration)> implementingInterfaces,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl)
     {
-        if (implementingInterfaces.Length < 1)
-        {
-            return;
-        }
-        
-        var adapter = context.Configuration.DependencyInjectionRegistrarAdapter;
+        if (interfaceImpl.OpenGenericInterface == typeof(INotificationHandler<>))
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
 
-        foreach (var grouping in implementingInterfaces.GroupBy(x => x.MustBeSingleRegistration))
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestHandler<>))
+            implementingInterfaces.Add((interfaceImpl.Interface, true));
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestHandler<,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, true));
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IStreamRequestHandler<,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, true));
+    }
+
+    private static void ScanForExceptionHandler(
+        List<(Type Interface, bool MustBeSingleRegistration)> implementingInterfaces,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl)
+    {
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestExceptionAction<,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestExceptionHandler<,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, true));
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionAction<,,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestResponseExceptionHandler<,,>))
+            implementingInterfaces.Add((interfaceImpl.Interface, true));
+    }
+
+    private static void ScanForProcessors(
+        List<(Type Interface, bool MustBeSingleRegistration)> implementingInterfaces,
+        Type implementationType,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl,
+        MediatRServiceConfiguration configuration)
+    {
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestPreProcessor<>) &&
+            !configuration.RequestPreProcessors.ContainsRegistration(interfaceImpl.Interface, implementationType))
         {
-            adapter.Register(
-                context.Configuration,
-                implementingType,
-                grouping.Select(i => i.ImplementingInterface),
-                grouping.Key);
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestPostProcessor<>) &&
+            !configuration.RequestPostProcessors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestPreProcessor<,>) &&
+            !configuration.RequestResponsePreProcessors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IRequestPostProcessor<,>) &&
+            !configuration.RequestResponsePostProcessors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+    }
+
+    private static void ScanForBehaviors(
+        List<(Type Interface, bool MustBeSingleRegistration)> implementingInterfaces,
+        Type implementationType,
+        (Type Interface, Type OpenGenericInterface) interfaceImpl,
+        MediatRServiceConfiguration configuration)
+    {
+        if (interfaceImpl.OpenGenericInterface == typeof(IPipelineBehavior<>) &&
+            !configuration.RequestBehaviors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IPipelineBehavior<,>) &&
+            !configuration.RequestResponseBehaviors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
+        }
+
+        if (interfaceImpl.OpenGenericInterface == typeof(IStreamPipelineBehavior<,>) &&
+            !configuration.StreamRequestBehaviors.ContainsRegistration(interfaceImpl.Interface, implementationType))
+        {
+            implementingInterfaces.Add((interfaceImpl.Interface, false));
         }
     }
 }

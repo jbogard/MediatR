@@ -6,7 +6,7 @@ using LightInject;
 using LightInject.Microsoft.DependencyInjection;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.MicrosoftDICExtensions;
+using MediatR.DependencyInjection.ConfigurationBase;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.LightInject;
@@ -40,52 +40,44 @@ class Program
 
 internal static class ServiceContainerExtension
 {
-    public static ServiceContainer ConfigureMediatR(this ServiceContainer serviceContainer, Action<MediatRServiceConfiguration<ServiceContainer>> configuration)
+    public static ServiceContainer ConfigureMediatR(this ServiceContainer serviceContainer, Action<LightInjectConfiguration> configuration)
     {
-        var dependencyInjectionConfiguration = new DependencyInjectionRegistrarAdapter<ServiceContainer>(
-            serviceContainer,
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerContainerLifetime()),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerRequestLifeTime()),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerContainerLifetime()),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, new PerRequestLifeTime()),
-            (container, serviceType, implementationType) =>
-            {
-                if (!container.ServiceExists(serviceType, implementationType))
-                {
-                    container.Register(serviceType, implementationType, new PerContainerLifetime());
-                }
-            },
-            (container, serviceType, implementationType) =>
-            {
-                if (!container.ServiceExists(serviceType, implementationType))
-                {
-                    container.Register(serviceType, implementationType, new PerRequestLifeTime());
-                }
-            },
-            (container, serviceType, implementationType) =>
-            {
-                if (!container.ServiceExists(serviceType, implementationType))
-                {
-                    container.Register(serviceType, implementationType, new PerRequestLifeTime());
-                }
-            },
-            (container, serviceType, implementationType) =>
-            {
-                if (!container.ServiceExists(serviceType, implementationType))
-                {
-                    container.Register(serviceType, implementationType, new PerContainerLifetime());
-                }
-            },
-            (container, fromType, toType) => container.Register(toType, fromType, new PerContainerLifetime()),
-            (container, serviceType, instance) => container.RegisterInstance(serviceType, instance));
+        var config = new LightInjectConfiguration();
 
-        MediatRConfigurator.ConfigureMediatR(dependencyInjectionConfiguration, configuration);
+        configuration(config);
+
+        var adapter = new LightInjectContainerAdapter(serviceContainer, config);
+        
+        MediatRConfigurator.Configure(adapter, config);
 
         return serviceContainer;
     }
 
-    private static bool ServiceExists(this IServiceRegistry container, Type serviceType, Type implementingType) =>
-        container.AvailableServices.Any(serviceRegistration =>
-            serviceRegistration.ServiceType == serviceType &&
-            serviceRegistration.ImplementingType == implementingType);
+    public sealed class LightInjectConfiguration : MediatRServiceConfiguration
+    {
+    }
+
+    internal sealed class LightInjectContainerAdapter : DependencyInjectionRegistrarAdapter<ServiceContainer, LightInjectConfiguration>
+    {
+        public LightInjectContainerAdapter(ServiceContainer registrar, LightInjectConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
+    }
 }

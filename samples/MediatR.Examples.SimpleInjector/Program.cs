@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using MediatR.Abstraction;
-using MediatR.MicrosoftDICExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using MediatR.DependencyInjection;
 using SimpleInjector;
+using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.Examples.SimpleInjector;
 
@@ -43,23 +43,44 @@ internal static class Program
 
 internal static class ContainerExtension
 {
-    public static Container ConfigureMediarR(this Container containerInstance, Action<MediatRServiceConfiguration<Container>> configuration)
+    public static Container ConfigureMediarR(this Container containerInstance, Action<SimpleInjectorConfiguration> configuration)
     {
-        var dependencyRegistrarationConfiguration = new DependencyInjectionRegistrarAdapter<Container>(
-            containerInstance,
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Singleton),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Transient),
-            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Singleton),
-            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Transient),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Singleton),
-            (container, serviceType, implementationType) => container.Register(serviceType, implementationType, Lifestyle.Transient),
-            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Transient),
-            (container, serviceType, implementationType) => container.Register(serviceType, new[] {implementationType}, Lifestyle.Singleton),
-            (container, fromType, toType) => container.Register(toType, fromType, Lifestyle.Singleton),
-            (container, serviceType, instance) => container.RegisterInstance(serviceType, instance));
+        var config = new SimpleInjectorConfiguration();
 
-        MediatRConfigurator.ConfigureMediatR(dependencyRegistrarationConfiguration, configuration);
+        configuration(config);
+
+        var adapter = new SimpleInjectorAdapter(containerInstance, config);
+
+        MediatRConfigurator.Configure(adapter, config);
 
         return containerInstance;
+    }
+    
+    public sealed class SimpleInjectorConfiguration : MediatRServiceConfiguration
+    {
+    }
+    
+    internal sealed class SimpleInjectorAdapter : DependencyInjectionRegistrarAdapter<Container, SimpleInjectorConfiguration>
+    {
+        public SimpleInjectorAdapter(Container registrar, SimpleInjectorConfiguration configuration)
+            : base(registrar, configuration)
+        {
+        }
+
+        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+
+        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
     }
 }

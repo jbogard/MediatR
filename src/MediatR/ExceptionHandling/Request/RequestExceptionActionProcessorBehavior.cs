@@ -3,19 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction.Behaviors;
 
-namespace MediatR.ExceptionHandling;
+namespace MediatR.ExceptionHandling.Request;
 
 internal sealed class RequestExceptionActionProcessorBehavior<TRequest> : IPipelineBehavior<TRequest>
     where TRequest : IRequest
 {
-    private static readonly Type[] RequestExceptionType = MessageTypeResolver.MessageTypeHierarchyFactory(typeof(TRequest));
-    
-    private readonly ExceptionHandlerFactory _factory;
+    private static readonly Type[] RequestExceptionType = MessageTypeResolver.GetMessageTypeHierarchy(typeof(TRequest));
 
-    public RequestExceptionActionProcessorBehavior(ExceptionHandlerFactory factory) =>
-        _factory = factory;
+    private readonly IServiceProvider _serviceProvider;
 
-    public async ValueTask Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
+    public RequestExceptionActionProcessorBehavior(IServiceProvider serviceProvider) =>
+        _serviceProvider = serviceProvider;
+
+    public async Task Handle(TRequest request, RequestHandlerDelegate<TRequest> next, CancellationToken cancellationToken)
     {
         try
         {
@@ -27,8 +27,8 @@ internal sealed class RequestExceptionActionProcessorBehavior<TRequest> : IPipel
             {
                 foreach (var messageType in RequestExceptionType)
                 {
-                    var handler = _factory.CreateRequestExceptionActionHandler(messageType, exceptionType);
-                    await handler.HandleAsync(request, exception, cancellationToken);
+                    var handler = ExceptionHandlerFactory.CreateRequestExceptionActionHandler(messageType, exceptionType);
+                    await handler.HandleAsync(request, exception, _serviceProvider, cancellationToken);
                 }
             }
 

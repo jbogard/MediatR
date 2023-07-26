@@ -1,128 +1,198 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MediatR.DependencyInjection.ConfigurationBase;
+using System;
 
 namespace MediatR.DependencyInjection;
 
 /// <summary>
-/// Declares the DiC Registrar Adapter
+/// Declares the DiC Registrar Adapter.
 /// </summary>
 /// <typeparam name="TRegistrar">The Registrar type.</typeparam>
-public sealed class DependencyInjectionRegistrarAdapter<TRegistrar>
+/// <typeparam name="TConfiguration">The MediarR configuration.</typeparam>
+public abstract class DependencyInjectionRegistrarAdapter<TRegistrar, TConfiguration>
+    where TConfiguration : MediatRServiceConfiguration
 {
     /// <summary>
-    /// Get the registrar to setup MediatR.
+    /// Get the registrar where to setup MediatR.
     /// </summary>
-    public TRegistrar Registrar { get; }
-    
-    /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a type to it self as a singleton and makes sure it is only registered once.
-    /// </summary>
-    public Action<TRegistrar, Type> RegisterSelfSingletonOnlyOnce { get; }
+    protected TRegistrar Registrar { get; }
 
     /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a singleton and makes sure it is only registered once.
+    /// Gets the current used configuration for MediatR.
     /// </summary>
-    public Action<TRegistrar, Type, Type> RegisterSingletonOnlyOnce { get; }
-    
-    /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its instance already created.
-    /// </summary>
-    public Action<TRegistrar, Type, object> RegisterInstance { get; }
-    
-    /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its implementing type already registered but should be forwarded to this service type.
-    /// </summary>
-    public Action<TRegistrar, Type, Type> RegisterMapping { get; }
-    
-    /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its implementing type already registered but should be forwarded to this service type and makes sure that its mapping is only registered once.
-    /// </summary>
-    public Action<TRegistrar, Type, Type> RegisterMappingOnlyOnce { get; }
+    protected TConfiguration Configuration { get; }
 
     /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a transient.
+    /// Creates an instance of <see cref="DependencyInjectionRegistrarAdapter{TRegistrar,TConfiguration}"/>
     /// </summary>
-    public Action<TRegistrar, Type, Type> RegisterTransient { get; }
-
-    /// <summary>
-    /// Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a transient and makes sure that it is only registered once.
-    /// </summary>
-    public Action<TRegistrar, Type, Type> RegisterTransientOnlyOnce { get; }
-
-    /// <summary>
-    /// Creates an adapter to register all MediatR Services.
-    /// </summary>
-    /// <param name="registrar">The registrar to setup MediatR.</param>
-    /// <param name="registerSelfSingletonOnlyOnce">Defines with the <typeparamref name="TRegistrar"/> how to register a type to it self as a singleton and makes sure it is only registered once.</param>
-    /// <param name="registerSingletonOnlyOnce">Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a singleton and makes sure it is only registered once.</param>
-    /// <param name="registerInstance">Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its instance already created.</param>
-    /// <param name="registerMapping">Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its implementing type already registered but should be forwarded to this service type.</param>
-    /// <param name="registerMappingOnlyOnce">Defines with the <typeparamref name="TRegistrar"/> how to register a service type with its implementing type already registered but should be forwarded to this service type and makes sure that its mapping is only registered once.</param>
-    /// <param name="registerTransient">Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a transient.</param>
-    /// <param name="registerTransientOnlyOnce">Defines with the <typeparamref name="TRegistrar"/> how to register a service type to the implementation type as a transient and makes sure that it is only registered once.</param>
-    public DependencyInjectionRegistrarAdapter(
-        TRegistrar registrar,
-        Action<TRegistrar, Type, Type> registerSingletonOnlyOnce,
-        Action<TRegistrar, Type> registerSelfSingletonOnlyOnce,
-        Action<TRegistrar, Type, object> registerInstance,
-        Action<TRegistrar, Type, Type> registerMapping,
-        Action<TRegistrar, Type, Type> registerMappingOnlyOnce,
-        Action<TRegistrar, Type, Type> registerTransient,
-        Action<TRegistrar, Type, Type> registerTransientOnlyOnce)
+    /// <param name="registrar">The registrar where to register MediatR.</param>
+    /// <param name="configuration">The configuration to use to register MediatR.</param>
+    protected DependencyInjectionRegistrarAdapter(TRegistrar registrar, TConfiguration configuration)
     {
         Registrar = registrar;
-        RegisterSelfSingletonOnlyOnce = registerSelfSingletonOnlyOnce;
-        RegisterSingletonOnlyOnce = registerSingletonOnlyOnce;
-        RegisterInstance = registerInstance;
-        RegisterMapping = registerMapping;
-        RegisterMappingOnlyOnce = registerMappingOnlyOnce;
-        RegisterTransient = registerTransient;
-        RegisterTransientOnlyOnce = registerTransientOnlyOnce;
+        Configuration = configuration;
     }
 
-    internal void Register(
-        MediatRServiceConfiguration<TRegistrar> configuration,
-        Type implementingType,
-        IEnumerable<Type> serviceTypes,
-        bool mustOnlyRegisterOnce)
+    /// <summary>
+    /// Registers a type to it self as a single instance.
+    /// </summary>
+    /// <param name="serviceType">The service and implementation type.</param>
+    public virtual void RegisterSelfSingleton(Type serviceType) =>
+        RegisterSingleton(serviceType, serviceType);
+
+    /// <summary>
+    /// Registers an open generic type to it self as a single instance.
+    /// </summary>
+    /// <param name="serviceType">The open generic service and implementation type.</param>
+    public virtual void RegisterOpenGenericSelfSingleton(Type serviceType) =>
+        RegisterOpenGenericSingleton(serviceType, serviceType);
+
+    /// <summary>
+    /// Registers a service type to its instance.
+    /// </summary>
+    /// <param name="serviceType"></param>
+    /// <param name="instance"></param>
+    public abstract void RegisterInstance(Type serviceType, object instance);
+
+    /// <summary>
+    /// Registers the <paramref name="serviceType"/> to the <paramref name="implementationType"/> as a singleton.
+    /// </summary>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementing type.</param>
+    public abstract void RegisterSingleton(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers the open generic <paramref name="serviceType"/> to the open generic <paramref name="implementationType"/> as a singleton.
+    /// </summary>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public abstract void RegisterOpenGenericSingleton(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers the <paramref name="serviceType"/> to the <paramref name="implementationType"/> as a singleton but ensures that it exists only once.
+    /// </summary>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementing type.</param>
+    public virtual void RegisterSingletonOnlyOnce(Type serviceType, Type implementationType)
     {
-        if (configuration.RegistrationOptions == RegistrationOptions.Transient)
+        if (!IsAlreadyRegistered(serviceType, implementationType))
         {
-            foreach (var serviceType in serviceTypes)
-            {
-                if (mustOnlyRegisterOnce)
-                {
-                    RegisterTransientOnlyOnce(Registrar, serviceType, implementingType);
-                }
-                else
-                {
-                    RegisterTransient(Registrar, serviceType, implementingType);
-                }
-            }
-        }
-        else
-        {
-            RegisterSelfSingletonOnlyOnce(Registrar, implementingType);
-            foreach (var serviceType in serviceTypes)
-            {
-                if (mustOnlyRegisterOnce)
-                {
-                    RegisterMappingOnlyOnce(Registrar, serviceType, implementingType);
-                }
-                else
-                {
-                    RegisterMapping(Registrar, serviceType, implementingType);
-                }
-            }
+            RegisterSingleton(serviceType, implementationType);
         }
     }
 
-    internal void RegisterSingleton(Type implementationType, IEnumerable<Type> serviceTypes)
+    /// <summary>
+    /// Registers the open generic <paramref name="serviceType"/> to the open generic <paramref name="implementationType"/> as a singleton but ensures that it exists only once.
+    /// </summary>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public virtual void RegisterOpenGenericSingletonOnlyOnce(Type serviceType, Type implementationType)
     {
-        RegisterSelfSingletonOnlyOnce(Registrar, implementationType);
-        foreach (var serviceType in serviceTypes)
+        if (!IsAlreadyRegistered(serviceType, implementationType))
         {
-            RegisterMappingOnlyOnce(Registrar, serviceType, implementationType);
+            RegisterOpenGenericSingleton(serviceType, implementationType);
         }
     }
+
+    /// <summary>
+    /// Registers a mapping or a factory to get for the service type the implementation type.
+    /// </summary>
+    /// <remarks>
+    /// This is to ensure that a single implementation type can have multiple service types but only creates one instance.
+    /// </remarks>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementation type.</param>
+    public abstract void RegisterMapping(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers a mapping or a factory to get for the open generic service type the open generic implementation type.
+    /// </summary>
+    /// <remarks>
+    /// This is to ensure that a single open generic implementation type can have multiple open generic service types but only creates one instance.
+    /// </remarks>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public abstract void RegisterOpenGenericMapping(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers a mapping or a factory to get for the service type the implementation type but ensures that it exists only once.
+    /// </summary>
+    /// <remarks>
+    /// This is to ensure that a single implementation type can have multiple service types but only creates one instance.
+    /// </remarks>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementation type.</param>
+    public virtual void RegisterMappingOnlyOnce(Type serviceType, Type implementationType)
+    {
+        if (!IsAlreadyRegistered(serviceType, implementationType))
+        {
+            RegisterMapping(serviceType, implementationType);
+        }
+    }
+
+    /// <summary>
+    /// Registers a mapping or a factory to get for the open generic service type the open generic implementation type but ensures that it exists only once.
+    /// </summary>
+    /// <remarks>
+    /// This is to ensure that a single open generic implementation type can have multiple open generic service types but only creates one instance.
+    /// </remarks>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public virtual void RegisterOpenGenericMappingOnlyOnce(Type serviceType, Type implementationType)
+    {
+        if (!IsAlreadyRegistered(serviceType, implementationType))
+        {
+            RegisterOpenGenericMapping(serviceType, implementationType);
+        }
+    }
+
+    /// <summary>
+    /// Registers the <paramref name="serviceType"/> with the <paramref name="implementationType"/> with a configurable service lifetime.
+    /// </summary>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementation type.</param>
+    public abstract void Register(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers the open generic <paramref name="serviceType"/> with the open generic <paramref name="implementationType"/> with a configurable service lifetime.
+    /// </summary>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public abstract void RegisterOpenGeneric(Type serviceType, Type implementationType);
+
+    /// <summary>
+    /// Registers the <paramref name="serviceType"/> with the <paramref name="implementationType"/> with a configurable service lifetime but ensures that it exists only once.
+    /// </summary>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementation type.</param>
+    public virtual void RegisterOnlyOnce(Type serviceType, Type implementationType)
+    {
+        if (!IsAlreadyRegistered(serviceType, implementationType))
+        {
+            Register(serviceType, implementationType);
+        }
+    }
+
+    /// <summary>
+    /// Registers the open generic <paramref name="serviceType"/> with the open generic <paramref name="implementationType"/> with a configurable service lifetime but ensures that it exists only once.
+    /// </summary>
+    /// <param name="serviceType">The open generic service type.</param>
+    /// <param name="implementationType">The open generic implementation type.</param>
+    public virtual void RegisterOpenGenericOnlyOnce(Type serviceType, Type implementationType)
+    {
+        if (!IsAlreadyRegistered(serviceType, implementationType))
+        {
+            RegisterOpenGeneric(serviceType, implementationType);
+        }
+    }
+
+    /// <summary>
+    /// Checks if a service type is already registered with the same implementation type.
+    /// </summary>
+    /// <remarks>
+    /// This also includes open generic services and not open generic services.
+    /// </remarks>
+    /// <param name="serviceType">The service type.</param>
+    /// <param name="implementationType">The implementation type.</param>
+    /// <returns><c>true</c> if the service with its implementation type is already registered in the container; else <c>false</c>.</returns>
+    public abstract bool IsAlreadyRegistered(Type serviceType, Type implementationType);
 }
