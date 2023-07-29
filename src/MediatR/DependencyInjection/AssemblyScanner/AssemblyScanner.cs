@@ -58,9 +58,9 @@ internal readonly ref struct AssemblyScanner
         foreach (var (typeWrapper, options) in _typesToScan)
         {
             // Checking for inherited types that are inherited by any other type, results in errors in the registration and should also not be expected by the user.
-            // Types with no interfaces can not have anything for us to look for.
+            // Types with no open generic interfaces can not have anything for us to look for.
             // To improves performance skip these types.
-            if (typeWrapper.TypesInheritingThisType.Count is not 0 || typeWrapper.Interfaces.Length is 0)
+            if (typeWrapper.TypesInheritingThisType.Count is not 0 || typeWrapper.OpenGenericInterfaces.Length is 0)
                 continue;
 
             ScanTypeForRelevantInterfaces((typeWrapper, options), _serviceInterfaceArrayBuilder, _configuration);

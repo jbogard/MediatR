@@ -9,9 +9,9 @@ internal sealed class AssemblyConfigurationEqualityComparer : IEqualityComparer<
     private AssemblyConfigurationEqualityComparer()
     {
     }
-    
+
     public bool Equals(AssemblyConfiguration x, AssemblyConfiguration y) => 
-        x.Assembly.Equals(y.Assembly);
+        x.Assembly == y.Assembly;
 
     public int GetHashCode(AssemblyConfiguration obj) => obj.Assembly.GetHashCode();
 }
