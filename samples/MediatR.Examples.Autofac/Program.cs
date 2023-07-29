@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Autofac;
 using MediatR.DependencyInjection;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 
 namespace MediatR.Examples.Autofac;
 
@@ -67,20 +67,40 @@ internal static class AutoFactBuilderExtension
         {
         }
 
-        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+        public override void RegisterInstance(Type serviceType, object instance) =>
+            Registrar.RegisterInstance(instance).As(serviceType);
 
-        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterType(implementationType).As(serviceType).SingleInstance();
 
-        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterGeneric(implementationType).As(serviceType);
 
-        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterMapping(Type serviceType, Type implementationType) =>
+            Registrar.Register(context => context.Resolve(implementationType)).As(serviceType);
 
-        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterMappingOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.Register(context => context.Resolve(implementationType)).As(serviceType).PreserveExistingDefaults();
 
-        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) =>
+            Registrar.RegisterGeneric((context, types) => context.Resolve(implementationType.MakeGenericType(types))).As(serviceType);
 
-        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericMappingOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.RegisterGeneric((context, types) => context.Resolve(implementationType.MakeGenericType(types))).As(serviceType).IfNotRegistered(serviceType);
 
-        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void Register(Type serviceType, Type implementationType) =>
+            Registrar.RegisterType(implementationType).As(serviceType).SingleInstance();
+
+        public override void RegisterOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.RegisterType(implementationType).As(serviceType).PreserveExistingDefaults();
+
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) =>
+            Registrar.RegisterGeneric(implementationType).As(serviceType).SingleInstance();
+
+        public override void RegisterOpenGenericOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.RegisterGeneric(implementationType).As(serviceType).IfNotRegistered(serviceType);
+
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) =>
+            throw new NotSupportedException();
     }
 }

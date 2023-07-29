@@ -2,12 +2,10 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Lamar;
-using Lamar.IoC.Instances;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MediatR.Examples.Lamar;
 
@@ -56,6 +54,7 @@ internal static class ServiceRegistrarExtension
 
     public sealed class LamarConfiguration : MediatRServiceConfiguration
     {
+        public ServiceLifetime MappingLifetime { get; set; } = ServiceLifetime.Singleton;
     }
 
     internal sealed class LamarServiceRegistryAdapter : DependencyInjectionRegistrarAdapter<ServiceRegistry, LamarConfiguration>
@@ -65,20 +64,56 @@ internal static class ServiceRegistrarExtension
         {
         }
 
-        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+        public override void RegisterInstance(Type serviceType, object instance) =>
+            Registrar.AddSingleton(serviceType, instance);
 
-        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterSingleton(Type serviceType, Type implementationType) =>
+            Registrar.AddSingleton(serviceType, implementationType);
 
-        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) =>
+            Registrar.AddSingleton(serviceType, implementationType);
 
-        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterMapping(Type serviceType, Type implementationType) =>
+            Registrar.Add(new ServiceDescriptor(serviceType, sp => sp.GetService(implementationType)!, Configuration.MappingLifetime));
 
-        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) =>
+            Registrar.Add(new ServiceDescriptor(serviceType, sp => sp.GetService(implementationType)!, Configuration.MappingLifetime));
 
-        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void Register(Type serviceType, Type implementationType) =>
+            Registrar.AddSingleton(serviceType, implementationType);
 
-        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) =>
+            Registrar.AddSingleton(serviceType, implementationType);
 
-        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType)
+        {
+            for (var i = 0; i < Registrar.Count; i++)
+            {
+                var descriptor = Registrar[i];
+                if (descriptor.ServiceType == serviceType && IsImplementationType(descriptor, implementationType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsImplementationType(ServiceDescriptor serviceDescriptor, Type implementationType)
+        {
+            if (serviceDescriptor.ImplementationType is not null &&
+                serviceDescriptor.ImplementationType == implementationType)
+            {
+                return true;
+            }
+
+            if (serviceDescriptor.ImplementationInstance is not null &&
+                serviceDescriptor.ImplementationInstance.GetType() == implementationType)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

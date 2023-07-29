@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.Subscriptions.Notifications;
 using MediatR.Subscriptions.Requests;
 using MediatR.Subscriptions.StreamingRequests;
@@ -49,21 +49,21 @@ internal static class SubscriptionFactory
         return (RequestHandler) Activator.CreateInstance(requestHandlerType)!;
     }
 
-    public static RequestResponseHandler CreateRequestResponseHandler(Type requestType, Type responseType)
+    public static RequestResponseHandler CreateRequestResponseHandler((Type RequestType, Type ResponseType) handlerCreationTypes)
     {
         TryInitRequestThreadStaticTypeCache();
-        genericRequestTypeCache![0] = requestType;
-        genericRequestTypeCache[1] = responseType;
+        genericRequestTypeCache![0] = handlerCreationTypes.RequestType;
+        genericRequestTypeCache[1] = handlerCreationTypes.ResponseType;
         var requestResponseType = genericRequestResponseHandlerType.MakeGenericType(genericRequestTypeCache);
 
         return (RequestResponseHandler) Activator.CreateInstance(requestResponseType)!;
     }
 
-    public static StreamRequestHandler CreateStreamRequestHandler(Type requestType, Type responseType)
+    public static StreamRequestHandler CreateStreamRequestHandler((Type RequestType, Type ResponseType) handlerCreationInfo)
     {
         TryInitRequestThreadStaticTypeCache();
-        genericRequestTypeCache![0] = requestType;
-        genericRequestTypeCache[1] = responseType;
+        genericRequestTypeCache![0] = handlerCreationInfo.RequestType;
+        genericRequestTypeCache[1] = handlerCreationInfo.ResponseType;
         var streamRequestType = genericStreamRequestHandlerType.MakeGenericType(genericRequestTypeCache);
 
         return (StreamRequestHandler) Activator.CreateInstance(streamRequestType)!;

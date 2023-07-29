@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction;
 using MediatR.Abstraction.Handlers;
+using MediatR.Subscriptions.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.PublishStrategies;
@@ -39,6 +40,10 @@ public class Publisher
     
     private sealed class ParallelWhenAll : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {
@@ -47,7 +52,7 @@ public class Publisher
             for (var i = 0; i < notificationHandlers.Length; i++)
             {
                 var notificationHandler = notificationHandlers[i];
-                tasks[i] = Task.Run(() => notificationHandler.Handle(notification, cancellationToken), cancellationToken);
+                tasks[i] = notificationHandler.Handle(notification, cancellationToken);
             }
 
             return Task.WhenAll(tasks);
@@ -56,6 +61,10 @@ public class Publisher
     
     private sealed class ParallelWhenAny : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {
@@ -73,6 +82,10 @@ public class Publisher
     
     private sealed class ParallelNoWait : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {
@@ -87,6 +100,10 @@ public class Publisher
     
     private sealed class AsyncContinueOnException : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {
@@ -127,6 +144,10 @@ public class Publisher
     
     private sealed class SyncStopOnException : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {
@@ -139,6 +160,10 @@ public class Publisher
     
     private sealed class SyncContinueOnException : INotificationPublisher
     {
+        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+            where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
             where TNotification : INotification
         {

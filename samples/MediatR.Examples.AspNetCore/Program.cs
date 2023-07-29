@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using MediatR.Abstraction;
 using MediatR.Abstraction.Behaviors;
 using MediatR.Abstraction.Handlers;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.Examples.Streams;
-using MediatR.MicrosoftDiCExtensions;
+using MediatR.MicrosoftDependencyInjectionExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
 

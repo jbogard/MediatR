@@ -11,13 +11,17 @@ namespace MediatR.Subscriptions.Requests;
 internal sealed class CachedRequestHandler<TRequest> : RequestHandler
     where TRequest : IRequest
 {
-    private IRequestHandler<TRequest>? _cachedHandler;
-    private IPipelineBehavior<TRequest>[]? _cachedBehaviors;
+    private RequestHandlerDelegate<TRequest>? _cachedHandler;
 
     public override ValueTask HandleAsync<TMethodRequest>(TMethodRequest request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         Debug.Assert(typeof(TRequest).IsAssignableFrom(typeof(TMethodRequest)), "request type must be an inherited type of method request type.");
 
+        if (_cachedHandler is not null)
+        {
+            return _cachedHandler(Unsafe.As<TMethodRequest, TRequest>(ref Unsafe.AsRef(request)), cancellationToken);
+        }
+        
         var behaviors = (IPipelineBehavior<TMethodRequest>[])GetBehaviors(serviceProvider);
         RequestHandlerDelegate<TMethodRequest> handler = ((IRequestHandler<TMethodRequest>)GetHandler(serviceProvider)).Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
@@ -27,14 +31,16 @@ internal sealed class CachedRequestHandler<TRequest> : RequestHandler
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
+        _cachedHandler = Unsafe.As<RequestHandlerDelegate<TMethodRequest>, RequestHandlerDelegate<TRequest>>(ref handler);
+
         return handler(request, cancellationToken);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IRequestHandler<TRequest> GetHandler(IServiceProvider serviceProvider) =>
-        _cachedHandler ??= serviceProvider.GetRequiredService<IRequestHandler<TRequest>>();
+        serviceProvider.GetRequiredService<IRequestHandler<TRequest>>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IPipelineBehavior<TRequest>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        _cachedBehaviors ??= serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
+        serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
 }

@@ -1,36 +1,49 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FF09BD23-EECE-46E7-ADAA-60AB7B109815}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR", "src\MediatR\MediatR.csproj", "{0C1F8B4E-F89C-4BBC-B9C8-07DEB4DFCD39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR", "src\MediatR\MediatR.csproj", "{0C1F8B4E-F89C-4BBC-B9C8-07DEB4DFCD39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Contracts", "src\MediatR.Contracts\MediatR.Contracts.csproj", "{EFF1E179-D727-4522-BB03-3DFD642E93F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Contracts", "src\MediatR.Contracts\MediatR.Contracts.csproj", "{EFF1E179-D727-4522-BB03-3DFD642E93F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C69A46FA-9EBA-4F5C-9937-72B84C1F65E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Benchmarks", "test\MediatR.Benchmarks\MediatR.Benchmarks.csproj", "{C2A7E46D-7FD3-4B9C-991C-4E90F8CE78A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Benchmarks", "test\MediatR.Benchmarks\MediatR.Benchmarks.csproj", "{C2A7E46D-7FD3-4B9C-991C-4E90F8CE78A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples", "samples\MediatR.Examples\MediatR.Examples.csproj", "{B267D7AA-B56C-4E8E-91A4-EF9509A62BDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples", "samples\MediatR.Examples\MediatR.Examples.csproj", "{B267D7AA-B56C-4E8E-91A4-EF9509A62BDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.AspNetCore", "samples\MediatR.Examples.AspNetCore\MediatR.Examples.AspNetCore.csproj", "{1966A266-EDB8-40D8-BCFA-D0425AC755DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.AspNetCore", "samples\MediatR.Examples.AspNetCore\MediatR.Examples.AspNetCore.csproj", "{1966A266-EDB8-40D8-BCFA-D0425AC755DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Autofac", "samples\MediatR.Examples.Autofac\MediatR.Examples.Autofac.csproj", "{28E87DB5-C678-479D-BD85-FF96302D0E9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Autofac", "samples\MediatR.Examples.Autofac\MediatR.Examples.Autofac.csproj", "{28E87DB5-C678-479D-BD85-FF96302D0E9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.DryIoc", "samples\MediatR.Examples.DryIoc\MediatR.Examples.DryIoc.csproj", "{36D8182A-E6A4-4CB9-ABBD-6A39B15ABF5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.DryIoc", "samples\MediatR.Examples.DryIoc\MediatR.Examples.DryIoc.csproj", "{36D8182A-E6A4-4CB9-ABBD-6A39B15ABF5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Lamar", "samples\MediatR.Examples.Lamar\MediatR.Examples.Lamar.csproj", "{C5ADD0DB-D1FC-444E-BF61-135665E333B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Lamar", "samples\MediatR.Examples.Lamar\MediatR.Examples.Lamar.csproj", "{C5ADD0DB-D1FC-444E-BF61-135665E333B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.LightInject", "samples\MediatR.Examples.LightInject\MediatR.Examples.LightInject.csproj", "{8F4B71C2-FE7C-435F-A54A-4B13583E7290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.LightInject", "samples\MediatR.Examples.LightInject\MediatR.Examples.LightInject.csproj", "{8F4B71C2-FE7C-435F-A54A-4B13583E7290}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.PublishStrategies", "samples\MediatR.Examples.PublishStrategies\MediatR.Examples.PublishStrategies.csproj", "{00A7C3D1-9BA6-4B30-A9E8-3D903CC2D365}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.PublishStrategies", "samples\MediatR.Examples.PublishStrategies\MediatR.Examples.PublishStrategies.csproj", "{00A7C3D1-9BA6-4B30-A9E8-3D903CC2D365}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.SimpleInjector", "samples\MediatR.Examples.SimpleInjector\MediatR.Examples.SimpleInjector.csproj", "{9C156950-54A3-49B5-B431-0EEF8C65945B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.SimpleInjector", "samples\MediatR.Examples.SimpleInjector\MediatR.Examples.SimpleInjector.csproj", "{9C156950-54A3-49B5-B431-0EEF8C65945B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Stashbox", "samples\MediatR.Examples.Stashbox\MediatR.Examples.Stashbox.csproj", "{8F96056B-392C-4939-9924-8C5B47D73AC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Stashbox", "samples\MediatR.Examples.Stashbox\MediatR.Examples.Stashbox.csproj", "{8F96056B-392C-4939-9924-8C5B47D73AC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Examples.Windsor", "samples\MediatR.Examples.Windsor\MediatR.Examples.Windsor.csproj", "{9D8D8D38-4BAD-4388-8051-A48282C003C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Examples.Windsor", "samples\MediatR.Examples.Windsor\MediatR.Examples.Windsor.csproj", "{9D8D8D38-4BAD-4388-8051-A48282C003C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediatR.Tests", "test\MediatR.Tests\MediatR.Tests.csproj", "{EC5B983A-0063-4EC3-9965-3A1F9B958F00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediatR.Tests", "test\MediatR.Tests\MediatR.Tests.csproj", "{EC5B983A-0063-4EC3-9965-3A1F9B958F00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{CBDEF804-0041-4A42-980C-E9EFF04E5ECA}"
+	ProjectSection(SolutionItems) = preProject
+		Build.ps1 = Build.ps1
+		BuildContracts.ps1 = BuildContracts.ps1
+		LICENSE = LICENSE
+		NuGet.Config = NuGet.Config
+		Push.ps1 = Push.ps1
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +107,9 @@ Global
 		{EC5B983A-0063-4EC3-9965-3A1F9B958F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC5B983A-0063-4EC3-9965-3A1F9B958F00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC5B983A-0063-4EC3-9965-3A1F9B958F00}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C2A7E46D-7FD3-4B9C-991C-4E90F8CE78A1} = {FF09BD23-EECE-46E7-ADAA-60AB7B109815}

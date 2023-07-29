@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using MediatR.Abstraction.Behaviors;
@@ -10,13 +11,19 @@ namespace MediatR.Subscriptions.StreamingRequests;
 internal sealed class CachedStreamRequestHandler<TRequest, TResponse> : StreamRequestHandler
     where TRequest : IStreamRequest<TResponse>
 {
-    private IStreamRequestHandler<TRequest, TResponse>? _cachedHandler;
-    private IStreamPipelineBehavior<TRequest, TResponse>[]? _cachedBehaviors;
+    private StreamHandlerDelegate<TRequest, TResponse>? _cachedHandler;
 
     public override IAsyncEnumerable<TMethodResponse> Handle<TMethodResponse>(IStreamRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
+
+        if (_cachedHandler is not null)
+        {
+            _cachedHandler((TRequest)request, cancellationToken);
+        }
+        
         var behaviors = GetBehaviors(serviceProvider);
-        StreamHandlerNext<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
+        StreamHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
         {
             var next = handler;
@@ -24,14 +31,16 @@ internal sealed class CachedStreamRequestHandler<TRequest, TResponse> : StreamRe
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
+        _cachedHandler = handler;
+
         return (IAsyncEnumerable<TMethodResponse>) handler((TRequest) request, cancellationToken);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IStreamRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
-        _cachedHandler ??= serviceProvider.GetRequiredService<IStreamRequestHandler<TRequest, TResponse>>();
+    private static IStreamRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<IStreamRequestHandler<TRequest, TResponse>>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IStreamPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        _cachedBehaviors ??= serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
+    private static IStreamPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
+        serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
 }

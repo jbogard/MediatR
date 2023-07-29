@@ -1,6 +1,6 @@
 ﻿using MediatR.DependencyInjection;
 using MediatR.DependencyInjection.AssemblyScanner;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.ExceptionHandling;
 using MediatR.Subscriptions;
 

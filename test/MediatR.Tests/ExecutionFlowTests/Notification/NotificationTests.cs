@@ -3,15 +3,15 @@ using System.Linq;
 using FluentAssertions;
 using MediatR.Abstraction;
 using MediatR.Abstraction.Handlers;
-using MediatR.DependencyInjection.ConfigurationBase;
-using MediatR.MicrosoftDiCExtensions;
+using MediatR.DependencyInjection.Configuration;
+using MediatR.MicrosoftDependencyInjectionExtensions;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MediatR.ExecutionFlowTests.Notification;
 
-public sealed class NotificationTests
+public sealed class NotificationTests : IDisposable
 {
     [Fact]
     public void PublishNotification_WithDefaultPublisher_ExecutesAllNotificationTypeHandlers()
@@ -22,7 +22,7 @@ public sealed class NotificationTests
         collection.AddMediatR(cfg =>
         {
             cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
-            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+            cfg.RegisterServicesFromAssemblyContaining(typeof(NotificationTests));
         });
         var provider = collection.BuildServiceProvider();
 
@@ -57,7 +57,7 @@ public sealed class NotificationTests
         {
             cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
             cfg.EnableCachingOfHandlers = true;
-            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+            cfg.RegisterServicesFromAssembly(typeof(NotificationTests).Assembly);
         });
         var provider = collection.BuildServiceProvider();
 
@@ -94,7 +94,7 @@ public sealed class NotificationTests
         {
             cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
             cfg.NotificationPublisher = expectedNotificationPublisher;
-            cfg.RegisterServicesFromAssemblyContaining<NotificationTests>();
+            cfg.RegisterServicesFromAssemblies(typeof(NotificationTests).Assembly, typeof(TestCleaner).Assembly);
         }).BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -118,9 +118,44 @@ public sealed class NotificationTests
         multiHandler.Calls.Should().Be(1);
     }
 
+    [Fact]
+    public void PublishNotification_WithCustomNotificationPublisherType_CreatesInstanceAndUsesCustomNotificationPublisherType()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        var provider = collection.AddMediatR(cfg =>
+        {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+            cfg.RegisterServicesFromAssemblies((typeof(NotificationTests).Assembly, AssemblyScannerOptions.Handlers));
+        }).BuildServiceProvider();
+
+        var mediator = provider.GetRequiredService<IMediator>();
+        var notification = new Notification
+        {
+            Message = "some Message"
+        };
+
+        // Act
+        mediator.Publish(notification);
+
+        // Assert
+        var notificationPublisher = provider.GetRequiredService<INotificationPublisher>();
+        var genericNotificationHandler = GetGenericNotificationHandler<Notification>(provider);
+        var multiHandler = provider.GetRequiredService<MultiNotificationHandler>();
+
+        notificationPublisher.Should().BeOfType<TaskWhenAllPublisher>();
+        notification.Handlers.Should().Be(2);
+
+        genericNotificationHandler.Calls.Should().Be(1);
+        multiHandler.Calls.Should().Be(1);
+    }
+
     private GenericNotificationHandler<TNotification> GetGenericNotificationHandler<TNotification>(IServiceProvider serviceProvider)
         where TNotification : INotification =>
         (GenericNotificationHandler<TNotification>) serviceProvider
             .GetServices<INotificationHandler<TNotification>>()
             .Single(t => t is GenericNotificationHandler<TNotification>);
+
+    public void Dispose() => TestCleaner.CleanUp();
 }

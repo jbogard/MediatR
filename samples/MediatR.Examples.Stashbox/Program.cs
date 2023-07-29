@@ -4,9 +4,8 @@ using System.IO;
 using System.Threading.Tasks;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
+using MediatR.DependencyInjection.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Stashbox.Lifetime;
-using MediatR.DependencyInjection.ConfigurationBase;
 
 namespace MediatR.Examples.Stashbox;
 
@@ -58,20 +57,28 @@ internal static class StashboxContainerExtension
         {
         }
 
-        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+        public override void RegisterInstance(Type serviceType, object instance) =>
+            Registrar.Register(serviceType, options => options.WithInstance(instance));
 
-        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterSingleton(serviceType, implementationType);
 
-        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterSingleton(serviceType, implementationType);
 
-        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterMapping(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, option => option.WithFactory(c => c.GetRequiredService(implementationType)));
 
-        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, option => option.WithFactory(c => c.GetRequiredService(implementationType)));
 
-        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void Register(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType);
 
-        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType);
 
-        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) =>
+            Registrar.IsRegistered(implementationType);
     }
 }

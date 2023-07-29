@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR.Abstraction.Behaviors;
+using MediatR.Abstraction.ExceptionHandler;
 using MediatR.ExceptionHandling.Request.Subscription;
 
 namespace MediatR.ExceptionHandling.Request;

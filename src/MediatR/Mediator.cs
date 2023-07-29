@@ -18,8 +18,8 @@ internal sealed class Mediator : IMediator
 {
     private static readonly ConcurrentDictionary<Type, NotificationHandler> _notificationHandlers = new();
     private static readonly ConcurrentDictionary<Type, RequestHandler> _requestHandlers = new();
-    private static readonly ConcurrentDictionary<Type, RequestResponseHandler> _requestResponseHandlers = new();
-    private static readonly ConcurrentDictionary<Type, StreamRequestHandler> _streamRequestHandlers = new();
+    private static readonly ConcurrentDictionary<(Type Request, Type Response), RequestResponseHandler> _requestResponseHandlers = new();
+    private static readonly ConcurrentDictionary<(Type Request, Type Response), StreamRequestHandler> _streamRequestHandlers = new();
 
     private readonly IServiceProvider _serviceProvider;
     private readonly INotificationPublisher _notificationPublisher;
@@ -42,7 +42,7 @@ internal sealed class Mediator : IMediator
             ThrowArgumentNull(nameof(request));
         }
 
-        return _requestResponseHandlers.GetOrAdd(request!.GetType(),static req => SubscriptionFactory.CreateRequestResponseHandler(req, typeof(TResponse)))
+        return _requestResponseHandlers.GetOrAdd((request!.GetType(), typeof(TResponse)), SubscriptionFactory.CreateRequestResponseHandler)
             .HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
@@ -54,8 +54,8 @@ internal sealed class Mediator : IMediator
             ThrowArgumentNull(nameof(request));
         }
 
-        return _requestHandlers.GetOrAdd(request!.GetType(), SubscriptionFactory.CreateRequestHandler)
-            .HandleAsync(request, _serviceProvider, cancellationToken);
+        return _requestHandlers.GetOrAdd(typeof(TRequest), SubscriptionFactory.CreateRequestHandler)
+            .HandleAsync(request!, _serviceProvider, cancellationToken);
     }
 
     public void Publish<TNotification>(TNotification? notification, CancellationToken cancellationToken = default)
@@ -66,18 +66,18 @@ internal sealed class Mediator : IMediator
             ThrowArgumentNull(nameof(notification));
         }
 
-        _notificationHandlers.GetOrAdd(notification!.GetType(), SubscriptionFactory.CreateNotificationHandler)
-            .Handle(notification, _serviceProvider, _notificationPublisher, cancellationToken);
+        var notificationHandler = _notificationHandlers.GetOrAdd(typeof(TNotification), SubscriptionFactory.CreateNotificationHandler);
+        _notificationPublisher.Publish(notificationHandler, notification!, _serviceProvider, _notificationPublisher, cancellationToken);
     }
 
-    public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse>? request, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<TResponse> CreateStreamAsync<TResponse>(IStreamRequest<TResponse>? request, CancellationToken cancellationToken = default)
     {
         if (request is null)
         {
             ThrowArgumentNull(nameof(request));
         }
 
-        return _streamRequestHandlers.GetOrAdd(request!.GetType(), static req => SubscriptionFactory.CreateStreamRequestHandler(req, typeof(TResponse)))
+        return _streamRequestHandlers.GetOrAdd((request!.GetType(), typeof(TResponse)), SubscriptionFactory.CreateStreamRequestHandler)
             .Handle(request, _serviceProvider, cancellationToken);
     }
 

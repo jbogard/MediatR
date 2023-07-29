@@ -35,9 +35,8 @@ internal static class MessageTypeResolver
         if (type == RequestType || type == NotificationType)
             return true;
 
-        if (!type.IsGenericType)
-            return false;
-
+        // The type here can only be a message type.
+        // Therefor if is isn't any none generic message type, it has to be an generic message type.
         var genericTypeDefinition = type.GetGenericTypeDefinition();
         return genericTypeDefinition == RequestResponseType ||
                genericTypeDefinition == StreamRequestType;

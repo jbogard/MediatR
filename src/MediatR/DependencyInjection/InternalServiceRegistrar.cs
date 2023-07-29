@@ -4,7 +4,7 @@ using MediatR.Abstraction;
 using MediatR.Abstraction.ExceptionHandler;
 using MediatR.Abstraction.Processors;
 using MediatR.DependencyInjection.AssemblyScanner;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.ExceptionHandling.Request;
 using MediatR.ExceptionHandling.RequestResponse;
 using MediatR.Pipeline.Request;
@@ -27,62 +27,77 @@ internal static class InternalServiceRegistrar
             adapter.RegisterInstance(typeof(INotificationPublisher), configuration.NotificationPublisher);
     }
 
-    public static IEnumerable<Type> GetInternalProcessorPipelines(TypeWrapper[] typeWrappers, IComparer<Type> comparer, MediatRServiceConfiguration configuration)
+    public static IEnumerable<Type> GetInternalProcessorPipelines((TypeWrapper, AssemblyScannerOptions)[] userImplementedTypes, MediatRServiceConfiguration configuration)
     {
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestPreProcessor<>), typeof(IRequestPostProcessor<>)))
+        if (HasRelevantImplementation(userImplementedTypes,
+                AssemblyScannerOptions.RequestPreProcessor | AssemblyScannerOptions.RequestPostProcessor,
+                (typeof(IRequestPreProcessor<>), configuration.RequestPreProcessors), (typeof(IRequestPostProcessor<>), configuration.RequestPostProcessors)))
             if (configuration.EnableCachingOfHandlers)
                 yield return typeof(CachingRequestProcessorBehavior<>);
             else
                 yield return typeof(TransientRequestProcessorBehavior<>);
 
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestPreProcessor<,>), typeof(IRequestPostProcessor<,>)))
+        if (HasRelevantImplementation(userImplementedTypes,
+                AssemblyScannerOptions.RequestResponsePreProcessor | AssemblyScannerOptions.RequestResponsePostProcessor,
+                (typeof(IRequestPreProcessor<,>), configuration.RequestResponsePreProcessors), (typeof(IRequestPostProcessor<,>), configuration.RequestResponsePostProcessors)))
             if (configuration.EnableCachingOfHandlers)
                 yield return typeof(CachingRequestResponseProcessorBehavior<,>);
             else
                 yield return typeof(TransientRequestResponseProcessorBehavior<,>);
     }
 
-    public static IEnumerable<Type> GetInternalExceptionHandlingPipelines(TypeWrapper[] typeWrappers, IComparer<Type> comparer, MediatRServiceConfiguration configuration)
+    public static IEnumerable<Type> GetInternalExceptionHandlingPipelines((TypeWrapper,AssemblyScannerOptions)[] userImplementedTypes, MediatRServiceConfiguration configuration)
     {
         if (configuration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
         {
-            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionAction<,>)))
+            if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestExceptionActionHandler, (typeof(IRequestExceptionAction<,>), null)))
                 yield return typeof(RequestExceptionActionProcessorBehavior<>);
 
-            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionHandler<,>)))
+            if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestExceptionHandler, (typeof(IRequestExceptionHandler<,>), null)))
                 yield return typeof(RequestExceptionHandlerProcessBehavior<>);
 
-            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionAction<,,>)))
+            if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestResponseExceptionActionHandler, (typeof(IRequestResponseExceptionAction<,,>), null)))
                 yield return typeof(RequestResponseExceptionActionProcessBehavior<,>);
 
-            if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionHandler<,,>)))
-                yield return typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>);
+            if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestResponseExceptionHandler, (typeof(IRequestResponseExceptionHandler<,,>), null)))
+                yield return typeof(RequestResponseExceptionHandlerProcessBehavior<,>);
 
             yield break;
         }
 
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionHandler<,>)))
+        if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestExceptionHandler, (typeof(IRequestExceptionHandler<,>), null)))
             yield return typeof(RequestExceptionHandlerProcessBehavior<>);
 
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestExceptionAction<,>)))
+        if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestExceptionActionHandler, (typeof(IRequestExceptionAction<,>), null)))
             yield return typeof(RequestExceptionActionProcessorBehavior<>);
 
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionHandler<,,>)))
-            yield return typeof(RequestResponseExceptionRequestHandlerProcessBehavior<,>);
+        if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestResponseExceptionHandler, (typeof(IRequestResponseExceptionHandler<,,>), null)))
+            yield return typeof(RequestResponseExceptionHandlerProcessBehavior<,>);
 
-        if (HasRelevantImplementation(typeWrappers, comparer, typeof(IRequestResponseExceptionAction<,,>)))
+        if (HasRelevantImplementation(userImplementedTypes, AssemblyScannerOptions.RequestResponseExceptionActionHandler, (typeof(IRequestResponseExceptionAction<,,>), null)))
             yield return typeof(RequestResponseExceptionActionProcessBehavior<,>);
     }
 
-    private static bool HasRelevantImplementation(TypeWrapper[] wrappers, IComparer<Type> comparer, params Type[] handlingOpenGenericInterface)
+    private static bool HasRelevantImplementation((TypeWrapper, AssemblyScannerOptions)[] userImplementedTypes, AssemblyScannerOptions requiredAssemblyScannerOptions, params (Type OpenGenericInterfaceDefinition, TypeRegistrar? TypeRegistrar)[] handlingOpenGenericInterface)
     {
-        foreach (var typeWrapper in wrappers)
+        foreach (var (typeWrapper, scannerOptions) in userImplementedTypes)
         {
-            foreach (var (_, openGenericInterface) in typeWrapper.OpenGenericInterfaces)
+            if (!scannerOptions.HasFlag(requiredAssemblyScannerOptions))
+                continue;
+
+            foreach (var (openGenericHandlingInterfaceDefinition, typeRegistrar) in handlingOpenGenericInterface)
             {
-                if (Array.BinarySearch(handlingOpenGenericInterface, openGenericInterface, comparer) > -1)
+                if (typeRegistrar?.Services.Count > 0)
                 {
                     return true;
+                }
+
+                foreach (var (_, openGenericInterface) in typeWrapper.OpenGenericInterfaces)
+                {
+                    if (openGenericInterface == openGenericHandlingInterfaceDefinition)
+                    {
+                        return true;
+                    }
                 }
             }
         }

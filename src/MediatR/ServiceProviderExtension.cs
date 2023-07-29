@@ -12,12 +12,12 @@ internal static class ServiceProviderExtension
         (T?)serviceProvider.GetService(typeof(T));
 
     public static T GetRequiredService<T>(this IServiceProvider serviceProvider) =>
-        serviceProvider.GetService<T>() ?? ThrowServiceNotFound<T>();
+        (T?)serviceProvider.GetService(typeof(T)) ?? ThrowServiceNotFound<T>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] GetServices<T>(this IServiceProvider serviceProvider)
     {
-        var services = serviceProvider.GetService<IEnumerable<T>>();
+        var services = (IEnumerable<T>)serviceProvider.GetService(typeof(IEnumerable<T>));
         if (services is T[] arrayServices)
         {
             return arrayServices;

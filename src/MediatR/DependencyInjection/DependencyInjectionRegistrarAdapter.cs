@@ -1,5 +1,5 @@
-﻿using MediatR.DependencyInjection.ConfigurationBase;
-using System;
+﻿using System;
+using MediatR.DependencyInjection.Configuration;
 
 namespace MediatR.DependencyInjection;
 
@@ -66,32 +66,6 @@ public abstract class DependencyInjectionRegistrarAdapter<TRegistrar, TConfigura
     /// <param name="serviceType">The open generic service type.</param>
     /// <param name="implementationType">The open generic implementation type.</param>
     public abstract void RegisterOpenGenericSingleton(Type serviceType, Type implementationType);
-
-    /// <summary>
-    /// Registers the <paramref name="serviceType"/> to the <paramref name="implementationType"/> as a singleton but ensures that it exists only once.
-    /// </summary>
-    /// <param name="serviceType">The service type.</param>
-    /// <param name="implementationType">The implementing type.</param>
-    public virtual void RegisterSingletonOnlyOnce(Type serviceType, Type implementationType)
-    {
-        if (!IsAlreadyRegistered(serviceType, implementationType))
-        {
-            RegisterSingleton(serviceType, implementationType);
-        }
-    }
-
-    /// <summary>
-    /// Registers the open generic <paramref name="serviceType"/> to the open generic <paramref name="implementationType"/> as a singleton but ensures that it exists only once.
-    /// </summary>
-    /// <param name="serviceType">The open generic service type.</param>
-    /// <param name="implementationType">The open generic implementation type.</param>
-    public virtual void RegisterOpenGenericSingletonOnlyOnce(Type serviceType, Type implementationType)
-    {
-        if (!IsAlreadyRegistered(serviceType, implementationType))
-        {
-            RegisterOpenGenericSingleton(serviceType, implementationType);
-        }
-    }
 
     /// <summary>
     /// Registers a mapping or a factory to get for the service type the implementation type.

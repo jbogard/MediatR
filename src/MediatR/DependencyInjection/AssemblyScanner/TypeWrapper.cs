@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace MediatR.DependencyInjection.AssemblyScanner;
 
 internal sealed class TypeWrapper
 {
-    public static TypeWrapper Create(Type type, HashSet<Assembly> assembliesToScan, Dictionary<Type, TypeWrapper> typesToScanCache)
+    public static TypeWrapper Create(Type type, HashSet<AssemblyConfiguration> assembliesToScan, Dictionary<Type, TypeWrapper> typesToScanCache)
     {
         if (typesToScanCache.TryGetValue(type, out var typeWrapper))
         {
@@ -15,7 +14,7 @@ internal sealed class TypeWrapper
 
         typesToScanCache[type] = typeWrapper = new TypeWrapper(type);
 
-        if (type.BaseType is not null && type.BaseType != typeof(object) && assembliesToScan.Contains(type.BaseType.Assembly))
+        if (type.BaseType is not null && type.BaseType != typeof(object) && assembliesToScan.Contains(new AssemblyConfiguration(type.BaseType.Assembly, default)))
         {
             var baseWrapper = Create(type.BaseType, assembliesToScan, typesToScanCache);
             typeWrapper.SetBaseType(in baseWrapper);

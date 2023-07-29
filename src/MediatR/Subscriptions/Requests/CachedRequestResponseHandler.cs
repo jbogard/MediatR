@@ -11,13 +11,17 @@ namespace MediatR.Subscriptions.Requests;
 internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : RequestResponseHandler
     where TRequest : IRequest<TResponse>
 {
-    private IRequestHandler<TRequest, TResponse>? _cachedHandler;
-    private IPipelineBehavior<TRequest, TResponse>[]? _cachedBehaviors;
+    private RequestHandlerDelegate<TRequest, TResponse>? _cachedHandler;
 
     public override ValueTask<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), "Response and method response must always be the same type.");
+        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
 
+        if (_cachedHandler is not null)
+        {
+            return CallHandler(_cachedHandler, request, cancellationToken);
+        }
+        
         var behaviors = GetBehaviors(serviceProvider);
         RequestHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
@@ -27,14 +31,26 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(ref Unsafe.AsRef(handler((TRequest) request, cancellationToken)));
+        _cachedHandler = handler;
+
+        return CallHandler(handler, request, cancellationToken);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ValueTask<TMethodResponse> CallHandler(RequestHandlerDelegate<TRequest, TResponse> handler, IRequest<TMethodResponse> request, CancellationToken cancellationToken)
+        {
+            return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
+                ref Unsafe.AsRef(
+                    handler(
+                        Unsafe.As<IRequest<TMethodResponse>, TRequest>(
+                            ref Unsafe.AsRef(request)), cancellationToken)));
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
-        _cachedHandler ??= serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
+    private static IRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        _cachedBehaviors ??= serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
+    private static IPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
+        serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
 }

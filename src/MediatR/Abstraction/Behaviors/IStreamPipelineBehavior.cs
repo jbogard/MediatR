@@ -9,7 +9,7 @@ namespace MediatR.Abstraction.Behaviors;
 /// <typeparam name="TRequest">Request type.</typeparam>
 /// <typeparam name="TResponse">Response type</typeparam>
 /// <returns>Async Enumerable returning a <typeparamref name="TResponse"/></returns>
-public delegate IAsyncEnumerable<TResponse> StreamHandlerNext<in TRequest, out TResponse>(TRequest request, CancellationToken cancellationToken)
+public delegate IAsyncEnumerable<TResponse> StreamHandlerDelegate<in TRequest, out TResponse>(TRequest request, CancellationToken cancellationToken)
     where TRequest : IStreamRequest<TResponse>;
 
 /// <summary>
@@ -28,5 +28,5 @@ public interface IStreamPipelineBehavior<TRequest, TResponse>
     /// <param name="next">Awaitable delegate for the next action in the pipeline. Eventually this delegate represents the handler.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Awaitable task returning the <typeparamref name="TResponse"/></returns>
-    IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerNext<TRequest, TResponse> next, CancellationToken cancellationToken);
+    IAsyncEnumerable<TResponse> Handle(TRequest request, StreamHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken);
 }

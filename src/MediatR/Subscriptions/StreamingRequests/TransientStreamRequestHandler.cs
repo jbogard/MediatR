@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using MediatR.Abstraction.Behaviors;
@@ -12,8 +13,10 @@ internal sealed class TransientStreamRequestHandler<TRequest, TResponse> : Strea
 {
     public override IAsyncEnumerable<TMethodResponse> Handle<TMethodResponse>(IStreamRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
+
         var behaviors = serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
-        StreamHandlerNext<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
+        StreamHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
         {
             var next = handler;

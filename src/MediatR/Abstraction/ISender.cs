@@ -34,5 +34,5 @@ public interface ISender
     /// <param name="request">The request object</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
-    IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<TResponse> CreateStreamAsync<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default);
 }

@@ -1,12 +1,11 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
 using MediatR.Abstraction;
 using MediatR.DependencyInjection;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.LightInject;
@@ -55,6 +54,7 @@ internal static class ServiceContainerExtension
 
     public sealed class LightInjectConfiguration : MediatRServiceConfiguration
     {
+        public ILifetime GetMappingLifetime() => new PerContainerLifetime();
     }
 
     internal sealed class LightInjectContainerAdapter : DependencyInjectionRegistrarAdapter<ServiceContainer, LightInjectConfiguration>
@@ -64,20 +64,38 @@ internal static class ServiceContainerExtension
         {
         }
 
-        public override void RegisterInstance(Type serviceType, object instance) => throw new NotImplementedException();
+        public override void RegisterInstance(Type serviceType, object instance) =>
+            Registrar.RegisterInstance(serviceType, instance);
 
-        public override void RegisterSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterSingleton(serviceType, implementationType);
 
-        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericSingleton(Type serviceType, Type implementationType) =>
+            Registrar.RegisterSingleton(serviceType, implementationType);
 
-        public override void RegisterMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterMapping(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType, Configuration.GetMappingLifetime());
 
-        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType, Configuration.GetMappingLifetime());
 
-        public override void Register(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void Register(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType);
 
-        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override void RegisterOpenGeneric(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType);
 
-        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) => throw new NotImplementedException();
+        public override bool IsAlreadyRegistered(Type serviceType, Type implementationType)
+        {
+            foreach (var serviceRegistration in Registrar.AvailableServices)
+            {
+                if (serviceRegistration.ServiceType == serviceType && serviceRegistration.ImplementingType == implementationType)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

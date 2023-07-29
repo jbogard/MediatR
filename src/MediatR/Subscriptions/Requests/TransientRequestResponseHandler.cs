@@ -13,7 +13,7 @@ internal sealed class TransientRequestResponseHandler<TRequest, TResponse> : Req
 {
     public override ValueTask<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), "Response and method response must always be the same type.");
+        Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
 
         var behaviors = serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
         RequestHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;

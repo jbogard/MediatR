@@ -3,7 +3,9 @@ using FluentAssertions;
 using MediatR.Abstraction;
 using MediatR.ExecutionFlowTests.Notification;
 using MediatR.ExecutionFlowTests.RequestResponse;
-using MediatR.MicrosoftDiCExtensions;
+using MediatR.ExecutionFlowTests.Requests.RequestMessages;
+using MediatR.ExecutionFlowTests.StreamRequest.StreamRequestMessages;
+using MediatR.MicrosoftDependencyInjectionExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -12,15 +14,13 @@ namespace MediatR.UnitTests;
 public sealed class MediatRTests
 {
     private readonly IMediator _sut;
-    private readonly ServiceCollection _serviceCollection;
-    private readonly IServiceProvider _serviceProvider;
 
     public MediatRTests()
     {
-        _serviceCollection = new ServiceCollection();
-        _serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<MediatRTests>());
-        _serviceProvider = _serviceCollection.BuildServiceProvider();
-        _sut = _serviceProvider.GetRequiredService<IMediator>();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<MediatRTests>());
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        _sut = serviceProvider.GetRequiredService<IMediator>();
     }
 
     [Fact]
@@ -42,6 +42,30 @@ public sealed class MediatRTests
 
         // Act
         var act = () => _sut.SendAsync<Response>(null!);
+        
+        // Assert
+        act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");
+    }
+
+    [Fact]
+    public void DefaultMediatR_PublishedNullRequest_ThrowsArgumentNullException()
+    {
+        // Arrange
+
+        // Act
+        var act = () => _sut.SendAsync((Request)null!);
+
+        // Assert
+        act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");
+    }
+
+    [Fact]
+    public void DefaultMediatR_PublishedNullStreamRequest_ThrowsArgumentNullException()
+    {
+        // Arrange
+        
+        // Act
+        var act = () => _sut.CreateStreamAsync<StreamResponse>(null!);
         
         // Assert
         act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");

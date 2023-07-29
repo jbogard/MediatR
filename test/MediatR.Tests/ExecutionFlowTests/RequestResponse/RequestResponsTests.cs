@@ -8,16 +8,16 @@ using MediatR.Abstraction.Behaviors;
 using MediatR.Abstraction.ExceptionHandler;
 using MediatR.Abstraction.Handlers;
 using MediatR.Abstraction.Processors;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.ExecutionFlowTests.RequestResponse.Pipelines;
 using MediatR.ExecutionFlowTests.RequestResponse.Processors;
-using MediatR.MicrosoftDiCExtensions;
+using MediatR.MicrosoftDependencyInjectionExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MediatR.ExecutionFlowTests.RequestResponse;
 
-public sealed class RequestResponseTests
+public sealed class RequestResponseTests : IDisposable
 {
     #region HandlerTests
 
@@ -39,7 +39,7 @@ public sealed class RequestResponseTests
         var response = await provider.GetRequiredService<IMediator>().SendAsync<Response>(request);
 
         // Assert
-        var handler = (RequestResponseHandler)provider.GetRequiredService<IRequestHandler<RequestResponse, Response>>();
+        var handler = (RequestHandler)provider.GetRequiredService<IRequestHandler<RequestResponse, Response>>();
 
         handler.Calls.Should().Be(1);
         response.Should().NotBeNull();
@@ -66,7 +66,7 @@ public sealed class RequestResponseTests
         var response2 = await mediator.SendAsync<Response>(request);
 
         // Assert
-        var handler = provider.GetRequiredService<RequestResponseHandler>();
+        var handler = provider.GetRequiredService<RequestHandler>();
 
         handler.Calls.Should().Be(2);
         response1.Should().NotBeNull();
@@ -92,7 +92,7 @@ public sealed class RequestResponseTests
         var response = await provider.GetRequiredService<IMediator>().SendAsync<Response>(request);
 
         // Assert
-        var handler = provider.GetRequiredService<RequestResponseHandler>();
+        var handler = provider.GetRequiredService<RequestHandler>();
 
         handler.Calls.Should().Be(1);
         response.Should().NotBeNull();
@@ -116,7 +116,7 @@ public sealed class RequestResponseTests
         var response = await provider.GetRequiredService<IMediator>().SendAsync<BaseResponse>(request);
 
         // Assert
-        var handler = provider.GetRequiredService<BaseRequestResponseHandler>();
+        var handler = provider.GetRequiredService<BaseRequestHandler>();
 
         handler.Calls.Should().Be(1);
         response.Should().NotBeNull();
@@ -141,7 +141,7 @@ public sealed class RequestResponseTests
         var response = await provider.GetRequiredService<IMediator>().SendAsync<BaseResponse>(request);
 
         // Assert
-        var handler = (BaseRequestResponseHandler)provider.GetRequiredService<IRequestHandler<RequestResponse, BaseResponse>>();
+        var handler = (BaseRequestHandler)provider.GetRequiredService<IRequestHandler<RequestResponse, BaseResponse>>();
 
         handler.Calls.Should().Be(1);
         response.Should().NotBeNull();
@@ -212,6 +212,31 @@ public sealed class RequestResponseTests
         response.Should().BeOfType<Response>();
     }
 
+    [Fact]
+    public async Task PublishRequest_ExceptionIsThrownWithoutAnyExceptionHandler_RethrowsTheExceptionInThePipeline()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<RequestResponseTests>(AssemblyScannerOptions.Handlers | AssemblyScannerOptions.Processor | AssemblyScannerOptions.PipelineBehaviors | AssemblyScannerOptions.ExceptionActionHandler);
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+        });
+        var provider = collection.BuildServiceProvider();
+        var expectedException = new UnreachableException("Expected Exception");
+
+        var request = new ThrowingExceptionRequest
+        {
+            Exception = expectedException
+        };
+
+        // Act
+        var act = async () => await provider.GetRequiredService<IMediator>().SendAsync(request);
+
+        // Assert
+        await act.Should().ThrowExactlyAsync<UnreachableException>().WithMessage(expectedException.Message);
+    }
+
     #endregion
 
     #region ExceptionActionTests
@@ -240,7 +265,7 @@ public sealed class RequestResponseTests
         var response = await provider.GetRequiredService<IMediator>().SendAsync(request);
 
         // Assert
-        var invalidException = (RequestResponseAction)provider.GetRequiredService<IRequestResponseExceptionAction<ThrowingExceptionRequest,Response,InvalidOperationException>>();
+        var invalidException = (RequestResponseAction)provider.GetRequiredService<IRequestResponseExceptionAction<ThrowingExceptionRequest, Response, InvalidOperationException>>();
         var exception = (RequestResponseAction) provider.GetRequiredService<IRequestResponseExceptionAction<ThrowingExceptionRequest, Response, Exception>>();
 
         invalidException.InvalidOperationExceptionActionCalls.Should().Be(1);
@@ -584,4 +609,6 @@ public sealed class RequestResponseTests
         serviceProvider.GetServices<IRequestPreProcessor<TRequest, TResponse>>()
             .OfType<TPreProcessor>()
             .Single();
+
+    public void Dispose() => TestCleaner.CleanUp();
 }

@@ -60,7 +60,7 @@ public static class Runner
             try
             {
                 int i = 0;
-                await foreach (var s in mediator.CreateStream(new Sing { Message = "Sing" }))
+                await foreach (var s in mediator.CreateStreamAsync(new Sing { Message = "Sing" }))
                 {
                     if (i == 0) {
                         failedSing = !s.Message.Contains("Singing do");

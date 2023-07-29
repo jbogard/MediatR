@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using MediatR.DependencyInjection.ConfigurationBase;
+using MediatR.DependencyInjection.Configuration;
 using MediatR.ExceptionHandling.Request.Subscription;
 using MediatR.ExceptionHandling.RequestResponse.Subscription;
 
@@ -15,9 +15,9 @@ internal static class ExceptionHandlerFactory
     private static readonly ConcurrentDictionary<(Type RequestType, Type ResponseType, Type ExceptionType), RequestResponseExceptionRequestHandler> RequestResponseExceptionRequestHandlers = new();
 
     private static Type genericRequestExceptionActionHandler = typeof(TransientRequestExceptionActionHandler<,>);
-    private static Type genericRequestExceptionRequestHandler = typeof(TransientRequestExceptionRequestHandler<,>);
+    private static Type genericRequestExceptionHandler = typeof(TransientRequestExceptionRequestHandler<,>);
     private static Type genericRequestResponseExceptionActionHandler = typeof(TransientRequestResponseExceptionActionHandler<,,>);
-    private static Type genericRequestResponseExceptionRequestHandler = typeof(TransientRequestResponseExceptionRequestHandler<,,>);
+    private static Type genericRequestResponseExceptionHandler = typeof(TransientRequestResponseExceptionHandler<,,>);
 
     [ThreadStatic]
     private static Type[]? GenericRequestTypeCache;
@@ -30,9 +30,9 @@ internal static class ExceptionHandlerFactory
         if (configuration.EnableCachingOfHandlers)
         {
             genericRequestExceptionActionHandler = typeof(CachedRequestExceptionActionHandler<,>);
-            genericRequestExceptionRequestHandler = typeof(CachedRequestExceptionRequestHandler<,>);
+            genericRequestExceptionHandler = typeof(CachedRequestExceptionHandler<,>);
             genericRequestResponseExceptionActionHandler = typeof(CachedRequestResponseExceptionActionHandler<,,>);
-            genericRequestResponseExceptionRequestHandler = typeof(CachedRequestResponseExceptionRequestHandler<,,>);
+            genericRequestResponseExceptionHandler = typeof(CachedRequestResponseExceptionHandler<,,>);
         }
     }
 
@@ -57,7 +57,7 @@ internal static class ExceptionHandlerFactory
         TryInitGenericHandlerTypeCache();
         GenericHandlerTypeCache![0] = tuple.RequestType;
         GenericHandlerTypeCache[1] = tuple.ExceptionType;
-        var requestExceptionHandler = genericRequestExceptionRequestHandler.MakeGenericType(GenericHandlerTypeCache);
+        var requestExceptionHandler = genericRequestExceptionHandler.MakeGenericType(GenericHandlerTypeCache);
 
         return (RequestExceptionRequestHandler) Activator.CreateInstance(requestExceptionHandler)!;
     }
@@ -85,7 +85,7 @@ internal static class ExceptionHandlerFactory
         GenericRequestTypeCache![0] = tuple.RequestType;
         GenericRequestTypeCache[1] = tuple.ResponseType;
         GenericRequestTypeCache[2] = tuple.ExceptionType;
-        var requestResponseExceptionHandler = genericRequestResponseExceptionRequestHandler.MakeGenericType(GenericRequestTypeCache);
+        var requestResponseExceptionHandler = genericRequestResponseExceptionHandler.MakeGenericType(GenericRequestTypeCache);
 
         return (RequestResponseExceptionRequestHandler) Activator.CreateInstance(requestResponseExceptionHandler);
     }

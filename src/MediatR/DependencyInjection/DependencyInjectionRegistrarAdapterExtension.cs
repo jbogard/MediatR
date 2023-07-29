@@ -1,5 +1,5 @@
-﻿using MediatR.DependencyInjection.ConfigurationBase;
-using System;
+﻿using System;
+using MediatR.DependencyInjection.Configuration;
 
 namespace MediatR.DependencyInjection;
 

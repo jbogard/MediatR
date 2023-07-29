@@ -19,8 +19,4 @@
     <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Benchmarks\" />
-  </ItemGroup>
-
 </Project>
