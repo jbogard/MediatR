@@ -19,7 +19,10 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
 
         if (_cachedHandler is not null)
         {
-            return CallHandler(_cachedHandler, request, cancellationToken);
+            return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
+                ref Unsafe.AsRef(_cachedHandler(
+                    Unsafe.As<IRequest<TMethodResponse>, TRequest>(ref request), 
+                    cancellationToken)));
         }
         
         var behaviors = GetBehaviors(serviceProvider);
@@ -33,17 +36,10 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
 
         _cachedHandler = handler;
 
-        return CallHandler(handler, request, cancellationToken);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ValueTask<TMethodResponse> CallHandler(RequestHandlerDelegate<TRequest, TResponse> handler, IRequest<TMethodResponse> request, CancellationToken cancellationToken)
-        {
-            return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
-                ref Unsafe.AsRef(
-                    handler(
-                        Unsafe.As<IRequest<TMethodResponse>, TRequest>(
-                            ref Unsafe.AsRef(request)), cancellationToken)));
-        }
+        return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
+            ref Unsafe.AsRef(_cachedHandler(
+                Unsafe.As<IRequest<TMethodResponse>, TRequest>(ref request),
+                cancellationToken)));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
