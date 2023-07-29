@@ -43,6 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		NuGet.Config = NuGet.Config
 		Push.ps1 = Push.ps1
 		README.md = README.md
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Global

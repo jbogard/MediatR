@@ -3,6 +3,14 @@
   <PropertyGroup>
     <RootNamespace>MediatR</RootNamespace>
     <AssemblyName>MediatR.Contracts</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="..\..\MediatR.snk">
+      <Link>MediatR.snk</Link>
+    </None>
+  </ItemGroup>
 
 </Project>

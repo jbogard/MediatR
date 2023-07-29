@@ -3,6 +3,8 @@
   <PropertyGroup>
     <AssemblyName>MediatR</AssemblyName>
     <RootNamespace>MediatR</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +26,9 @@
     <None Include="..\..\assets\logo\gradient_128x128.png">
       <Pack>true</Pack>
       <Link>Assets\gradient_128x128.png</Link>
+    </None>
+    <None Include="..\..\MediatR.snk">
+      <Link>Properties\MediatR.snk</Link>
     </None>
   </ItemGroup>
 

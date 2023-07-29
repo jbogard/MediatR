@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>exe</OutputType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +32,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MediatR\MediatR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\MediatR.snk">
+      <Link>MediatR.snk</Link>
+    </None>
   </ItemGroup>
 
 </Project>
