@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using MediatR.Abstraction;
-using MediatR.Benchmarks.MockServices.Notification;
 using MediatR.Benchmarks.MockServices.Request;
 using MediatR.Benchmarks.MockServices.RequestResponse;
 using MediatR.Benchmarks.MockServices.StreamRequest;
@@ -15,7 +14,6 @@ namespace MediatR.Benchmarks.Mediator;
 public class MediarR_PipelineHandling_Bencharks
 {
     private readonly Ping _request = new();
-    private readonly PingNotification _notification = new();
     private readonly PingPong _requestResponse = new();
     private readonly SingStream _streamRequest = new();
 
