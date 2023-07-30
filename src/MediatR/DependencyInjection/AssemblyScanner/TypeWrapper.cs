@@ -39,7 +39,6 @@ internal sealed class TypeWrapper
         Interfaces = type.GetInterfaces();
 
         var genericInterfaces = Array.FindAll(Interfaces, static t => t.IsGenericType || t.IsOpenGeneric());
-        Array.Sort(genericInterfaces, static (x, y) => x.GetGenericArguments().Length.CompareTo(y.GetGenericArguments().Length));
         OpenGenericInterfaces = Array.ConvertAll(genericInterfaces, static t => (t, t.GetGenericTypeDefinition()));
     }
 

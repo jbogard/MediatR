@@ -1,4 +1,5 @@
-﻿using MediatR.Abstraction;
+﻿using System;
+using MediatR.Abstraction;
 using MediatR.DependencyInjection.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,4 +22,15 @@ public sealed class ServiceCollectionConfiguration : MediatRServiceConfiguration
     /// This service life time will be applied on all service when <see cref="MediatRServiceConfiguration.RegistrationStyle"/> is set to <see cref="RegistrationStyle.EachServiceOneInstance"/>.
     /// </remarks>
     public ServiceLifetime DefaultServiceLifetime { get; set; } = ServiceLifetime.Transient;
+
+    /// <inheritdoc />
+    public override void Validate()
+    {
+        base.Validate();
+        
+        if (EnableCachingOfHandlers && (RegistrationStyle == RegistrationStyle.EachServiceOneInstance || DefaultServiceLifetime == ServiceLifetime.Singleton))
+        {
+            throw new InvalidOperationException($"Caching is only possible if the handlers are registered as singletons. Currently they are '{RegistrationStyle}' and that could break the application. Either set the option to '{RegistrationStyle.OneInstanceForeachService}' or disable the caching of the handlers.");
+        }
+    }
 }

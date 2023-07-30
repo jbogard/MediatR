@@ -157,10 +157,5 @@ public abstract class MediatRServiceConfiguration
         {
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");
         }
-
-        if (EnableCachingOfHandlers && RegistrationStyle == RegistrationStyle.EachServiceOneInstance)
-        {
-            throw new InvalidOperationException($"Caching is only possible if the handlers are registered as singletons. Currently they are '{RegistrationStyle}' and that could break the application. Either set the option to '{RegistrationStyle.OneInstanceForeachService}' or disable the caching of the handlers.");
-        }
     }
 }
