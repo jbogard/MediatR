@@ -11,7 +11,7 @@ namespace MediatR.Subscriptions.StreamingRequests;
 internal sealed class TransientStreamRequestHandler<TRequest, TResponse> : StreamRequestHandler
     where TRequest : IStreamRequest<TResponse>
 {
-    public override IAsyncEnumerable<TMethodResponse> Handle<TMethodResponse>(IStreamRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public override IAsyncEnumerable<TMethodResponse> HandleAsync<TMethodResponse>(IStreamRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
 

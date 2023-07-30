@@ -59,11 +59,11 @@ internal static class SubscriptionFactory
         return (RequestResponseHandler) Activator.CreateInstance(requestResponseType)!;
     }
 
-    public static StreamRequestHandler CreateStreamRequestHandler((Type RequestType, Type ResponseType) handlerCreationInfo)
+    public static StreamRequestHandler CreateStreamRequestHandler((Type RequestType, Type ResponseType) handlerCreationTypes)
     {
         TryInitRequestThreadStaticTypeCache();
-        genericRequestTypeCache![0] = handlerCreationInfo.RequestType;
-        genericRequestTypeCache[1] = handlerCreationInfo.ResponseType;
+        genericRequestTypeCache![0] = handlerCreationTypes.RequestType;
+        genericRequestTypeCache[1] = handlerCreationTypes.ResponseType;
         var streamRequestType = genericStreamRequestHandlerType.MakeGenericType(genericRequestTypeCache);
 
         return (StreamRequestHandler) Activator.CreateInstance(streamRequestType)!;

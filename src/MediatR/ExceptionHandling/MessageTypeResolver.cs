@@ -19,7 +19,7 @@ internal static class MessageTypeResolver
     {
         arrayBuilder ??= new List<Type>();
 
-        while (rootMessageType is not null && rootMessageType.GetInterfaces().Any(IsMessageType) && rootMessageType != ObjectType)
+        while (rootMessageType is not null && rootMessageType != ObjectType && rootMessageType.GetInterfaces().Any(IsMessageType))
         {
             arrayBuilder.Add(rootMessageType);
             rootMessageType = rootMessageType.BaseType;
@@ -35,8 +35,9 @@ internal static class MessageTypeResolver
         if (type == RequestType || type == NotificationType)
             return true;
 
-        // The type here can only be a message type.
-        // Therefor if is isn't any none generic message type, it has to be an generic message type.
+        if (!type.IsGenericType)
+            return false;
+        
         var genericTypeDefinition = type.GetGenericTypeDefinition();
         return genericTypeDefinition == RequestResponseType ||
                genericTypeDefinition == StreamRequestType;

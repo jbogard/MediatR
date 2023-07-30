@@ -78,8 +78,8 @@ internal sealed class Mediator : IMediator
         }
 
         return _streamRequestHandlers.GetOrAdd((request!.GetType(), typeof(TResponse)), SubscriptionFactory.CreateStreamRequestHandler)
-            .Handle(request, _serviceProvider, cancellationToken);
+            .HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
-    private static void ThrowArgumentNull(string message) => throw new ArgumentNullException(message);
+    private static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
 }
