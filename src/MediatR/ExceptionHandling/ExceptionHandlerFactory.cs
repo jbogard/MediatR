@@ -20,10 +20,10 @@ internal static class ExceptionHandlerFactory
     private static Type genericRequestResponseExceptionHandler = typeof(TransientRequestResponseExceptionHandler<,,>);
 
     [ThreadStatic]
-    private static Type[]? GenericRequestTypeCache;
+    private static Type[]? genericRequestTypeCache;
 
     [ThreadStatic]
-    private static Type[]? GenericHandlerTypeCache;
+    private static Type[]? genericHandlerTypeCache;
 
     public static void Initialize(MediatRServiceConfiguration configuration)
     {
@@ -42,9 +42,9 @@ internal static class ExceptionHandlerFactory
     private static RequestExceptionActionHandler RequestActionHandlerFactory((Type RequestType, Type ExceptionType) tuple)
     {
         TryInitGenericHandlerTypeCache();
-        GenericHandlerTypeCache![0] = tuple.RequestType;
-        GenericHandlerTypeCache[1] = tuple.ExceptionType;
-        var requestExceptionActionHandler = genericRequestExceptionActionHandler.MakeGenericType(GenericHandlerTypeCache);
+        genericHandlerTypeCache![0] = tuple.RequestType;
+        genericHandlerTypeCache[1] = tuple.ExceptionType;
+        var requestExceptionActionHandler = genericRequestExceptionActionHandler.MakeGenericType(genericHandlerTypeCache);
 
         return (RequestExceptionActionHandler) Activator.CreateInstance(requestExceptionActionHandler)!;
     }
@@ -55,9 +55,9 @@ internal static class ExceptionHandlerFactory
     private static RequestExceptionRequestHandler RequestHandlerFactory((Type RequestType, Type ExceptionType) tuple)
     {
         TryInitGenericHandlerTypeCache();
-        GenericHandlerTypeCache![0] = tuple.RequestType;
-        GenericHandlerTypeCache[1] = tuple.ExceptionType;
-        var requestExceptionHandler = genericRequestExceptionHandler.MakeGenericType(GenericHandlerTypeCache);
+        genericHandlerTypeCache![0] = tuple.RequestType;
+        genericHandlerTypeCache[1] = tuple.ExceptionType;
+        var requestExceptionHandler = genericRequestExceptionHandler.MakeGenericType(genericHandlerTypeCache);
 
         return (RequestExceptionRequestHandler) Activator.CreateInstance(requestExceptionHandler)!;
     }
@@ -68,10 +68,10 @@ internal static class ExceptionHandlerFactory
     private static RequestResponseExceptionActionHandler RequestResponseActionHandlerFactory((Type RequestType, Type ResponseType, Type ExceptionType) tuple)
     {
         TryInitGenericRequestTypeCache();
-        GenericRequestTypeCache![0] = tuple.RequestType;
-        GenericRequestTypeCache[1] = tuple.ResponseType;
-        GenericRequestTypeCache[2] = tuple.ExceptionType;
-        var requestResponseExceptionActionHandler = genericRequestResponseExceptionActionHandler.MakeGenericType(GenericRequestTypeCache);
+        genericRequestTypeCache![0] = tuple.RequestType;
+        genericRequestTypeCache[1] = tuple.ResponseType;
+        genericRequestTypeCache[2] = tuple.ExceptionType;
+        var requestResponseExceptionActionHandler = genericRequestResponseExceptionActionHandler.MakeGenericType(genericRequestTypeCache);
 
         return (RequestResponseExceptionActionHandler) Activator.CreateInstance(requestResponseExceptionActionHandler);
     }
@@ -82,19 +82,19 @@ internal static class ExceptionHandlerFactory
     private static RequestResponseExceptionRequestHandler RequestResponseHandlerFactory((Type RequestType, Type ResponseType, Type ExceptionType) tuple)
     {
         TryInitGenericRequestTypeCache();
-        GenericRequestTypeCache![0] = tuple.RequestType;
-        GenericRequestTypeCache[1] = tuple.ResponseType;
-        GenericRequestTypeCache[2] = tuple.ExceptionType;
-        var requestResponseExceptionHandler = genericRequestResponseExceptionHandler.MakeGenericType(GenericRequestTypeCache);
+        genericRequestTypeCache![0] = tuple.RequestType;
+        genericRequestTypeCache[1] = tuple.ResponseType;
+        genericRequestTypeCache[2] = tuple.ExceptionType;
+        var requestResponseExceptionHandler = genericRequestResponseExceptionHandler.MakeGenericType(genericRequestTypeCache);
 
         return (RequestResponseExceptionRequestHandler) Activator.CreateInstance(requestResponseExceptionHandler);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void TryInitGenericRequestTypeCache() =>
-        GenericRequestTypeCache ??= new Type[3];
+        genericRequestTypeCache ??= new Type[3];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void TryInitGenericHandlerTypeCache() =>
-        GenericHandlerTypeCache ??= new Type[2];
+        genericHandlerTypeCache ??= new Type[2];
 }

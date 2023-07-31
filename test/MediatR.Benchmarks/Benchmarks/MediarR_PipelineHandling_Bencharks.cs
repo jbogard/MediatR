@@ -30,6 +30,7 @@ public class MediarR_PipelineHandling_Bencharks
         {
             conf.RegisterServicesFromAssemblyContaining<MediatR_Handlers_Benchmarks>(AssemblyScannerOptions.Handlers | AssemblyScannerOptions.PipelineBehaviors);
             conf.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            conf.DefaultServiceLifetime = ServiceLifetime.Singleton;
             conf.EnableCachingOfHandlers = true;
         });
 

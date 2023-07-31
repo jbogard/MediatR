@@ -28,6 +28,7 @@ public class MediatR_ExceptionHanding_Benchmarks
         {
             conf.RegisterServicesFromAssemblyContaining<MediatR_Handlers_Benchmarks>(AssemblyScannerOptions.Handlers | AssemblyScannerOptions.ExceptionHandler);
             conf.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            conf.DefaultServiceLifetime = ServiceLifetime.Singleton;
             conf.EnableCachingOfHandlers = true;
         });
 

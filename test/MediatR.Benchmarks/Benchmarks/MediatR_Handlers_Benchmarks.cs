@@ -32,6 +32,7 @@ public class MediatR_Handlers_Benchmarks
         {
             conf.RegisterServicesFromAssemblyContaining<MediatR_Handlers_Benchmarks>(AssemblyScannerOptions.Handlers);
             conf.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            conf.DefaultServiceLifetime = ServiceLifetime.Singleton;
             conf.EnableCachingOfHandlers = true;
         });
 
