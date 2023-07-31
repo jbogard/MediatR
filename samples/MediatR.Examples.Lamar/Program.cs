@@ -25,6 +25,7 @@ class Program
         {
             cfg.ConfigureMediatR(config =>
             {
+                config.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
                 config.RegisterServicesFromAssemblyContaining<Ping>();
             });
 

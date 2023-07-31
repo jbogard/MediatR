@@ -26,9 +26,11 @@ internal static class Program
 
         builder.ConfigureMediatR(configuration =>
         {
+            configuration.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             configuration.RegisterServicesFromAssemblyContaining<Ping>();
-        })
-            .RegisterInstance(writer).As<TextWriter>();
+        });
+
+        builder.RegisterInstance(writer).As<TextWriter>();
 
         var services = new ServiceCollection();
 

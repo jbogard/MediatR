@@ -32,6 +32,7 @@ internal static class Program
 
         container.ConfigureMediarR(config =>
         {
+            config.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             config.RegisterServicesFromAssemblyContaining<Ping>();
         })
             .RegisterInstance(typeof(TextWriter), writer);

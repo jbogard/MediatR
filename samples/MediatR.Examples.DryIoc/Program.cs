@@ -17,7 +17,7 @@ class Program
         var writer = new WrappingWriter(Console.Out);
         var mediator = BuildMediator(writer);
 
-        return Runner.Run(mediator, writer, "DryIoc");
+        return Runner.Run(mediator, writer, "DryIoc", true);
     }
 
     private static IMediator BuildMediator(WrappingWriter writer)
@@ -26,6 +26,8 @@ class Program
         container.ConfigureMediatR(config =>
         {
             config.RegisterServicesFromAssemblyContaining<Ping>();
+            config.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            config.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
         });
         container.Use<TextWriter>(writer);
 
@@ -41,7 +43,10 @@ internal static class DryIoCException
 {
     public static IContainer ConfigureMediatR(this IContainer containerInstance, Action<DryIoCContainerConfiguration> configuration)
     {
-        var config = new DryIoCContainerConfiguration();
+        var config = new DryIoCContainerConfiguration
+        {
+            KeyFactory = (serviceType, implementationType) => (serviceType, implementationType)
+        };
         configuration(config);
 
         var adapter = new DryIoCContainerAdapter(containerInstance, config);
@@ -53,7 +58,7 @@ internal static class DryIoCException
 
     public sealed class DryIoCContainerConfiguration : MediatRServiceConfiguration
     {
-        public IReuse MappingLifeTime { get; set; } = Reuse.Singleton;
+        public required Func<Type, Type, object> KeyFactory { get; init; }
     }
 
     internal sealed class DryIoCContainerAdapter : DependencyInjectionRegistrarAdapter<IContainer, DryIoCContainerConfiguration>
@@ -73,18 +78,30 @@ internal static class DryIoCException
             Registrar.Register(serviceType, implementationType, Reuse.Singleton);
 
         public override void RegisterMapping(Type serviceType, Type implementationType) =>
-            Registrar.RegisterMapping(serviceType, implementationType, Configuration.MappingLifeTime);
+            Registrar.RegisterMapping(serviceType, implementationType, serviceKey: Configuration.KeyFactory(serviceType, implementationType));
+
+        public override void RegisterMappingOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.RegisterMapping(serviceType, implementationType, IfAlreadyRegistered.Throw);
 
         public override void RegisterOpenGenericMapping(Type serviceType, Type implementationType) =>
-            Registrar.RegisterMapping(serviceType, implementationType, Configuration.MappingLifeTime);
+            Registrar.RegisterMapping(serviceType, implementationType, serviceKey: Configuration.KeyFactory(serviceType, implementationType));
+
+        public override void RegisterOpenGenericMappingOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.RegisterMapping(serviceType, implementationType, IfAlreadyRegistered.Throw);
 
         public override void Register(Type serviceType, Type implementationType) =>
-            Registrar.Register(serviceType, implementationType);
+            Registrar.Register(serviceType, implementationType, serviceKey: Configuration.KeyFactory(serviceType, implementationType));
+
+        public override void RegisterOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType, ifAlreadyRegistered: IfAlreadyRegistered.Throw);
 
         public override void RegisterOpenGeneric(Type serviceType, Type implementationType) =>
-            Registrar.Register(serviceType, implementationType);
+            Registrar.Register(serviceType, implementationType, serviceKey: Configuration.KeyFactory(serviceType, implementationType));
+
+        public override void RegisterOpenGenericOnlyOnce(Type serviceType, Type implementationType) =>
+            Registrar.Register(serviceType, implementationType, ifAlreadyRegistered: IfAlreadyRegistered.Throw);
 
         public override bool IsAlreadyRegistered(Type serviceType, Type implementationType) =>
-            Registrar.IsRegistered(serviceType, condition: factory => factory.ImplementationType == implementationType);
+            Registrar.IsRegistered(serviceType);
     }
 }

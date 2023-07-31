@@ -28,6 +28,7 @@ internal class Program
 
         container.AddMediatR(cfg =>
         {
+            cfg.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
             cfg.RegisterServicesFromAssemblyContaining<Ping>();
         });
 

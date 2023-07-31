@@ -25,9 +25,10 @@ class Program
         var serviceContainer = new ServiceContainer(ContainerOptions.Default.WithMicrosoftSettings());
         serviceContainer
             .ConfigureMediatR(config =>
-                {
-                    config.RegisterServicesFromAssemblyContaining<Ping>();
-                })
+            {
+                config.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
+                config.RegisterServicesFromAssemblyContaining<Ping>();
+            })
             .RegisterInstance<TextWriter>(writer);
 
         var services = new ServiceCollection();

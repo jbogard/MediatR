@@ -24,7 +24,8 @@ class Program
             .RegisterInstance<TextWriter>(writer)
             .ConfigureMediatR(config =>
             {
-               config.RegisterServicesFromAssemblyContaining<Ping>(); 
+                config.RequestExceptionActionProcessorStrategy = RequestExceptionActionProcessorStrategy.ApplyForAllExceptions;
+                config.RegisterServicesFromAssemblyContaining<Ping>(); 
             });
 
         return container.GetRequiredService<IMediator>();
