@@ -55,27 +55,10 @@ internal sealed class ServiceCollectionAdapter : DependencyInjectionRegistrarAda
         for (var i = 0; i < Registrar.Count; i++)
         {
             var descriptor = Registrar[i];
-            if (descriptor.ServiceType == serviceType && IsImplementationType(descriptor, implementationType))
+            if (descriptor.ServiceType == serviceType)
             {
                 return true;
             }
-        }
-
-        return false;
-    }
-
-    private static bool IsImplementationType(ServiceDescriptor serviceDescriptor, Type implementationType)
-    {
-        if (serviceDescriptor.ImplementationType is not null &&
-            serviceDescriptor.ImplementationType == implementationType)
-        {
-            return true;
-        }
-
-        if (serviceDescriptor.ImplementationInstance is not null &&
-            serviceDescriptor.ImplementationInstance.GetType() == implementationType)
-        {
-            return true;
         }
 
         return false;
