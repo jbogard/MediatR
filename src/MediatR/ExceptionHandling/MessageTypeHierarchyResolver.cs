@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace MediatR.ExceptionHandling;
 
-internal static class MessageTypeResolver
+internal static class MessageTypeHierarchyResolver
 {
     private static readonly Type ObjectType = typeof(object);
     private static readonly Type RequestType = typeof(IRequest);

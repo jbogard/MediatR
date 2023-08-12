@@ -19,8 +19,13 @@ namespace MediatR.NotificationPublishers;
 public class TaskWhenAllPublisher : INotificationPublisher
 {
     /// <inheritdoc />
-    public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+    public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
         where TNotification : INotification =>
+        notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).GetAwaiter().GetResult();
+
+    /// <inheritdoc />
+    public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+        CancellationToken cancellationToken) =>
         notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).GetAwaiter().GetResult();
 
     /// <inheritdoc />

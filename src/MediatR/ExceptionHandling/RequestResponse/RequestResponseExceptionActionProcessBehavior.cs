@@ -10,7 +10,7 @@ internal sealed class RequestResponseExceptionActionProcessBehavior<TRequest, TR
     where TResponse : notnull
 {
     private static readonly Type ResponseType = typeof(TResponse);
-    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeResolver.GetMessageTypeHierarchy(typeof(TRequest));
+    private static readonly Type[] RequestResponseTypeHierarchy = MessageTypeHierarchyResolver.GetMessageTypeHierarchy(typeof(TRequest));
 
     private readonly IServiceProvider _serviceProvider;
 

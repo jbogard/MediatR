@@ -85,6 +85,44 @@ public sealed class NotificationTests : IDisposable
     }
 
     [Fact]
+    public void PublishObjectNotification_WithDefaultPublisher_ExecutesAllNotificationTypeHandlers()
+    {
+        const string NotExplicitHandledMessage = "Notification was not handled.";
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.RegisterServicesFromAssemblyContaining(typeof(NotificationTests));
+        });
+        var provider = collection.BuildServiceProvider();
+
+        var notification = new Notification
+        {
+            Message = NotExplicitHandledMessage
+        };
+
+        var mediator = provider.GetRequiredService<IMediator>();
+        mediator.Publish(notification);
+
+        // Act
+        mediator.Publish((object)notification);
+
+        // Assert
+        var baseHandler = provider.GetRequiredService<BaseNotificationHandler>();
+        var multiHandler = provider.GetRequiredService<MultiNotificationHandler>();
+        var genericHandlerType = GetGenericNotificationHandler<Notification>(provider);
+
+        notification.Message.Should().NotBe(NotExplicitHandledMessage);
+        notification.Handlers.Should().Be(4);
+
+        baseHandler.Calls.Should().Be(0);
+        multiHandler.Calls.Should().Be(2);
+        genericHandlerType.Calls.Should().Be(2);
+    }
+
+
+    [Fact]
     public void PublishNotification_WithTaskWhenAllPublisher_ExecutedAllHandlesAtOnce()
     {
         // Arrange

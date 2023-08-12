@@ -86,6 +86,87 @@ public sealed class StreamRequestTests : IDisposable
     }
 
     [Fact]
+    public async Task PublishObjectStreamRequest_WithOneInstancePerServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<StreamRequestTests>();
+            cfg.RegistrationStyle = RegistrationStyle.EachServiceOneInstance;
+            cfg.DefaultServiceLifetime = ServiceLifetime.Singleton;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new StreamRequestMessage();
+        var mediator = provider.GetRequiredService<IMediator>();
+        var typedStream = mediator.CreateStreamAsync<StreamResponse>(request);
+
+        // Act
+        var dynamicStream = mediator.CreateStreamAsync(request);
+
+        // Assert
+        var handler = (StreamRequestHandler)provider.GetRequiredService<IStreamRequestHandler<StreamRequestMessage, StreamResponse>>();
+
+        await foreach (var response in typedStream)
+        {
+            response.Should().NotBeNull();
+            response.Should().BeOfType<StreamResponse>();
+        }
+
+        await foreach (var response in dynamicStream)
+        {
+            response.Should().NotBeNull();
+            response.Should().BeOfType<StreamResponse>();
+        }
+
+        handler.Calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task PublishObjectStreamRequestWithCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<StreamRequestTests>();
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.EnableCachingOfHandlers = true;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new StreamRequestMessage();
+        var mediator = provider.GetRequiredService<IMediator>();
+        var firstStream = mediator.CreateStreamAsync<StreamResponse>(request);
+        var secondStream = mediator.CreateStreamAsync<StreamResponse>(request);
+
+        // Act
+        var dynamicStream = mediator.CreateStreamAsync(request);
+
+        // Assert
+        var handler = provider.GetRequiredService<StreamRequestHandler>();
+
+        await foreach (var response in firstStream)
+        {
+            response.Should().NotBeNull();
+            response.Should().BeOfType<StreamResponse>();
+        }
+
+        await foreach (var response in secondStream)
+        {
+            response.Should().NotBeNull();
+            response.Should().BeOfType<StreamResponse>();
+        }
+
+        await foreach (var response in dynamicStream)
+        {
+            response.Should().NotBeNull();
+            response.Should().BeOfType<StreamResponse>();
+        }
+
+        handler.Calls.Should().Be(3);
+    }
+
+    [Fact]
     public async Task PublishStreamRequestWithoutCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
     {
         // Arrange

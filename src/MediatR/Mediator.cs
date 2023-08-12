@@ -58,6 +58,28 @@ internal sealed class Mediator : IMediator
             .HandleAsync(request!, _serviceProvider, cancellationToken);
     }
 
+    public async ValueTask<object?> SendAsync(object? request, CancellationToken cancellationToken)
+    {
+        if (request is null)
+        {
+            ThrowArgumentNull(nameof(request));
+        }
+
+        var requestType = request!.GetType();
+
+        if (MessageTypeResolver.TryGetMessageType(requestType, typeof(IRequest<>), out var requestResponseInterface))
+        {
+            var handler = _requestResponseHandlers.GetOrAdd(requestResponseInterface, SubscriptionFactory.CreateRequestResponseHandler);
+            return await handler.HandleAsync(request, _serviceProvider, cancellationToken);
+        }
+        else
+        {
+            var handler = _requestHandlers.GetOrAdd(requestType, SubscriptionFactory.CreateRequestHandler);
+            await handler.HandleAsync(request, _serviceProvider, cancellationToken);
+            return null;
+        }
+    }
+
     public void Publish<TNotification>(TNotification? notification, CancellationToken cancellationToken = default)
         where TNotification : INotification
     {
@@ -67,7 +89,18 @@ internal sealed class Mediator : IMediator
         }
 
         var notificationHandler = _notificationHandlers.GetOrAdd(typeof(TNotification), SubscriptionFactory.CreateNotificationHandler);
-        _notificationPublisher.Publish(notificationHandler, notification!, _serviceProvider, _notificationPublisher, cancellationToken);
+        _notificationPublisher.Publishing(notificationHandler, notification!, _serviceProvider, _notificationPublisher, cancellationToken);
+    }
+
+    public void Publish(object? notification, CancellationToken cancellationToken = default)
+    {
+        if (notification is null)
+        {
+            ThrowArgumentNull(nameof(notification));
+        }
+
+        var notificationHandler = _notificationHandlers.GetOrAdd(notification!.GetType(), SubscriptionFactory.CreateNotificationHandler);
+        _notificationPublisher.Publishing(notificationHandler, notification, _serviceProvider, _notificationPublisher, cancellationToken);
     }
 
     public IAsyncEnumerable<TResponse> CreateStreamAsync<TResponse>(IStreamRequest<TResponse>? request, CancellationToken cancellationToken = default)
@@ -79,6 +112,18 @@ internal sealed class Mediator : IMediator
 
         return _streamRequestHandlers.GetOrAdd((request!.GetType(), typeof(TResponse)), SubscriptionFactory.CreateStreamRequestHandler)
             .HandleAsync(request, _serviceProvider, cancellationToken);
+    }
+
+    public IAsyncEnumerable<object?> CreateStreamAsync(object? request, CancellationToken cancellationToken = default)
+    {
+        if (request is null)
+        {
+            ThrowArgumentNull(nameof(request));
+        }
+
+        var handlerCreationInfo = MessageTypeResolver.GetMessageType(request!.GetType(), typeof(IStreamRequest<>));
+        var handler = _streamRequestHandlers.GetOrAdd(handlerCreationInfo, SubscriptionFactory.CreateStreamRequestHandler);
+        return handler.HandleAsync(request, _serviceProvider, cancellationToken);
     }
 
     private static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);

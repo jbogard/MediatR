@@ -20,9 +20,19 @@ public interface INotificationPublisher
     /// <param name="notificationPublisher">The current notification publisher.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <typeparam name="TNotification">The notification type.</typeparam>
-    void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+    void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
         where TNotification : INotification;
     
+    /// <summary>
+    ///  Defines how to handle the publishing task.
+    /// </summary>
+    /// <param name="notificationHandler">The notification handler.</param>
+    /// <param name="notification">The notification message.</param>
+    /// <param name="serviceProvider">The current service provider.</param>
+    /// <param name="notificationPublisher">The current notification publisher.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken);
+
     /// <summary>
     /// Publishes the <paramref name="notification"/> to the handlers <paramref name="notificationHandlers"/>.
     /// </summary>

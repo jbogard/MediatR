@@ -14,6 +14,10 @@ namespace MediatR.ExecutionFlowTests;
 
 internal static class TestCleaner
 {
+    private static readonly FieldInfo messageTypeResolverMessageTypeCache = typeof(MessageTypeResolver)
+        .GetFields(BindingFlags.Static | BindingFlags.NonPublic)
+        .Single(f => f.FieldType.IsGenericType && f.FieldType.GetGenericTypeDefinition() == typeof(ConcurrentDictionary<,>));
+
     private static readonly FieldInfo subscriptionFactoryOpenGenericNotificationHandlerField = typeof(SubscriptionFactory)
         .GetField("genericNotificationHandlerType", BindingFlags.Static | BindingFlags.NonPublic)!;
 
@@ -51,6 +55,7 @@ internal static class TestCleaner
     public static void CleanUp()
     {
         CleanUpStaticDictionaryCaches();
+        ClearMessageTypeCache();
         ResetConfigurationFields();
     }
 
@@ -67,11 +72,6 @@ internal static class TestCleaner
             var dictionary = exceptionFactoryConcurrentDictionary.GetValue(null);
             GetCleanMethod(exceptionFactoryConcurrentDictionary.FieldType).Invoke(dictionary, Array.Empty<object?>());
         }
-
-        static MethodInfo GetCleanMethod(Type concurrentDictionaryType)
-        {
-            return concurrentDictionaryType.GetMethod(nameof(ConcurrentDictionary<dynamic, dynamic>.Clear))!;
-        }
     }
 
     private static void ResetConfigurationFields()
@@ -86,4 +86,15 @@ internal static class TestCleaner
         exceptionHandlerFactoryRequestResponseExceptionActionHandlerField.SetValue(null, typeof(TransientRequestResponseExceptionActionHandler<,,>));
         exceptionHandlerFactoryRequestResponseExceptionHandlerField.SetValue(null, typeof(TransientRequestResponseExceptionHandler<,,>));
     }
+
+    private static void ClearMessageTypeCache()
+    {
+        var cleanMethod = GetCleanMethod(messageTypeResolverMessageTypeCache.FieldType);
+        var concurrentDic = messageTypeResolverMessageTypeCache.GetValue(null);
+
+        cleanMethod.Invoke(concurrentDic, Array.Empty<object>());
+    }
+    
+    private static MethodInfo GetCleanMethod(Type concurrentDictionaryType) =>
+        concurrentDictionaryType.GetMethod(nameof(ConcurrentDictionary<dynamic, dynamic>.Clear))!;
 }

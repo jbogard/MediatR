@@ -74,6 +74,57 @@ public sealed class RequestTests : IDisposable
     }
 
     [Fact]
+    public async Task PublishObjectRequest_WithOneInstancePerServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<RequestTests>();
+            cfg.RegistrationStyle = RegistrationStyle.EachServiceOneInstance;
+            cfg.DefaultServiceLifetime = ServiceLifetime.Singleton;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new Request();
+        var mediator = provider.GetRequiredService<IMediator>();
+        await mediator.SendAsync(request);
+
+        // Act
+        await mediator.SendAsync((object) request);
+
+        // Assert
+        var handler = (RequestHandler)provider.GetRequiredService<IRequestHandler<Request>>();
+
+        handler.Calls.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task PublishObjectRequestWithCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<RequestTests>();
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.EnableCachingOfHandlers = true;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new Request();
+        var mediator = provider.GetRequiredService<IMediator>();
+        await mediator.SendAsync(request);
+        await mediator.SendAsync(request);
+
+        // Act
+        await mediator.SendAsync((object)request);
+
+        // Assert
+        var handler = provider.GetRequiredService<RequestHandler>();
+
+        handler.Calls.Should().Be(3);
+    }
+
+    [Fact]
     public async Task PublishRequestWithoutCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
     {
         // Arrange

@@ -36,6 +36,18 @@ public sealed class MediatRTests
     }
 
     [Fact]
+    public void DefaultMediatR_PublishNullObjectNotification_ThrowsArgumentNullException()
+    {
+        // Arrange
+
+        // Act
+        var act = () => _sut.Publish(null!);
+
+        // Assert
+        act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*notification*");
+    }
+
+    [Fact]
     public void DefaultMediatR_PublishedNullRequestResponse_ThrowsArgumentNullException()
     {
         // Arrange
@@ -45,6 +57,18 @@ public sealed class MediatRTests
         
         // Assert
         act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");
+    }
+
+    [Fact]
+    public void DefaultMediatR_PublishedNullObjectRequestResponse_ThrowsArgumentNullException()
+    {
+        // Arrange
+
+        // Act
+        var act = async () => await _sut.SendAsync(null!);
+        
+        // Assert
+        act.Should().ThrowExactlyAsync<ArgumentNullException>().WithMessage("*request*");
     }
 
     [Fact]
@@ -66,6 +90,18 @@ public sealed class MediatRTests
         
         // Act
         var act = () => _sut.CreateStreamAsync<StreamResponse>(null!);
+        
+        // Assert
+        act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");
+    }
+
+    [Fact]
+    public void DefaultMediatR_PublishedNullObjectStreamRequest_ThrowsArgumentNullException()
+    {
+        // Arrange
+        
+        // Act
+        var act = () => _sut.CreateStreamAsync(null!);
         
         // Assert
         act.Should().ThrowExactly<ArgumentNullException>().WithMessage("*request*");

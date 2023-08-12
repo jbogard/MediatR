@@ -17,13 +17,31 @@ internal sealed class CachedRequestHandler<TRequest> : RequestHandler
     {
         Debug.Assert(typeof(TRequest).IsAssignableFrom(typeof(TMethodRequest)), "request type must be an inherited type of method request type.");
 
+        var handler = GetHandler(serviceProvider);
+
+        var methodHandler = Unsafe.As<RequestHandlerDelegate<TRequest>, RequestHandlerDelegate<TMethodRequest>>(ref handler);
+        return methodHandler(request, cancellationToken);
+    }
+
+    public override ValueTask HandleAsync(object request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        Debug.Assert(request.GetType() == typeof(TRequest), "The request type must be the same.");
+
+        var handler = GetHandler(serviceProvider);
+
+        return handler((TRequest) request, cancellationToken);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private RequestHandlerDelegate<TRequest> GetHandler(IServiceProvider serviceProvider)
+    {
         if (_cachedHandler is not null)
         {
-            return _cachedHandler(Unsafe.As<TMethodRequest, TRequest>(ref Unsafe.AsRef(request)), cancellationToken);
+            return _cachedHandler;
         }
-        
-        var behaviors = (IPipelineBehavior<TMethodRequest>[])GetBehaviors(serviceProvider);
-        RequestHandlerDelegate<TMethodRequest> handler = ((IRequestHandler<TMethodRequest>)GetHandler(serviceProvider)).Handle;
+
+        var behaviors = serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
+        RequestHandlerDelegate<TRequest> handler = serviceProvider.GetRequiredService<IRequestHandler<TRequest>>().Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
         {
             var next = handler;
@@ -31,16 +49,6 @@ internal sealed class CachedRequestHandler<TRequest> : RequestHandler
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        _cachedHandler = Unsafe.As<RequestHandlerDelegate<TMethodRequest>, RequestHandlerDelegate<TRequest>>(ref handler);
-
-        return handler(request, cancellationToken);
+        return _cachedHandler = handler;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IRequestHandler<TRequest> GetHandler(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IRequestHandler<TRequest>>();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IPipelineBehavior<TRequest>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        serviceProvider.GetServices<IPipelineBehavior<TRequest>>();
 }

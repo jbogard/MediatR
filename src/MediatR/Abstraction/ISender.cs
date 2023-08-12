@@ -28,6 +28,14 @@ public interface ISender
         where TRequest : IRequest;
 
     /// <summary>
+    /// Asynchronously send a request to a single handler via dynamic dispatching.
+    /// </summary>
+    /// <param name="request">Request object</param>
+    /// <param name="cancellationToken">Optional cancellation token</param>
+    /// <returns>A task that represents the send operation. The task result contains the handler response.</returns>
+    ValueTask<object?> SendAsync(object? request, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Create a stream via a single stream handler
     /// </summary>
     /// <typeparam name="TResponse">The Response</typeparam>
@@ -35,4 +43,11 @@ public interface ISender
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     IAsyncEnumerable<TResponse> CreateStreamAsync<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Create a stream via a single stream handler via dynamic dispatching.
+    /// </summary>
+    /// <param name="request">The request object</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    IAsyncEnumerable<object?> CreateStreamAsync(object? request, CancellationToken cancellationToken = default);
 }

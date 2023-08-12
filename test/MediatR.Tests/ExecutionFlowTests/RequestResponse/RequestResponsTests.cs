@@ -76,6 +76,68 @@ public sealed class RequestResponseTests : IDisposable
     }
 
     [Fact]
+    public async Task PublishObjectRequestResponse_WithOneInstancePerServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<RequestResponseTests>();
+            cfg.RegistrationStyle = RegistrationStyle.EachServiceOneInstance;
+            cfg.DefaultServiceLifetime = ServiceLifetime.Singleton;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new RequestResponse();
+
+        var mediator = provider.GetRequiredService<IMediator>();
+        var typedResponse = await mediator.SendAsync<Response>(request);
+
+        // Act
+        var dynamicResponse = await mediator.SendAsync(request);
+
+        // Assert
+        var handler = (RequestHandler)provider.GetRequiredService<IRequestHandler<RequestResponse, Response>>();
+
+        handler.Calls.Should().Be(2);
+        typedResponse.Should().NotBeNull();
+        dynamicResponse.Should().NotBeNull();
+        typedResponse.Should().BeOfType<Response>();
+        dynamicResponse.Should().BeOfType<Response>();
+    }
+
+    [Fact]
+    public async Task PublishObjectRequestResponseWithCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
+    {
+        // Arrange
+        var collection = new ServiceCollection();
+        collection.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<RequestResponseTests>();
+            cfg.RegistrationStyle = RegistrationStyle.OneInstanceForeachService;
+            cfg.EnableCachingOfHandlers = true;
+        });
+        var provider = collection.BuildServiceProvider();
+        var request = new RequestResponse();
+        var mediator = provider.GetRequiredService<IMediator>();
+        var typedResponse1 = await mediator.SendAsync<Response>(request);
+        var typedResponse2 = await mediator.SendAsync<Response>(request);
+
+        // Act
+        var dynamicResponse = await mediator.SendAsync(request);
+
+        // Assert
+        var handler = provider.GetRequiredService<RequestHandler>();
+
+        handler.Calls.Should().Be(3);
+        typedResponse1.Should().NotBeNull();
+        typedResponse1.Should().BeOfType<Response>();
+        typedResponse2.Should().NotBeNull();
+        typedResponse2.Should().BeOfType<Response>();
+        dynamicResponse.Should().NotBeNull();
+        dynamicResponse.Should().BeOfType<Response>();
+    }
+
+    [Fact]
     public async Task PublishRequestResponseWithoutCaching_WithOneInstanceForeachServiceRegistration_ReturnsDefaultResponse()
     {
         // Arrange

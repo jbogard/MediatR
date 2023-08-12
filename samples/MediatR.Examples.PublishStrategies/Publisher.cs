@@ -40,8 +40,12 @@ public class Publisher
     
     private sealed class ParallelWhenAll : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
@@ -61,8 +65,12 @@ public class Publisher
     
     private sealed class ParallelWhenAny : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
@@ -82,8 +90,12 @@ public class Publisher
     
     private sealed class ParallelNoWait : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
@@ -100,8 +112,12 @@ public class Publisher
     
     private sealed class AsyncContinueOnException : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
@@ -144,8 +160,12 @@ public class Publisher
     
     private sealed class SyncStopOnException : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)
@@ -160,8 +180,12 @@ public class Publisher
     
     private sealed class SyncContinueOnException : INotificationPublisher
     {
-        public void Publish<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+        public void Publishing<TNotification>(NotificationHandler notificationHandler, TNotification notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
             where TNotification : INotification =>
+            notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        public void Publishing(NotificationHandler notificationHandler, object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher,
+            CancellationToken cancellationToken) =>
             notificationHandler.Handle(notification, serviceProvider, notificationPublisher, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task Publish<TNotification>(INotificationHandler<TNotification>[] notificationHandlers, TNotification notification, CancellationToken cancellationToken)

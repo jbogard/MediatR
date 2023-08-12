@@ -8,7 +8,7 @@ namespace MediatR.ExceptionHandling.Request;
 internal sealed class RequestExceptionActionProcessorBehavior<TRequest> : IPipelineBehavior<TRequest>
     where TRequest : IRequest
 {
-    private static readonly Type[] RequestExceptionType = MessageTypeResolver.GetMessageTypeHierarchy(typeof(TRequest));
+    private static readonly Type[] RequestExceptionType = MessageTypeHierarchyResolver.GetMessageTypeHierarchy(typeof(TRequest));
 
     private readonly IServiceProvider _serviceProvider;
 

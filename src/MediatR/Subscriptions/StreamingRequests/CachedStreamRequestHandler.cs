@@ -17,13 +17,33 @@ internal sealed class CachedStreamRequestHandler<TRequest, TResponse> : StreamRe
     {
         Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
 
+        var handler = GetHandler(serviceProvider);
+
+        return (IAsyncEnumerable<TMethodResponse>) handler((TRequest) request, cancellationToken);
+    }
+
+    public override async IAsyncEnumerable<object?> HandleAsync(object request, IServiceProvider serviceProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        Debug.Assert(request is IStreamRequest<TResponse>, "request must be an StreamRequest.");
+
+        var handler = GetHandler(serviceProvider);
+
+        await foreach (var response in handler((TRequest) request, cancellationToken))
+        {
+            yield return response;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private StreamHandlerDelegate<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider)
+    {
         if (_cachedHandler is not null)
         {
-            _cachedHandler((TRequest)request, cancellationToken);
+            return _cachedHandler;
         }
-        
-        var behaviors = GetBehaviors(serviceProvider);
-        StreamHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
+
+        var behaviors = serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
+        StreamHandlerDelegate<TRequest, TResponse> handler = serviceProvider.GetRequiredService<IStreamRequestHandler<TRequest, TResponse>>().Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
         {
             var next = handler;
@@ -31,16 +51,6 @@ internal sealed class CachedStreamRequestHandler<TRequest, TResponse> : StreamRe
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        _cachedHandler = handler;
-
-        return (IAsyncEnumerable<TMethodResponse>) handler((TRequest) request, cancellationToken);
+        return _cachedHandler = handler;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IStreamRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IStreamRequestHandler<TRequest, TResponse>>();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IStreamPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        serviceProvider.GetServices<IStreamPipelineBehavior<TRequest, TResponse>>();
 }

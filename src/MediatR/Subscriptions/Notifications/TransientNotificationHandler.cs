@@ -18,6 +18,13 @@ internal sealed class TransientNotificationHandler<TNotification> : Notification
         return notificationPublisher.Publish((INotificationHandler<TMethodNotification>[])GetHandlers(serviceProvider), notification, cancellationToken);
     }
 
+    public override Task Handle(object notification, IServiceProvider serviceProvider, INotificationPublisher notificationPublisher, CancellationToken cancellationToken)
+    {
+        Debug.Assert(notification.GetType() == typeof(TNotification), "Notification types must be the same.");
+
+        return notificationPublisher.Publish(GetHandlers(serviceProvider), (TNotification) notification, cancellationToken);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static INotificationHandler<TNotification>[] GetHandlers(IServiceProvider serviceProvider) =>
         serviceProvider.GetServices<INotificationHandler<TNotification>>();

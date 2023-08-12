@@ -13,20 +13,38 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
 {
     private RequestHandlerDelegate<TRequest, TResponse>? _cachedHandler;
 
-    public override ValueTask<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    public override ValueTask<TMethodResponse> HandleAsync<TMethodResponse>(IRequest<TMethodResponse> methodRequest, IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
+        Debug.Assert(methodRequest is TRequest, "request type must be an inherited type of method request type.");
         Debug.Assert(typeof(TResponse) == typeof(TMethodResponse), $"Response '{typeof(TResponse)}' and method response '{typeof(TMethodResponse)}' must always be the same type.");
 
+        var request = Unsafe.As<IRequest<TMethodResponse>, TRequest>(ref methodRequest);
+        var handler = GetHandler(serviceProvider);
+        var response = handler(request, cancellationToken);
+
+        return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(ref response);
+    }
+
+    public override async ValueTask<object?> HandleAsync(object request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+    {
+        Debug.Assert(request.GetType() == typeof(TRequest), "Request types must be the same.");
+
+        var handler = GetHandler(serviceProvider);
+        var response = await handler((TRequest) request, cancellationToken);
+
+        return response;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private RequestHandlerDelegate<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider)
+    {
         if (_cachedHandler is not null)
         {
-            return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
-                ref Unsafe.AsRef(_cachedHandler(
-                    Unsafe.As<IRequest<TMethodResponse>, TRequest>(ref request), 
-                    cancellationToken)));
+            return _cachedHandler;
         }
-        
-        var behaviors = GetBehaviors(serviceProvider);
-        RequestHandlerDelegate<TRequest, TResponse> handler = GetHandler(serviceProvider).Handle;
+
+        var behaviors = serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
+        RequestHandlerDelegate<TRequest, TResponse> handler = serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>().Handle;
         for (var i = behaviors.Length - 1; i >= 0; i--)
         {
             var next = handler;
@@ -34,19 +52,6 @@ internal sealed class CachedRequestResponseHandler<TRequest, TResponse> : Reques
             handler = (behaviorRequest, token) => behavior.Handle(behaviorRequest, next, token);
         }
 
-        _cachedHandler = handler;
-
-        return Unsafe.As<ValueTask<TResponse>, ValueTask<TMethodResponse>>(
-            ref Unsafe.AsRef(_cachedHandler(
-                Unsafe.As<IRequest<TMethodResponse>, TRequest>(ref request),
-                cancellationToken)));
+        return _cachedHandler = handler;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IRequestHandler<TRequest, TResponse> GetHandler(IServiceProvider serviceProvider) =>
-        serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static IPipelineBehavior<TRequest, TResponse>[] GetBehaviors(IServiceProvider serviceProvider) =>
-        serviceProvider.GetServices<IPipelineBehavior<TRequest, TResponse>>();
 }
