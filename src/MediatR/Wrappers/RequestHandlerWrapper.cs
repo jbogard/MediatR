@@ -58,7 +58,8 @@ public class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
         async Task<Unit> Handler()
         {
             await serviceProvider.GetRequiredService<IRequestHandler<TRequest>>()
-                .Handle((TRequest) request, cancellationToken);
+                .Handle((TRequest) request, cancellationToken)
+                .ConfigureAwait(false);
 
             return Unit.Value;
         }
