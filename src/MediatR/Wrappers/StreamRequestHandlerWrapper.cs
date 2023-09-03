@@ -22,7 +22,7 @@ internal abstract class StreamRequestHandlerWrapper<TResponse> : StreamRequestHa
         CancellationToken cancellationToken);
 }
 
-internal class StreamRequestHandlerWrapperImpl<TRequest, TResponse> 
+internal sealed class StreamRequestHandlerWrapperImpl<TRequest, TResponse> 
     : StreamRequestHandlerWrapper<TResponse>
     where TRequest : IStreamRequest<TResponse>
 {

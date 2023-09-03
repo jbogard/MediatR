@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MediatR.Internal;
 
-internal class ObjectDetails : IComparer<ObjectDetails>
+internal sealed class ObjectDetails : IComparer<ObjectDetails>
 {
     public string Name { get; }
 
