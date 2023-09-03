@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediatR(this IServiceCollection services, 
         MediatRServiceConfiguration configuration)
     {
-        if (!configuration.AssembliesToRegister.Any())
+        if (configuration.AssembliesToRegister.Count == 0)
         {
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");
         }

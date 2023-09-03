@@ -58,7 +58,7 @@ public static class ServiceRegistrar
         foreach (var type in assembliesToScan.SelectMany(a => a.DefinedTypes).Where(t => !t.IsOpenGeneric()).Where(configuration.TypeEvaluator))
         {
             var interfaceTypes = type.FindInterfacesThatClose(openRequestInterface).ToArray();
-            if (!interfaceTypes.Any()) continue;
+            if (interfaceTypes.Length == 0) continue;
 
             if (type.IsConcrete())
             {
@@ -232,13 +232,13 @@ public static class ServiceRegistrar
             RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
         }
 
-        if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
+        if (serviceConfiguration.RequestPreProcessorsToRegister.Count != 0)
         {
             services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
             services.TryAddEnumerable(serviceConfiguration.RequestPreProcessorsToRegister);
         }
 
-        if (serviceConfiguration.RequestPostProcessorsToRegister.Any())
+        if (serviceConfiguration.RequestPostProcessorsToRegister.Count != 0)
         {
             services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>), ServiceLifetime.Transient));
             services.TryAddEnumerable(serviceConfiguration.RequestPostProcessorsToRegister);
