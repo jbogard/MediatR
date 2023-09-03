@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Internal;
 
 namespace MediatR.NotificationPublishers;
 
@@ -16,6 +17,8 @@ public class ForeachAwaitPublisher : INotificationPublisher
 {
     public async Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
     {
+        handlerExecutors.ThrowIfNull();
+
         foreach (var handler in handlerExecutors)
         {
             await handler.HandlerCallback(notification, cancellationToken).ConfigureAwait(false);

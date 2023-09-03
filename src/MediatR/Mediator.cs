@@ -1,3 +1,4 @@
+using MediatR.Internal;
 using MediatR.NotificationPublishers;
 
 namespace MediatR;
@@ -41,10 +42,7 @@ public class Mediator : IMediator
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        request.ThrowIfNull();
 
         var handler = (RequestHandlerWrapper<TResponse>)_requestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
@@ -76,10 +74,7 @@ public class Mediator : IMediator
 
     public Task<object?> Send(object request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        request.ThrowIfNull();
 
         var handler = _requestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
@@ -154,10 +149,7 @@ public class Mediator : IMediator
 
     public IAsyncEnumerable<TResponse> CreateStream<TResponse>(IStreamRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        request.ThrowIfNull();
 
         var streamHandler = (StreamRequestHandlerWrapper<TResponse>)_streamRequestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
@@ -174,10 +166,7 @@ public class Mediator : IMediator
 
     public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        request.ThrowIfNull();
 
         var handler = _streamRequestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {

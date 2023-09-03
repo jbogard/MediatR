@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MediatR.Internal;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +13,8 @@ public static class ServiceRegistrar
 {
     public static void AddMediatRClasses(IServiceCollection services, MediatRServiceConfiguration configuration)
     {
+        configuration.ThrowIfNull();
+
         var assembliesToScan = configuration.AssembliesToRegister.Distinct().ToArray();
 
         ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>), services, assembliesToScan, false, configuration);
@@ -209,6 +212,8 @@ public static class ServiceRegistrar
 
     public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
     {
+        serviceConfiguration.ThrowIfNull();
+
         // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
         services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));

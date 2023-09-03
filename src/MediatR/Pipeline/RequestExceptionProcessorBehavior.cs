@@ -25,6 +25,8 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        next.ThrowIfNull();
+
         try
         {
             return await next().ConfigureAwait(false);

@@ -1,3 +1,5 @@
+using MediatR.Internal;
+
 namespace MediatR.Wrappers;
 
 using System;
@@ -21,6 +23,8 @@ public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandler
         Func<IEnumerable<NotificationHandlerExecutor>, INotification, CancellationToken, Task> publish,
         CancellationToken cancellationToken)
     {
+        publish.ThrowIfNull();
+
         var handlers = serviceFactory
             .GetServices<INotificationHandler<TNotification>>()
             .Select(static x => new NotificationHandlerExecutor(x, (theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));

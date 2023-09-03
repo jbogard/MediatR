@@ -25,6 +25,8 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        next.ThrowIfNull();
+
         try
         {
             return await next().ConfigureAwait(false);

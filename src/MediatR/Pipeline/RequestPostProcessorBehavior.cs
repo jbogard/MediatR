@@ -1,3 +1,5 @@
+using MediatR.Internal;
+
 namespace MediatR.Pipeline;
 
 using System.Collections.Generic;
@@ -19,6 +21,8 @@ public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavi
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        next.ThrowIfNull();
+        
         var response = await next().ConfigureAwait(false);
 
         foreach (var processor in _postProcessors)

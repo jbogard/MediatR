@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using MediatR;
+using MediatR.Internal;
 using MediatR.Pipeline;
 using MediatR.Registration;
 
@@ -26,6 +27,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediatR(this IServiceCollection services, 
         Action<MediatRServiceConfiguration> configuration)
     {
+        configuration.ThrowIfNull();
+
         var serviceConfig = new MediatRServiceConfiguration();
 
         configuration.Invoke(serviceConfig);
@@ -42,6 +45,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediatR(this IServiceCollection services, 
         MediatRServiceConfiguration configuration)
     {
+        configuration.ThrowIfNull();
+
         if (configuration.AssembliesToRegister.Count == 0)
         {
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");

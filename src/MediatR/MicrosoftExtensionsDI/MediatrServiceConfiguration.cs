@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MediatR;
+using MediatR.Internal;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
 using MediatR.Registration;
@@ -78,7 +79,11 @@ public class MediatRServiceConfiguration
     /// <param name="type">Type from assembly to scan</param>
     /// <returns>This</returns>
     public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining(Type type)
-        => RegisterServicesFromAssembly(type.Assembly);
+    {
+        type.ThrowIfNull();
+
+        return RegisterServicesFromAssembly(type.Assembly);
+    }
 
     /// <summary>
     /// Register various handlers from assembly
@@ -134,6 +139,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        implementationType.ThrowIfNull();
+        
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IPipelineBehavior<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -171,6 +178,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        openBehaviorType.ThrowIfNull();
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -233,6 +242,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        implementationType.ThrowIfNull();
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IStreamPipelineBehavior<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -256,6 +267,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenStreamBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        openBehaviorType.ThrowIfNull();
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -319,6 +332,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        implementationType.ThrowIfNull();
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPreProcessor<>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -342,6 +357,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenRequestPreProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        openBehaviorType.ThrowIfNull();
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -404,6 +421,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        implementationType.ThrowIfNull();
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPostProcessor<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -426,6 +445,8 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenRequestPostProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        openBehaviorType.ThrowIfNull();
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
