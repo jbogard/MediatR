@@ -141,7 +141,7 @@ public static class ServiceRegistrar
         }
     }
 
-    internal static bool CouldCloseTo(this Type openConcretion, Type closedInterface)
+    private static bool CouldCloseTo(this Type openConcretion, Type closedInterface)
     {
         var openInterface = closedInterface.GetGenericTypeDefinition();
         var arguments = closedInterface.GenericTypeArguments;

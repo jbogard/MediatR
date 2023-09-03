@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using MediatR;
 using MediatR.Internal;
 using MediatR.Pipeline;

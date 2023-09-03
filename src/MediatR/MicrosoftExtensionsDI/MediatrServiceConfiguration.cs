@@ -15,7 +15,7 @@ public class MediatRServiceConfiguration
     /// <summary>
     /// Optional filter for types to register. Default value is a function returning true.
     /// </summary>
-    public Func<Type, bool> TypeEvaluator { get; set; } = t => true;
+    public Func<Type, bool> TypeEvaluator { get; set; } = _ => true;
     
     /// <summary>
     /// Mediator implementation type to register. Default is <see cref="Mediator"/>
