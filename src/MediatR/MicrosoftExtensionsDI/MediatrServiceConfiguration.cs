@@ -47,22 +47,22 @@ public class MediatRServiceConfiguration
     /// <summary>
     /// List of behaviors to register in specific order
     /// </summary>
-    public List<ServiceDescriptor> BehaviorsToRegister { get; } = new();
+    public IList<ServiceDescriptor> BehaviorsToRegister { get; } = new List<ServiceDescriptor>();
 
     /// <summary>
     /// List of stream behaviors to register in specific order
     /// </summary>
-    public List<ServiceDescriptor> StreamBehaviorsToRegister { get; } = new();
+    public IList<ServiceDescriptor> StreamBehaviorsToRegister { get; } = new List<ServiceDescriptor>();
 
     /// <summary>
     /// List of request pre processors to register in specific order
     /// </summary>
-    public List<ServiceDescriptor> RequestPreProcessorsToRegister { get; } = new();
+    public IList<ServiceDescriptor> RequestPreProcessorsToRegister { get; } = new List<ServiceDescriptor>();
 
     /// <summary>
     /// List of request post processors to register in specific order
     /// </summary>
-    public List<ServiceDescriptor> RequestPostProcessorsToRegister { get; } = new();
+    public IList<ServiceDescriptor> RequestPostProcessorsToRegister { get; } = new List<ServiceDescriptor>();
 
     /// <summary>
     /// Register various handlers from assembly containing given type
