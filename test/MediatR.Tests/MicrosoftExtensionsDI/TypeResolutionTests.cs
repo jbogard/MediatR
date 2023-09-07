@@ -55,7 +55,7 @@ public class TypeResolutionTests
     [Fact]
     public void ShouldResolveNotificationHandlers()
     {
-        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(3);
+        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(4);
     }
 
     [Fact]
@@ -76,5 +76,19 @@ public class TypeResolutionTests
     public void ShouldResolveIgnoreSecondDuplicateHandler()
     {
         _provider.GetServices<IRequestHandler<DuplicateTest, string>>().Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public void ShouldHandleKeyedServices()
+    {
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(new Logger());
+        services.AddKeyedSingleton<string>("Foo", "Foo");
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining(typeof(Ping)));
+        var serviceProvider = services.BuildServiceProvider();
+
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        
+        mediator.ShouldNotBeNull();
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Xunit.Abstractions;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
@@ -841,6 +843,100 @@ public class PipelineTests
         {
             services.AddMediatR(cfg);
             services.BuildServiceProvider();
+        });
+    }
+
+    public sealed record FooRequest : IRequest;
+    
+    public interface IBlogger<T>
+    {
+        IList<string> Messages { get; }
+    }
+
+    public class Blogger<T> : IBlogger<T>
+    {
+        private readonly Logger _logger;
+
+        public Blogger(Logger logger)
+        {
+            _logger = logger;
+        }
+
+        public IList<string> Messages => _logger.Messages;
+    }
+
+    public sealed class FooRequestHandler : IRequestHandler<FooRequest> {
+        public FooRequestHandler(IBlogger<FooRequestHandler> logger)
+        {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<FooRequestHandler> logger;
+
+        public Task Handle(FooRequest request, CancellationToken cancellationToken) {
+            logger.Messages.Add("Invoked Handler");
+            return Task.CompletedTask;
+        }
+    }
+
+    sealed class ClosedBehavior : IPipelineBehavior<FooRequest, Unit> {
+        public ClosedBehavior(IBlogger<ClosedBehavior> logger)
+        {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<ClosedBehavior> logger;
+
+        public Task<Unit> Handle(FooRequest request, RequestHandlerDelegate<Unit> next, CancellationToken cancellationToken) {
+            logger.Messages.Add("Invoked Closed Behavior");
+            return next();
+        }
+    }
+
+    sealed class Open2Behavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull {
+        public Open2Behavior(IBlogger<Open2Behavior<TRequest, TResponse>> logger) {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<Open2Behavior<TRequest, TResponse>> logger;
+
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) {
+            logger.Messages.Add("Invoked Open Behavior");
+            return next();
+        }
+    }
+    [Fact]
+    public async Task Should_register_correctly()
+    {
+        var services = new ServiceCollection();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<FooRequest>();
+            cfg.AddBehavior<ClosedBehavior>();
+            cfg.AddOpenBehavior(typeof(Open2Behavior<,>));
+        });
+        var logger = new Logger();
+        services.AddSingleton(logger);
+        services.AddSingleton(new MediatR.Tests.PipelineTests.Logger());
+        services.AddSingleton(new MediatR.Tests.StreamPipelineTests.Logger());
+        services.AddSingleton(new MediatR.Tests.SendTests.Dependency());
+        services.AddSingleton<System.IO.TextWriter>(new System.IO.StringWriter());
+        services.AddTransient(typeof(IBlogger<>), typeof(Blogger<>));
+        var provider = services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateOnBuild = true
+        });
+
+        var mediator = provider.GetRequiredService<IMediator>();
+        var request = new FooRequest();
+        await mediator.Send(request);
+        
+        logger.Messages.ShouldBe(new []
+        {
+            "Invoked Closed Behavior",
+            "Invoked Open Behavior",
+            "Invoked Handler",
         });
     }
 }
