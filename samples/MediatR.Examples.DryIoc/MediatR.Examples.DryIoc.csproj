@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="DryIoc.Microsoft.DependencyInjection" Version="6.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.1.23419.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.2.23479.6" />
   </ItemGroup>
 
 </Project>
