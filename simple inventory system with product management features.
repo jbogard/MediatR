@@ -1,0 +1,69 @@
+#The code includes basic classes for products and inventory management. 
+#In a real-world scenario, a full-fledged system would be much more complex and include user interfaces, database integration
+
+using System;
+using System.Collections.Generic;
+
+class Product
+{
+    public int ProductId { get; set; }
+    public string Name { get; set; }
+    public double Price { get; set; }
+}
+
+class Inventory
+{
+    private List<Product> products;
+
+    public Inventory()
+    {
+        products = new List<Product>();
+    }
+
+    public void AddProduct(Product product)
+    {
+        products.Add(product);
+    }
+
+    public Product FindProduct(int productId)
+    {
+        return products.Find(p => p.ProductId == productId);
+    }
+
+    public void ListProducts()
+    {
+        Console.WriteLine("Product Inventory:");
+        foreach (var product in products)
+        {
+            Console.WriteLine($"Product ID: {product.ProductId}, Name: {product.Name}, Price: {product.Price:C}");
+        }
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Inventory inventory = new Inventory();
+
+        // Adding products to the inventory
+        inventory.AddProduct(new Product { ProductId = 1, Name = "Laptop", Price = 999.99 });
+        inventory.AddProduct(new Product { ProductId = 2, Name = "Smartphone", Price = 499.99 });
+        inventory.AddProduct(new Product { ProductId = 3, Name = "Tablet", Price = 299.99 });
+
+        // Listing products
+        inventory.ListProducts();
+
+        // Finding a product
+        int productIdToFind = 2;
+        Product foundProduct = inventory.FindProduct(productIdToFind);
+        if (foundProduct != null)
+        {
+            Console.WriteLine($"Product {productIdToFind} found: {foundProduct.Name}");
+        }
+        else
+        {
+            Console.WriteLine($"Product {productIdToFind} not found.");
+        }
+    }
+}
