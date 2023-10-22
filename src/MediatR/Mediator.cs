@@ -68,14 +68,7 @@ public class Mediator : IMediator
 
         var handler = (RequestHandlerWrapper) _requestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
-            try
-            {
-                return new RequestHandlerWrapperImpl<TRequest>();
-            }
-            catch (Exception)
-            {
-                throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
-            }
+            return new RequestHandlerWrapperImpl<TRequest>() ?? throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
         });
 
         return handler.Handle(request, _serviceProvider, cancellationToken);
