@@ -22,7 +22,7 @@
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <AnalysisLevel>latest-All</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
-    <NoWarn>$(NoWarn);CA1031;CA1040;CA1307;CA1711;CA1716;CA1812</NoWarn>
+    <NoWarn>$(NoWarn);CA1014;CA1031;CA1040;CA1307;CA1711;CA1716;CA1812</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
