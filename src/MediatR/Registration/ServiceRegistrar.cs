@@ -258,6 +258,7 @@ public static class ServiceRegistrar
     private static void RegisterBehaviorIfImplementationsExist(IServiceCollection services, Type behaviorType, Type subBehaviorType)
     {
         var hasAnyRegistrationsOfSubBehaviorType = services
+            .Where(service => !service.IsKeyedService)    
             .Select(service => service.ImplementationType)
             .OfType<Type>()
             .SelectMany(type => type.GetInterfaces())

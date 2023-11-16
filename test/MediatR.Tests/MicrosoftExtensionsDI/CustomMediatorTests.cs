@@ -39,7 +39,7 @@ public class CustomMediatorTests
     [Fact]
     public void ShouldResolveNotificationHandlers()
     {
-        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(3);
+        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(4);
     }
 
     [Fact]

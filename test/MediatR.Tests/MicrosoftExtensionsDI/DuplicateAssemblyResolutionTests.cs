@@ -22,6 +22,6 @@ public class DuplicateAssemblyResolutionTests
     [Fact]
     public void ShouldResolveNotificationHandlersOnlyOnce()
     {
-        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(3);
+        _provider.GetServices<INotificationHandler<Pinged>>().Count().ShouldBe(4);
     }
 }

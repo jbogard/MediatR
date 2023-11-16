@@ -78,6 +78,12 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
         }
     }
 
+    public class PingedAlsoOpenHandler<TNotification> : INotificationHandler<TNotification>
+        where TNotification : Pinged
+    {
+        public Task Handle(TNotification notification, CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
     public class Logger
     {
         public IList<string> Messages { get; } = new List<string>();
