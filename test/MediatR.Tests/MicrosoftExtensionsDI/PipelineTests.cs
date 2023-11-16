@@ -846,6 +846,29 @@ public class PipelineTests
         });
     }
 
+    [Fact]
+    public void Should_auto_register_processors_when_configured()
+    {
+        var cfg = new MediatRServiceConfiguration
+        {
+            AutoRegisterRequestProcessors = true
+        };
+
+        var output = new Logger();
+        IServiceCollection services = new ServiceCollection();
+        services.AddSingleton(output);
+
+        cfg.RegisterServicesFromAssemblyContaining<Ping>();
+
+        services.AddMediatR(cfg);
+
+        var provider = services.BuildServiceProvider();
+
+        provider.GetServices(typeof(IRequestPreProcessor<Ping>)).Count().ShouldBeGreaterThan(0);
+        provider.GetServices(typeof(IRequestPostProcessor<Ping, Pong>)).Count().ShouldBeGreaterThan(0);
+    }
+
+
     public sealed record FooRequest : IRequest;
     
     public interface IBlogger<T>

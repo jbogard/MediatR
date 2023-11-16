@@ -65,6 +65,11 @@ public class MediatRServiceConfiguration
     public List<ServiceDescriptor> RequestPostProcessorsToRegister { get; } = new();
 
     /// <summary>
+    /// Automatically register processors during assembly scanning
+    /// </summary>
+    public bool AutoRegisterRequestProcessors { get; set; }
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>

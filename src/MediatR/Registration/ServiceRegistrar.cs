@@ -21,12 +21,24 @@ public static class ServiceRegistrar
         ConnectImplementationsToTypesClosing(typeof(IRequestExceptionHandler<,,>), services, assembliesToScan, true, configuration);
         ConnectImplementationsToTypesClosing(typeof(IRequestExceptionAction<,>), services, assembliesToScan, true, configuration);
 
-        var multiOpenInterfaces = new[]
+        if (configuration.AutoRegisterRequestProcessors)
+        {
+            ConnectImplementationsToTypesClosing(typeof(IRequestPreProcessor<>), services, assembliesToScan, false, configuration);
+            ConnectImplementationsToTypesClosing(typeof(IRequestPostProcessor<,>), services, assembliesToScan, false, configuration);
+        }
+
+        var multiOpenInterfaces = new List<Type>
         {
             typeof(INotificationHandler<>),
             typeof(IRequestExceptionHandler<,,>),
             typeof(IRequestExceptionAction<,>)
         };
+
+        if (configuration.AutoRegisterRequestProcessors)
+        {
+            multiOpenInterfaces.Add(typeof(IRequestPreProcessor<>));
+            multiOpenInterfaces.Add(typeof(IRequestPostProcessor<,>));
+        }
 
         foreach (var multiOpenInterface in multiOpenInterfaces)
         {
