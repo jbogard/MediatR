@@ -10,9 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LightInject" Version="6.6.1" />
-    <PackageReference Include="LightInject.Microsoft.DependencyInjection" Version="3.6.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="LightInject" Version="6.6.4" />
+    <PackageReference Include="LightInject.Microsoft.DependencyInjection" Version="3.7.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
   </ItemGroup>
 
 </Project>
