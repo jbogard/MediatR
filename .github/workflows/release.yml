@@ -20,6 +20,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
+    - name: Setup dotnet 8.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '8.0.100'
     - name: Build and Test
       run: ./Build.ps1
       shell: pwsh
