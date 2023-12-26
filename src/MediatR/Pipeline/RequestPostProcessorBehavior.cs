@@ -1,3 +1,6 @@
+using System.Linq;
+using MediatR.Internal;
+
 namespace MediatR.Pipeline;
 
 using System.Collections.Generic;
@@ -21,11 +24,19 @@ public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavi
     {
         var response = await next().ConfigureAwait(false);
 
-        foreach (var processor in _postProcessors)
+        foreach (var processor in _postProcessors.OrderBy(GetOrder))
         {
             await processor.Process(request, response, cancellationToken).ConfigureAwait(false);
         }
 
         return response;
+    }
+
+    private static int GetOrder(IRequestPostProcessor<TRequest, TResponse> arg)
+    {
+        if (arg is IOrderableHandler oh)
+            return oh.Order;
+
+        return arg.GetOrderIfExists().GetValueOrDefault(0);
     }
 }

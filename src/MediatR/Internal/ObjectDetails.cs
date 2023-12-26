@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using MediatR.Pipeline;
 
 namespace MediatR.Internal;
 
@@ -40,7 +42,30 @@ internal class ObjectDetails : IComparer<ObjectDetails>
             return -1;
         }
 
-        return CompareByAssembly(x, y) ?? CompareByNamespace(x, y) ?? CompareByLocation(x, y);
+        return CompareByOrder(x, y) ?? CompareByAssembly(x, y) ?? CompareByNamespace(x, y) ?? CompareByLocation(x, y);
+    }
+
+    /// <summary>
+    /// Compare two objects according to an optional Order property that has been declared on many of the
+    /// IRequestXXXHandler interfaces.
+    /// </summary>
+    /// <param name="x">First object to compare</param>
+    /// <param name="y">Second object to compare</param>
+    /// <returns>-1 if the left object should be ordered sooner, or 1 if the right object
+    /// should be ordered sooner.  If either object does not support the Order
+    /// property, or their orders match, then null is returned to allow pass-through
+    /// handling.</returns>
+    private int? CompareByOrder(ObjectDetails x, ObjectDetails y)
+    {
+        var leftOrder = x.Value.GetOrderIfExists();
+        var rightOrder = y.Value.GetOrderIfExists();
+
+        if (leftOrder is null && rightOrder is null) return null;
+
+        if (leftOrder is null) return 1;    // always sort null after values
+        if (rightOrder is null) return -1;  // same
+
+        return leftOrder.Value.CompareTo(rightOrder.Value);
     }
 
     /// <summary>
@@ -112,7 +137,7 @@ internal class ObjectDetails : IComparer<ObjectDetails>
     /// <param name="x">First object to compare</param>
     /// <param name="y">Second object to compare</param>
     /// <returns>
-    /// An object has a higher priority if it location is part of the current location and the other is not;
+    /// An object has a higher priority if its location is part of the current location and the other is not;
     /// If both objects are part of the current location, the closest has higher priority;
     /// If none of the objects are part of the current location, they can be considered equal.
     /// </returns>

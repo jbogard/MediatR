@@ -1,3 +1,6 @@
+using System.Linq;
+using MediatR.Internal;
+
 namespace MediatR.Pipeline;
 
 using System.Collections.Generic;
@@ -19,11 +22,19 @@ public class RequestPreProcessorBehavior<TRequest, TResponse> : IPipelineBehavio
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        foreach (var processor in _preProcessors)
+        foreach (var processor in _preProcessors.OrderBy(GetOrder))
         {
             await processor.Process(request, cancellationToken).ConfigureAwait(false);
         }
 
         return await next().ConfigureAwait(false);
+    }
+
+    private static int GetOrder(IRequestPreProcessor<TRequest> arg)
+    {
+        if (arg is IOrderableHandler oh)
+            return oh.Order;
+
+        return arg.GetOrderIfExists().GetValueOrDefault(0);
     }
 }

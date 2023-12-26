@@ -14,6 +14,17 @@ public interface IRequestExceptionHandler<in TRequest, TResponse, in TException>
     where TRequest : notnull
     where TException : Exception
 {
+#if NET8_0
+    /// <summary>
+    /// Controls execution order of any implementations of this request exception-processor.
+    /// All implementations are ordered by this field, and order of duplicate
+    /// numbers is not guaranteed.  Not overriding this property has the behavior of
+    /// all implementations will be executed in the order they are returned by the DI
+    /// container.
+    /// </summary>
+    int Order => 0;
+#endif
+
     /// <summary>
     /// Called when the request handler throws an exception
     /// </summary>
