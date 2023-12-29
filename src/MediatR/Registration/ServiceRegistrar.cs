@@ -23,8 +23,8 @@ public static class ServiceRegistrar
 
         if (configuration.AutoRegisterRequestProcessors)
         {
-            ConnectImplementationsToTypesClosing(typeof(IRequestPreProcessor<>), services, assembliesToScan, false, configuration);
-            ConnectImplementationsToTypesClosing(typeof(IRequestPostProcessor<,>), services, assembliesToScan, false, configuration);
+            ConnectImplementationsToTypesClosing(typeof(IRequestPreProcessor<>), services, assembliesToScan, true, configuration);
+            ConnectImplementationsToTypesClosing(typeof(IRequestPostProcessor<,>), services, assembliesToScan, true, configuration);
         }
 
         var multiOpenInterfaces = new List<Type>
