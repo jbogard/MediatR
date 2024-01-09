@@ -64,16 +64,14 @@ public class Mediator : IMediator
             throw new ArgumentNullException(nameof(request));
         }
 
-        var handler = (RequestHandlerWrapper)_requestHandlers.GetOrAdd(request.GetType(), static requestType =>
+        var handler = (RequestHandlerWrapper) _requestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
-            var wrapperType = typeof(RequestHandlerWrapperImpl<>).MakeGenericType(requestType);
-            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
-            return (RequestHandlerBase)wrapper;
+            return new RequestHandlerWrapperImpl<TRequest>() ?? throw new InvalidOperationException($"Could not create wrapper type for {typeof(TRequest)}");
         });
 
         return handler.Handle(request, _serviceProvider, cancellationToken);
     }
-
+    
     public Task<object?> Send(object request, CancellationToken cancellationToken = default)
     {
         if (request == null)
