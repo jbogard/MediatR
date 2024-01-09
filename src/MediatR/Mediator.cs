@@ -150,9 +150,9 @@ public class Mediator : IMediator
     {
         var handler = _notificationHandlers.GetOrAdd(notification.GetType(), static notificationType =>
         {
-            var wrapperType = typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType); var ctor = wrapperType.GetConstructors().First();
-            var wrapper = Expression.Lambda<Func<NotificationHandlerWrapper>>(Expression.New(ctor)).Compile() ?? throw new InvalidOperationException($"Could not create wrapper for type {notificationType}");
-            return wrapper();
+            var wrapperType = typeof(NotificationHandlerWrapperImpl<>).MakeGenericType(notificationType);
+            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {notificationType}");
+            return (NotificationHandlerWrapper) wrapper;
         });
 
         return handler.Handle(notification, _serviceProvider, PublishCore, cancellationToken);
@@ -168,9 +168,8 @@ public class Mediator : IMediator
         var streamHandler = (StreamRequestHandlerWrapper<TResponse>) _streamRequestHandlers.GetOrAdd(request.GetType(), static requestType =>
         {
             var wrapperType = typeof(StreamRequestHandlerWrapperImpl<,>).MakeGenericType(requestType, typeof(TResponse));
-            var ctor = wrapperType.GetConstructors().First();
-            var wrapper = Expression.Lambda<Func<StreamRequestHandlerWrapper<TResponse>>>(Expression.New(ctor)).Compile() ?? throw new InvalidOperationException($"Could not create wrapper type for {requestType}");
-            return wrapper();
+            var wrapper = Activator.CreateInstance(wrapperType) ?? throw new InvalidOperationException($"Could not create wrapper for type {requestType}");
+            return (StreamRequestHandlerBase) wrapper;
         });
 
         var items = streamHandler.Handle(request, _serviceProvider, cancellationToken);
