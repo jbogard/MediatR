@@ -58,6 +58,53 @@ public static class ServiceRegistrar
             }
         }
     }
+    public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
+    {
+        // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
+        services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
+
+        var notificationPublisherServiceDescriptor = serviceConfiguration.NotificationPublisherType != null
+            ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType, serviceConfiguration.Lifetime)
+            : new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisher);
+
+        services.TryAdd(notificationPublisherServiceDescriptor);
+
+        // Register pre processors, then post processors, then behaviors
+        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
+        {
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
+        }
+        else
+        {
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
+            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
+        }
+
+        if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
+        {
+            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
+            services.TryAddEnumerable(serviceConfiguration.RequestPreProcessorsToRegister);
+        }
+
+        if (serviceConfiguration.RequestPostProcessorsToRegister.Any())
+        {
+            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>), ServiceLifetime.Transient));
+            services.TryAddEnumerable(serviceConfiguration.RequestPostProcessorsToRegister);
+        }
+
+        foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
+        {
+            services.TryAddEnumerable(serviceDescriptor);
+        }
+
+        foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
+        {
+            services.TryAddEnumerable(serviceDescriptor);
+        }
+    }
 
     private static void ConnectImplementationsToTypesClosing(Type openRequestInterface,
         IServiceCollection services,
@@ -217,54 +264,6 @@ public static class ServiceRegistrar
     {
         if (list.Contains(value)) return;
         list.Add(value);
-    }
-
-    public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
-    {
-        // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
-        services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
-        services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
-        services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
-
-        var notificationPublisherServiceDescriptor = serviceConfiguration.NotificationPublisherType != null
-            ? new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisherType, serviceConfiguration.Lifetime)
-            : new ServiceDescriptor(typeof(INotificationPublisher), serviceConfiguration.NotificationPublisher);
-
-        services.TryAdd(notificationPublisherServiceDescriptor);
-
-        // Register pre processors, then post processors, then behaviors
-        if (serviceConfiguration.RequestExceptionActionProcessorStrategy == RequestExceptionActionProcessorStrategy.ApplyForUnhandledExceptions)
-        {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
-        }
-        else
-        {
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionProcessorBehavior<,>), typeof(IRequestExceptionHandler<,,>));
-            RegisterBehaviorIfImplementationsExist(services, typeof(RequestExceptionActionProcessorBehavior<,>), typeof(IRequestExceptionAction<,>));
-        }
-
-        if (serviceConfiguration.RequestPreProcessorsToRegister.Any())
-        {
-            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>), ServiceLifetime.Transient));
-            services.TryAddEnumerable(serviceConfiguration.RequestPreProcessorsToRegister);
-        }
-
-        if (serviceConfiguration.RequestPostProcessorsToRegister.Any())
-        {
-            services.TryAddEnumerable(new ServiceDescriptor(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>), ServiceLifetime.Transient));
-            services.TryAddEnumerable(serviceConfiguration.RequestPostProcessorsToRegister);
-        }
-
-        foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
-        {
-            services.TryAddEnumerable(serviceDescriptor);
-        } 
-        
-        foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
-        {
-            services.TryAddEnumerable(serviceDescriptor);
-        }
     }
 
     private static void RegisterBehaviorIfImplementationsExist(IServiceCollection services, Type behaviorType, Type subBehaviorType)
