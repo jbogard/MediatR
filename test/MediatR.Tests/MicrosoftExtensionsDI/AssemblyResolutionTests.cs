@@ -12,7 +12,6 @@ using Xunit;
 public class AssemblyResolutionTests
 {
     private readonly IServiceProvider _provider;
-    private readonly List<ServiceDescriptor> _services;
 
     public AssemblyResolutionTests()
     {
@@ -20,7 +19,6 @@ public class AssemblyResolutionTests
         services.AddSingleton(new Logger());
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
         _provider = services.BuildServiceProvider();
-        _services = services.ToList();
     }
 
     [Fact]
