@@ -3,6 +3,7 @@
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Shouldly;
@@ -11,6 +12,7 @@ using Xunit;
 public class AssemblyResolutionTests
 {
     private readonly IServiceProvider _provider;
+    private readonly List<ServiceDescriptor> _services;
 
     public AssemblyResolutionTests()
     {
@@ -18,6 +20,7 @@ public class AssemblyResolutionTests
         services.AddSingleton(new Logger());
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
         _provider = services.BuildServiceProvider();
+        _services = services.ToList();
     }
 
     [Fact]
@@ -55,8 +58,32 @@ public class AssemblyResolutionTests
     {
         var services = new ServiceCollection();
 
-        Action registration = () => services.AddMediatR(_ => {});
+        Action registration = () => services.AddMediatR(_ => { });
 
         registration.ShouldThrow<ArgumentException>();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericVoidRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<OpenGenericVoidRequest<ConcreteTypeArgument>>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericReturnTypeRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<OpenGenericReturnTypeRequest<ConcreteTypeArgument>, string>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericPingRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<GenericPing<Pong>, Pong>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveVoidGenericPingRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldNotBeNull();
     }
 }

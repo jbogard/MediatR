@@ -67,19 +67,35 @@ public static class ServiceRegistrar
     {
         var concretions = new List<Type>();
         var interfaces = new List<Type>();
-        foreach (var type in assembliesToScan.SelectMany(a => a.DefinedTypes).Where(t => !t.IsOpenGeneric()).Where(configuration.TypeEvaluator))
+        var genericConcretions = new List<Type>();
+        var genericInterfaces = new List<Type>();
+
+        var types = assembliesToScan
+            .SelectMany(a => a.DefinedTypes)
+            .Where(t => t.IsConcrete() && t.FindInterfacesThatClose(openRequestInterface).Any())
+            .Where(configuration.TypeEvaluator)
+            .ToList();
+
+        foreach (var type in types)
         {
             var interfaceTypes = type.FindInterfacesThatClose(openRequestInterface).ToArray();
-            if (!interfaceTypes.Any()) continue;
 
-            if (type.IsConcrete())
+            if (!type.IsOpenGeneric())
             {
                 concretions.Add(type);
-            }
 
-            foreach (var interfaceType in interfaceTypes)
+                foreach (var interfaceType in interfaceTypes)
+                {
+                    interfaces.Fill(interfaceType);
+                }
+            }
+            else
             {
-                interfaces.Fill(interfaceType);
+                genericConcretions.Add(type);
+                foreach (var interfaceType in interfaceTypes)
+                {
+                    genericInterfaces.Fill(interfaceType);
+                }
             }
         }
 
@@ -110,6 +126,12 @@ public static class ServiceRegistrar
             {
                 AddConcretionsThatCouldBeClosed(@interface, concretions, services);
             }
+        }
+
+        foreach (var @interface in genericInterfaces)
+        {
+            var exactMatches = genericConcretions.Where(x => x.CanBeCastTo(@interface)).ToList();
+            AddAllConcretionsThatClose(@interface, exactMatches, services, assembliesToScan);
         }
     }
 
@@ -146,6 +168,62 @@ public static class ServiceRegistrar
             }
             catch (Exception)
             {
+            }
+        }
+    }
+
+    private static (Type Service, Type Implementation) GetConcreteRegistrationTypes(Type openRequestHandlerInterface, Type concreteGenericTRequest, Type openRequestHandlerImplementation)
+    {
+        var closingType = concreteGenericTRequest.GetGenericArguments().First();
+
+        var concreteTResponse = concreteGenericTRequest.GetInterfaces()
+            .FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IRequest<>))
+            ?.GetGenericArguments()
+            .FirstOrDefault();
+
+        var typeDefinition = openRequestHandlerInterface.GetGenericTypeDefinition();
+
+        var serviceType = concreteTResponse != null ?
+            typeDefinition.MakeGenericType(concreteGenericTRequest, concreteTResponse) :
+            typeDefinition.MakeGenericType(concreteGenericTRequest);
+
+        return (serviceType, openRequestHandlerImplementation.MakeGenericType(closingType));
+    }
+
+    private static List<Type>? GetConcreteRequestTypes(Type openRequestHandlerInterface, Type openRequestHandlerImplementation, IEnumerable<Assembly> assembliesToScan)
+    {
+        var constraints = openRequestHandlerImplementation.GetGenericArguments().First().GetGenericParameterConstraints();
+
+        var typesThatCanClose = assembliesToScan
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => type.IsClass && !type.IsAbstract && constraints.All(constraint => constraint.IsAssignableFrom(type)))
+            .ToList();
+
+        var requestType = openRequestHandlerInterface.GenericTypeArguments.First();
+
+        if (requestType.IsGenericParameter)
+            return null;
+
+        var requestGenericTypeDefinition = requestType.GetGenericTypeDefinition();
+
+        return typesThatCanClose.Select(type => requestGenericTypeDefinition.MakeGenericType(type)).ToList();
+    }
+
+    private static void AddAllConcretionsThatClose(Type openRequestInterface, List<Type> concretions, IServiceCollection services, IEnumerable<Assembly> assembliesToScan)
+    {
+        foreach (var concretion in concretions)
+        {
+            var concreteRequests = GetConcreteRequestTypes(openRequestInterface, concretion, assembliesToScan);
+
+            if (concreteRequests is null)
+                continue;
+
+            var registrationTypes = concreteRequests
+                .Select(concreteRequest => GetConcreteRegistrationTypes(openRequestInterface, concreteRequest, concretion));
+
+            foreach (var (Service, Implementation) in registrationTypes)
+            {
+                services.AddTransient(Service, Implementation);
             }
         }
     }
@@ -259,8 +337,8 @@ public static class ServiceRegistrar
         foreach (var serviceDescriptor in serviceConfiguration.BehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
-        } 
-        
+        }
+
         foreach (var serviceDescriptor in serviceConfiguration.StreamBehaviorsToRegister)
         {
             services.TryAddEnumerable(serviceDescriptor);
@@ -270,7 +348,7 @@ public static class ServiceRegistrar
     private static void RegisterBehaviorIfImplementationsExist(IServiceCollection services, Type behaviorType, Type subBehaviorType)
     {
         var hasAnyRegistrationsOfSubBehaviorType = services
-            .Where(service => !service.IsKeyedService)    
+            .Where(service => !service.IsKeyedService)
             .Select(service => service.ImplementationType)
             .OfType<Type>()
             .SelectMany(type => type.GetInterfaces())
