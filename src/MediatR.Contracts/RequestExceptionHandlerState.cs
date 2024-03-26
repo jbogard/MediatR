@@ -1,4 +1,4 @@
-namespace MediatR.Pipeline;
+namespace MediatR.Contracts.Pipeline;
 
 /// <summary>
 /// Represents the result of handling an exception thrown by a request handler

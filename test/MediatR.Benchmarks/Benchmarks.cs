@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Benchmarks

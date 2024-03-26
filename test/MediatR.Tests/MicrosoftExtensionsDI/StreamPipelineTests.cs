@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;

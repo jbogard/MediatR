@@ -1,4 +1,5 @@
 using System;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Wrappers;

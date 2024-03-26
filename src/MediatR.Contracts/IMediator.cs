@@ -1,4 +1,4 @@
-namespace MediatR;
+namespace MediatR.Contracts;
 
 /// <summary>
 /// Defines a mediator to encapsulate request/response and publishing interaction patterns

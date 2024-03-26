@@ -1,4 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Xunit.Abstractions;

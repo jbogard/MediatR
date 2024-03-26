@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using MediatR;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using MediatR.Pipeline;
 using MediatR.Registration;
 

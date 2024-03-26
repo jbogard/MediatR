@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using MediatR.Contracts;
 
 namespace MediatR.Examples;
 

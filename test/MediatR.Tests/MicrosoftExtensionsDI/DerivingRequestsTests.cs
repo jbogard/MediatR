@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;

@@ -1,3 +1,4 @@
+using MediatR.Contracts;
 using MediatR.NotificationPublishers;
 
 namespace MediatR;
