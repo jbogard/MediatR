@@ -1,3 +1,5 @@
+using MediatR.Contracts;
+
 namespace MediatR.Examples;
 
 public class Sing : IStreamRequest<Song>

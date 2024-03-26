@@ -1,4 +1,6 @@
 using Autofac.Extensions.DependencyInjection;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.Autofac;

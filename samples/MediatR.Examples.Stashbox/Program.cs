@@ -3,6 +3,7 @@ using Stashbox.Configuration;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.Stashbox;

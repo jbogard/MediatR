@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MediatR;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
 using MediatR.Registration;

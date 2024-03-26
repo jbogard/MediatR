@@ -20,8 +20,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <Deterministic>true</Deterministic>
     <Version>2.0.1</Version>
-    <RootNamespace>MediatR</RootNamespace>
-
+    <RootNamespace>MediatR.Contacts</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>
 
 </Project>

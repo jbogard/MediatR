@@ -1,4 +1,4 @@
-﻿namespace MediatR;
+﻿namespace MediatR.Contracts;
 
 using System;
 using System.Threading.Tasks;

@@ -1,4 +1,4 @@
-namespace MediatR;
+namespace MediatR.Contracts;
 
 /// <summary>
 /// Marker interface to represent a notification

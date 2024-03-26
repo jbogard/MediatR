@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 

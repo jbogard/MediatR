@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Contracts;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;

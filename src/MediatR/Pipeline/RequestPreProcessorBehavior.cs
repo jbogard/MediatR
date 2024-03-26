@@ -1,3 +1,6 @@
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
+
 namespace MediatR.Pipeline;
 
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-namespace MediatR.Pipeline;
+namespace MediatR.Contracts.Pipeline;
 
 using System.Threading;
 using System.Threading.Tasks;

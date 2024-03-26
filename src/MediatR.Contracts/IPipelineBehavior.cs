@@ -1,5 +1,5 @@
 
-namespace MediatR;
+namespace MediatR.Contracts;
 
 using System.Threading;
 using System.Threading.Tasks;

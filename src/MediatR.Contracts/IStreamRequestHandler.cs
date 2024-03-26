@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace MediatR;
+namespace MediatR.Contracts;
 
 /// <summary>
 /// Defines a handler for a stream request using IAsyncEnumerable as return type.

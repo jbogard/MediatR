@@ -38,4 +38,8 @@
     <PackageReference Include="MinVer" Version="4.3.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Contracts\MediatR.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

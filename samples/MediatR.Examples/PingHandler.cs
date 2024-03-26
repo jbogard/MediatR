@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading;
+using MediatR.Contracts;
 
 namespace MediatR.Examples;
 

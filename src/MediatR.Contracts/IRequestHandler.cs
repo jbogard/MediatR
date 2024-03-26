@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR;
+namespace MediatR.Contracts;
 
 /// <summary>
 /// Defines a handler for a request

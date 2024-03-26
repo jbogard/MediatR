@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediatR;
+namespace MediatR.Contracts;
 
 /// <summary>
 /// Publish a notification or event through the mediator pipeline to be handled by multiple handlers.

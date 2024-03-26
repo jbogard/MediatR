@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR.Contracts;
 using Shouldly;
 using Xunit;
 

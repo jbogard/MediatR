@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Examples.DryIoc;

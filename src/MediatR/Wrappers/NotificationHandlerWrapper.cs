@@ -1,3 +1,5 @@
+using MediatR.Contracts;
+
 namespace MediatR.Wrappers;
 
 using System;

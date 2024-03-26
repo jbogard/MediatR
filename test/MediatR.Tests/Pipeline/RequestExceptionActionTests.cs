@@ -1,3 +1,6 @@
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
+
 namespace MediatR.Tests.Pipeline;
 
 using System;

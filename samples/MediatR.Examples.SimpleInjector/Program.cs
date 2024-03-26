@@ -1,5 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
+using MediatR.Contracts;
+using MediatR.Contracts.Pipeline;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 

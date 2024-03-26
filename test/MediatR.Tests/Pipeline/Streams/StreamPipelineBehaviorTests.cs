@@ -1,4 +1,5 @@
 using System.Threading;
+using MediatR.Contracts;
 
 namespace MediatR.Tests.Pipeline.Streams;
 

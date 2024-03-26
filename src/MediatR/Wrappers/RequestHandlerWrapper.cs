@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediatR.Wrappers;
