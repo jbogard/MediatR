@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <Authors>Jimmy Bogard</Authors>
+    <Description>Abstractions package for implementing handlers and behaviors used by the pipeline</Description>
+    <Copyright>Copyright Jimmy Bogard</Copyright>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <Features>strict</Features>
+    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageIcon>gradient_128x128.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <Version>2.0.1</Version>
+    <RootNamespace>MediatR</RootNamespace>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\assets\logo\gradient_128x128.png" Link="gradient_128x128.png">
+      <PackagePath></PackagePath>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
+  </ItemGroup>
+
+</Project>
