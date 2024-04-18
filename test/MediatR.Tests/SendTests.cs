@@ -7,9 +7,24 @@ using System.Threading.Tasks;
 using Shouldly;
 using Lamar;
 using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 public class SendTests
 {
+    private readonly IServiceProvider _serviceProvider;
+    private Dependency _dependency;
+    private readonly IMediator _mediator;
+    
+    public SendTests()
+    {
+        _dependency = new Dependency();
+        var services = new ServiceCollection();
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly));
+        services.AddSingleton(_dependency);
+        _serviceProvider = services.BuildServiceProvider();
+        _mediator = _serviceProvider.GetService<IMediator>()!;
+
+    }
 
     public class Ping : IRequest<Pong>
     {
@@ -62,6 +77,7 @@ public class SendTests
         where T : Pong
     {
         private readonly Dependency _dependency;
+
         public GenericPingHandler(Dependency dependency) => _dependency = dependency;
 
         public Task<T> Handle(GenericPing<T> request, CancellationToken cancellationToken)
@@ -255,55 +271,21 @@ public class SendTests
     [Fact]
     public async Task Should_resolve_generic_handler_by_given_interface()
     {
-        var dependency = new Dependency();
-        var container = new Container(cfg =>
-        {
-            cfg.Scan(scanner =>
-            {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespace(typeof(GenericPing<>).Namespace);
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-            });
-            cfg.ForSingletonOf<Dependency>().Use(dependency);
-            cfg.For<ISender>().Use<Mediator>();
-            cfg.For<IRequestHandler<GenericPing<Pong>, Pong>>().Use<GenericPingHandler<Pong>>();
-        });
-
-        var mediator = container.GetInstance<ISender>();
-
-        object request = new GenericPing<Pong> { Pong = new Pong { Message = "Ping" } };
-        var result = await mediator.Send(request);
+        var request = new GenericPing<Pong> { Pong = new Pong { Message = "Ping" } };
+        var result = await _mediator.Send(request);
 
         var pong = result.ShouldBeOfType<Pong>();
         pong.Message.ShouldBe("Ping Pong");
 
-        dependency.Called.ShouldBeTrue();
+        _dependency.Called.ShouldBeTrue();
     }
 
     [Fact]
     public async Task Should_resolve_generic_void_handler_by_given_interface()
     {
-        var dependency = new Dependency();
-        var container = new Container(cfg =>
-        {
-            cfg.Scan(scanner =>
-            {
-                scanner.AssemblyContainingType(typeof(PublishTests));
-                scanner.IncludeNamespace(typeof(VoidGenericPing<>).Namespace);
-                scanner.WithDefaultConventions();
-                scanner.AddAllTypesOf(typeof(IRequestHandler<,>));
-            });
-            cfg.ForSingletonOf<Dependency>().Use(dependency);
-            cfg.For<ISender>().Use<Mediator>();
-            cfg.For<IRequestHandler<VoidGenericPing<Pong>>>().Use<VoidGenericPingHandler<Pong>>();
-        });
-
-        var mediator = container.GetInstance<ISender>();
-
         var request = new VoidGenericPing<Pong>();
-        await mediator.Send(request);
+        await _mediator.Send(request);
 
-        dependency.Called.ShouldBeTrue();
+        _dependency.Called.ShouldBeTrue();
     }
 }
