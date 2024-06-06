@@ -3,6 +3,7 @@
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Shouldly;
@@ -55,8 +56,32 @@ public class AssemblyResolutionTests
     {
         var services = new ServiceCollection();
 
-        Action registration = () => services.AddMediatR(_ => {});
+        Action registration = () => services.AddMediatR(_ => { });
 
         registration.ShouldThrow<ArgumentException>();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericVoidRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<OpenGenericVoidRequest<ConcreteTypeArgument>>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericReturnTypeRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<OpenGenericReturnTypeRequest<ConcreteTypeArgument>, string>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveGenericPingRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<GenericPing<Pong>, Pong>>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void ShouldResolveVoidGenericPingRequestHandler()
+    {
+        _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldNotBeNull();
     }
 }
