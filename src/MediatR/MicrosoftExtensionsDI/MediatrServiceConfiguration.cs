@@ -70,6 +70,26 @@ public class MediatRServiceConfiguration
     public bool AutoRegisterRequestProcessors { get; set; }
 
     /// <summary>
+    /// Configure the maximum number of type parameters that a generic request handler can have. To Disable this constraint, set the value to 0.
+    /// </summary>
+    public int MaxGenericTypeParameters { get; set; } = 10;
+
+    /// <summary>
+    /// Configure the maximum number of types that can close a generic request type parameter constraint.  To Disable this constraint, set the value to 0.
+    /// </summary>
+    public int MaxTypesClosing { get; set; } = 100;
+
+    /// <summary>
+    /// Configure the Maximum Amount of Generic RequestHandler Types MediatR will try to register.  To Disable this constraint, set the value to 0.
+    /// </summary>
+    public int MaxGenericTypeRegistrations { get; set; } = 125000;
+
+    /// <summary>
+    /// Configure the Timeout in Milliseconds that the GenericHandler Registration Process will exit with error.  To Disable this constraint, set the value to 0.
+    /// </summary>
+    public int RegistrationTimeout { get; set; } = 15000;
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>
