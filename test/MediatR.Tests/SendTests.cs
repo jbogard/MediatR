@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace MediatR.Tests;
 public class SendTests
@@ -48,6 +49,7 @@ public class SendTests
     public class Dependency
     {
         public bool Called { get; set; }
+        public bool CalledSpecific { get; set; }
     }
 
     public class VoidPingHandler : IRequestHandler<VoidPing>
@@ -99,6 +101,20 @@ public class SendTests
         {
             _dependency.Called = true;
 
+            return Task.CompletedTask;
+        }
+    }
+
+
+    public class TestClass1PingRequestHandler : IRequestHandler<VoidGenericPing<Pong>>
+    {
+        private readonly Dependency _dependency;
+
+        public TestClass1PingRequestHandler(Dependency dependency) => _dependency = dependency;
+
+        public Task Handle(VoidGenericPing<Pong> request, CancellationToken cancellationToken)
+        {
+            _dependency.CalledSpecific = true;
             return Task.CompletedTask;
         }
     }
@@ -221,5 +237,22 @@ public class SendTests
         await _mediator.Send(request);
 
         _dependency.Called.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Should_resolve_closed_handler_if_defined()
+    {
+        var dependency = new Dependency();
+        var services = new ServiceCollection();
+        services.AddSingleton(dependency);       
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddTransient(typeof(IRequestHandler<VoidGenericPing<Pong>>), typeof(TestClass1PingRequestHandler));
+        var serviceProvider = services.BuildServiceProvider();
+        var mediator = serviceProvider.GetService<IMediator>()!;
+
+        var request = new VoidGenericPing<Pong>();
+        await mediator.Send(request);
+
+        dependency.CalledSpecific.ShouldBeTrue();
     }
 }
