@@ -246,13 +246,14 @@ public class SendTests
         var services = new ServiceCollection();
         services.AddSingleton(dependency);       
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
-        services.AddTransient(typeof(IRequestHandler<VoidGenericPing<Pong>>), typeof(TestClass1PingRequestHandler));
+        services.AddTransient<IRequestHandler<VoidGenericPing<Pong>>,TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;
 
         var request = new VoidGenericPing<Pong>();
         await mediator.Send(request);
 
+        dependency.Called.ShouldBeFalse();
         dependency.CalledSpecific.ShouldBeTrue();
     }
 }
