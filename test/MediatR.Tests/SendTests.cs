@@ -105,14 +105,18 @@ public class SendTests
         }
     }
 
+    public class PongExtension : Pong
+    {
 
-    public class TestClass1PingRequestHandler : IRequestHandler<VoidGenericPing<Pong>>
+    }
+
+    public class TestClass1PingRequestHandler : IRequestHandler<VoidGenericPing<PongExtension>>
     {
         private readonly Dependency _dependency;
 
         public TestClass1PingRequestHandler(Dependency dependency) => _dependency = dependency;
 
-        public Task Handle(VoidGenericPing<Pong> request, CancellationToken cancellationToken)
+        public Task Handle(VoidGenericPing<PongExtension> request, CancellationToken cancellationToken)
         {
             _dependency.CalledSpecific = true;
             return Task.CompletedTask;
@@ -246,14 +250,32 @@ public class SendTests
         var services = new ServiceCollection();
         services.AddSingleton(dependency);       
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
-        services.AddTransient<IRequestHandler<VoidGenericPing<Pong>>,TestClass1PingRequestHandler>();
+        services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>,TestClass1PingRequestHandler>();
+        var serviceProvider = services.BuildServiceProvider();
+        var mediator = serviceProvider.GetService<IMediator>()!;
+
+        var request = new VoidGenericPing<PongExtension>();
+        await mediator.Send(request);
+
+        dependency.Called.ShouldBeFalse();
+        dependency.CalledSpecific.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Should_resolve_open_handler_if_not_defined()
+    {
+        var dependency = new Dependency();
+        var services = new ServiceCollection();
+        services.AddSingleton(dependency);
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>, TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;
 
         var request = new VoidGenericPing<Pong>();
         await mediator.Send(request);
 
-        dependency.Called.ShouldBeFalse();
-        dependency.CalledSpecific.ShouldBeTrue();
+        dependency.Called.ShouldBeTrue();
+        dependency.CalledSpecific.ShouldBeFalse();
     }
 }
