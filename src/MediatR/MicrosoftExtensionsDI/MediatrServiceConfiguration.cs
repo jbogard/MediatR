@@ -90,6 +90,11 @@ public class MediatRServiceConfiguration
     public int RegistrationTimeout { get; set; } = 15000;
 
     /// <summary>
+    /// Flag that controlls whether MediatR will attempt to register handlers that containg generic type parameters.
+    /// </summary>
+    public bool RegisterGenericHandlers { get; set; } = true;
+
+    /// <summary>
     /// Register various handlers from assembly containing given type
     /// </summary>
     /// <typeparam name="T">Type from assembly to scan</typeparam>

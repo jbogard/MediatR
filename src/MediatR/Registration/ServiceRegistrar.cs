@@ -103,6 +103,7 @@ public static class ServiceRegistrar
 
         var types = assembliesToScan
             .SelectMany(a => a.DefinedTypes)
+            .Where(t => !t.ContainsGenericParameters || configuration.RegisterGenericHandlers)
             .Where(t => t.IsConcrete() && t.FindInterfacesThatClose(openRequestInterface).Any())
             .Where(configuration.TypeEvaluator)
             .ToList();        

@@ -26,6 +26,12 @@ namespace MediatR.Tests.MicrosoftExtensionsDI
         protected static Assembly GenerateTimeoutOccursAssembly() =>
             CreateAssemblyModuleBuilder("TimeOutOccursAssembly", 400, 3, CreateHandlerForTimeoutOccursTest);
 
+        protected static Assembly GenerateOptOutAssembly() =>
+            CreateAssemblyModuleBuilder("OptOutAssembly", 2, 2, CreateHandlerForOptOutTest);
+
+        protected static void CreateHandlerForOptOutTest(ModuleBuilder moduleBuilder) =>
+            CreateRequestHandler(moduleBuilder, "OptOutRequest", 2);
+
         protected static void CreateHandlerForMissingConstraintsTest(ModuleBuilder moduleBuilder) =>
           CreateRequestHandler(moduleBuilder, "MissingConstraintsRequest", 3, 0, false);
 

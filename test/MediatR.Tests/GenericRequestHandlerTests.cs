@@ -186,5 +186,35 @@ namespace MediatR.Tests
             })
             .Message.ShouldBe("The generic handler registration process timed out.");
         }
+
+        [Fact]
+        public void ShouldNotRegisterGenericHandlersWhenOptingOut()
+        {
+            IServiceCollection services = new ServiceCollection();
+            services.AddSingleton(new Logger());
+
+            var assembly = GenerateOptOutAssembly();
+            services.AddMediatR(cfg =>
+            {
+                //opt out flag set
+                cfg.RegisterGenericHandlers = false;
+                cfg.RegisterServicesFromAssembly(assembly);
+            });
+
+            var provider = services.BuildServiceProvider();
+            var testClasses = Enumerable.Range(1, 2)
+                .Select(i => assembly.GetType($"TestClass{i}")!)
+                .ToArray();
+            var requestType = assembly.GetType("OptOutRequest")!;
+            var combinations = GenerateCombinations(testClasses, 2);
+
+            var concreteRequestType = requestType.MakeGenericType(combinations.First());
+            var requestHandlerInterface = typeof(IRequestHandler<>).MakeGenericType(concreteRequestType);
+
+            var handler = provider.GetService(requestHandlerInterface);
+            handler.ShouldBeNull($"Handler for {concreteRequestType} should be null");
+
+
+        }
     }
 }
