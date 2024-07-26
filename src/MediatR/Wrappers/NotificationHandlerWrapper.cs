@@ -21,6 +21,21 @@ public class NotificationHandlerWrapperImpl<TNotification> : NotificationHandler
         Func<IEnumerable<NotificationHandlerExecutor>, INotification, CancellationToken, Task> publish,
         CancellationToken cancellationToken)
     {
+        if (notification is null)
+        {
+            throw new ArgumentNullException(nameof(notification));
+        }
+
+        if (serviceFactory is null)
+        {
+            throw new ArgumentNullException(nameof(serviceFactory));
+        }
+
+        if (publish is null)
+        {
+            throw new ArgumentNullException(nameof(publish));
+        }
+
         var handlers = serviceFactory
             .GetServices<INotificationHandler<TNotification>>()
             .Select(static x => new NotificationHandlerExecutor(x, (theNotification, theToken) => x.Handle((TNotification)theNotification, theToken)));

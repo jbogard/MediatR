@@ -21,10 +21,21 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public RequestExceptionActionProcessorBehavior(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    public RequestExceptionActionProcessorBehavior(IServiceProvider serviceProvider)
+        => _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (next is null)
+        {
+            throw new ArgumentNullException(nameof(next));
+        }
+
         try
         {
             return await next().ConfigureAwait(false);
@@ -44,7 +55,7 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
             {
                 try
                 {
-                    await ((Task)(actionForException.MethodInfo.Invoke(actionForException.Action, new object[] { request, exception, cancellationToken })
+                    await ((Task) (actionForException.MethodInfo.Invoke(actionForException.Action, new object[] { request, exception, cancellationToken })
                                   ?? throw new InvalidOperationException($"Could not create task for action method {actionForException.MethodInfo}."))).ConfigureAwait(false);
                 }
                 catch (TargetInvocationException invocationException) when (invocationException.InnerException != null)
@@ -72,7 +83,7 @@ public class RequestExceptionActionProcessorBehavior<TRequest, TResponse> : IPip
         var exceptionActionInterfaceType = typeof(IRequestExceptionAction<,>).MakeGenericType(typeof(TRequest), exceptionType);
         var enumerableExceptionActionInterfaceType = typeof(IEnumerable<>).MakeGenericType(exceptionActionInterfaceType);
 
-        var actionsForException = (IEnumerable<object>)_serviceProvider.GetRequiredService(enumerableExceptionActionInterfaceType);
+        var actionsForException = (IEnumerable<object>) _serviceProvider.GetRequiredService(enumerableExceptionActionInterfaceType);
 
         return HandlersOrderer.Prioritize(actionsForException.ToList(), request)
             .Select(action => (exceptionType, action));

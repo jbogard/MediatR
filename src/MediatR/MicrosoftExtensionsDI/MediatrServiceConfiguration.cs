@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using MediatR;
+﻿using MediatR;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
 using MediatR.Registration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +15,7 @@ public class MediatRServiceConfiguration
     /// Optional filter for types to register. Default value is a function returning true.
     /// </summary>
     public Func<Type, bool> TypeEvaluator { get; set; } = t => true;
-    
+
     /// <summary>
     /// Mediator implementation type to register. Default is <see cref="Mediator"/>
     /// </summary>
@@ -108,7 +108,14 @@ public class MediatRServiceConfiguration
     /// <param name="type">Type from assembly to scan</param>
     /// <returns>This</returns>
     public MediatRServiceConfiguration RegisterServicesFromAssemblyContaining(Type type)
-        => RegisterServicesFromAssembly(type.Assembly);
+    {
+        if (type is null)
+        {
+            throw new ArgumentNullException(nameof(type));
+        }
+
+        return RegisterServicesFromAssembly(type.Assembly);
+    }
 
     /// <summary>
     /// Register various handlers from assembly
@@ -117,6 +124,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration RegisterServicesFromAssembly(Assembly assembly)
     {
+        if (assembly is null)
+        {
+            throw new ArgumentNullException(nameof(assembly));
+        }
+
         AssembliesToRegister.Add(assembly);
 
         return this;
@@ -130,6 +142,11 @@ public class MediatRServiceConfiguration
     public MediatRServiceConfiguration RegisterServicesFromAssemblies(
         params Assembly[] assemblies)
     {
+        if (assemblies is null)
+        {
+            throw new ArgumentNullException(nameof(assemblies));
+        }
+
         AssembliesToRegister.AddRange(assemblies);
 
         return this;
@@ -164,6 +181,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IPipelineBehavior<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -188,6 +210,16 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddBehavior(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         BehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
         return this;
@@ -201,6 +233,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (openBehaviorType is null)
+        {
+            throw new ArgumentNullException(nameof(openBehaviorType));
+        }
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -231,7 +268,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddStreamBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed stream behavior type
     /// </summary>
@@ -241,11 +278,21 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         StreamBehaviorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
         return this;
     }
-    
+
     /// <summary>
     /// Register a closed stream behavior type against all <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -254,7 +301,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior<TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddStreamBehavior(typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed stream behavior type against all <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -263,6 +310,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IStreamPipelineBehavior<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -277,7 +329,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open stream behavior type against the <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> open generic interface type
     /// </summary>
@@ -286,6 +338,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenStreamBehavior(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (openBehaviorType is null)
+        {
+            throw new ArgumentNullException(nameof(openBehaviorType));
+        }
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -316,7 +373,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPreProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request pre processor type
     /// </summary>
@@ -326,6 +383,16 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         RequestPreProcessorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
         return this;
@@ -349,6 +416,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPreProcessor<>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -360,10 +432,10 @@ public class MediatRServiceConfiguration
         {
             RequestPreProcessorsToRegister.Add(new ServiceDescriptor(implementedPreProcessorType, implementationType, serviceLifetime));
         }
-        
+
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open request pre processor type against the <see cref="IRequestPreProcessor{TRequest}"/> open generic interface type
     /// </summary>
@@ -372,6 +444,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenRequestPreProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (openBehaviorType is null)
+        {
+            throw new ArgumentNullException(nameof(openBehaviorType));
+        }
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");
@@ -392,7 +469,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
-    
+
     /// <summary>
     /// Register a closed request post processor type
     /// </summary>
@@ -402,7 +479,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPostProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request post processor type
     /// </summary>
@@ -412,11 +489,21 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor(Type serviceType, Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (serviceType is null)
+        {
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         RequestPostProcessorsToRegister.Add(new ServiceDescriptor(serviceType, implementationType, serviceLifetime));
 
         return this;
     }
- 
+
     /// <summary>
     /// Register a closed request post processor type against all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -425,7 +512,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor<TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPostProcessor(typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request post processor type against all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -434,6 +521,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor(Type implementationType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (implementationType is null)
+        {
+            throw new ArgumentNullException(nameof(implementationType));
+        }
+
         var implementedGenericInterfaces = implementationType.FindInterfacesThatClose(typeof(IRequestPostProcessor<,>)).ToList();
 
         if (implementedGenericInterfaces.Count == 0)
@@ -447,7 +539,7 @@ public class MediatRServiceConfiguration
         }
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open request post processor type against the <see cref="IRequestPostProcessor{TRequest,TResponse}"/> open generic interface type
     /// </summary>
@@ -456,6 +548,11 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddOpenRequestPostProcessor(Type openBehaviorType, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
     {
+        if (openBehaviorType is null)
+        {
+            throw new ArgumentNullException(nameof(openBehaviorType));
+        }
+
         if (!openBehaviorType.IsGenericType)
         {
             throw new InvalidOperationException($"{openBehaviorType.Name} must be generic");

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,16 @@ public class TaskWhenAllPublisher : INotificationPublisher
 {
     public Task Publish(IEnumerable<NotificationHandlerExecutor> handlerExecutors, INotification notification, CancellationToken cancellationToken)
     {
+        if (handlerExecutors is null)
+        {
+            throw new ArgumentNullException(nameof(handlerExecutors));
+        }
+
+        if (notification is null)
+        {
+            throw new ArgumentNullException(nameof(notification));
+        }
+
         var tasks = handlerExecutors
             .Select(handler => handler.HandlerCallback(notification, cancellationToken))
             .ToArray();

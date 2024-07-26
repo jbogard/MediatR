@@ -21,10 +21,21 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
 {
     private readonly IServiceProvider _serviceProvider;
 
-    public RequestExceptionProcessorBehavior(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    public RequestExceptionProcessorBehavior(IServiceProvider serviceProvider)
+        => _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (next is null)
+        {
+            throw new ArgumentNullException(nameof(next));
+        }
+
         try
         {
             return await next().ConfigureAwait(false);

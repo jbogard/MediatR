@@ -1,3 +1,5 @@
+using System;
+
 namespace MediatR.Pipeline;
 
 /// <summary>
@@ -22,6 +24,11 @@ public class RequestExceptionHandlerState<TResponse>
     /// <param name="response">Set the response that will be returned.</param>
     public void SetHandled(TResponse response)
     {
+        if (response is null)
+        {
+            throw new ArgumentNullException(nameof(response));
+        }
+
         Handled = true;
         Response = response;
     }
