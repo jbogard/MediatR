@@ -18,6 +18,11 @@ public static class ServiceRegistrar
 
     public static void SetGenericRequestHandlerRegistrationLimitations(MediatRServiceConfiguration configuration)
     {
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
         MaxGenericTypeParameters = configuration.MaxGenericTypeParameters;
         MaxTypesClosing = configuration.MaxTypesClosing;
         MaxGenericTypeRegistrations = configuration.MaxGenericTypeRegistrations;
@@ -26,7 +31,17 @@ public static class ServiceRegistrar
 
     public static void AddMediatRClassesWithTimeout(IServiceCollection services, MediatRServiceConfiguration configuration)
     {
-        using(var cts = new CancellationTokenSource(RegistrationTimeout))
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
+        using (var cts = new CancellationTokenSource(RegistrationTimeout))
         {
             try
             {
@@ -40,7 +55,16 @@ public static class ServiceRegistrar
     }
 
     public static void AddMediatRClasses(IServiceCollection services, MediatRServiceConfiguration configuration, CancellationToken cancellationToken = default)
-    {   
+    {
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
 
         var assembliesToScan = configuration.AssembliesToRegister.Distinct().ToArray();
 
@@ -254,6 +278,16 @@ public static class ServiceRegistrar
     // Method to generate combinations recursively
     public static List<List<Type>> GenerateCombinations(Type requestType, List<List<Type>> lists, int depth = 0, CancellationToken cancellationToken = default)
     {
+        if (requestType is null)
+        {
+            throw new ArgumentNullException(nameof(requestType));
+        }
+
+        if (lists is null)
+        {
+            throw new ArgumentNullException(nameof(lists));
+        }
+
         if (depth == 0)
         {
             // Initial checks
@@ -389,6 +423,16 @@ public static class ServiceRegistrar
 
     public static void AddRequiredServices(IServiceCollection services, MediatRServiceConfiguration serviceConfiguration)
     {
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (serviceConfiguration is null)
+        {
+            throw new ArgumentNullException(nameof(serviceConfiguration));
+        }
+
         // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
         services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));

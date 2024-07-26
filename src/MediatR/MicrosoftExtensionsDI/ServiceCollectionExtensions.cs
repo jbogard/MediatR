@@ -26,6 +26,16 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediatR(this IServiceCollection services, 
         Action<MediatRServiceConfiguration> configuration)
     {
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
         var serviceConfig = new MediatRServiceConfiguration();
 
         configuration.Invoke(serviceConfig);
@@ -42,6 +52,16 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMediatR(this IServiceCollection services, 
         MediatRServiceConfiguration configuration)
     {
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
         if (!configuration.AssembliesToRegister.Any())
         {
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");

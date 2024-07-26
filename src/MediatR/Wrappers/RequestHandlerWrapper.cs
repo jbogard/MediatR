@@ -34,6 +34,16 @@ public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrap
     public override Task<TResponse> Handle(IRequest<TResponse> request, IServiceProvider serviceProvider,
         CancellationToken cancellationToken)
     {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (serviceProvider is null)
+        {
+            throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
         Task<TResponse> Handler() => serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>()
             .Handle((TRequest) request, cancellationToken);
 
@@ -55,6 +65,16 @@ public class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
     public override Task<Unit> Handle(IRequest request, IServiceProvider serviceProvider,
         CancellationToken cancellationToken)
     {
+        if (request is null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (serviceProvider is null)
+        {
+            throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
         async Task<Unit> Handler()
         {
             await serviceProvider.GetRequiredService<IRequestHandler<TRequest>>()

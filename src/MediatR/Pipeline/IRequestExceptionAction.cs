@@ -3,7 +3,7 @@ namespace MediatR.Pipeline;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-    
+
 /// <summary>
 /// Defines an exception action for a request
 /// </summary>
