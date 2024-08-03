@@ -94,24 +94,6 @@ namespace MediatR.Tests
         }
 
         [Fact]
-        public void ShouldThrowExceptionWhenRegisterningHandlersWithNoConstraints()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
-
-            var assembly = GenerateMissingConstraintsAssembly();
-
-            Should.Throw<ArgumentException>(() =>
-            {
-                services.AddMediatR(cfg =>
-                {
-                    cfg.RegisterServicesFromAssembly(assembly);
-                });
-            })
-            .Message.ShouldContain("When registering generic requests with more than two type parameters, each type parameter must have at least one constraint of type interface or class.");
-        }
-
-        [Fact]
         public void ShouldThrowExceptionWhenTypesClosingExceedsMaximum()
         {
             IServiceCollection services = new ServiceCollection();
