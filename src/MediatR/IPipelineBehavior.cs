@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 /// </summary>
 /// <typeparam name="TResponse">Response type</typeparam>
 /// <returns>Awaitable task returning a <typeparamref name="TResponse"/></returns>
-public delegate Task<TResponse> RequestHandlerDelegate<TResponse>();
+public delegate Task<TResponse> RequestHandlerDelegate<TResponse>(CancellationToken t = default);
 
 /// <summary>
 /// Pipeline behavior to surround the inner handler.
