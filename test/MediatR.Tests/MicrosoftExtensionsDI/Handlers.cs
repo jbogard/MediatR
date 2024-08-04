@@ -213,48 +213,6 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
             throw new System.NotImplementedException();
         }
     }
-
-    interface ITypeArgument { }
-    class ConcreteTypeArgument : ITypeArgument { }
-    class OpenGenericVoidRequest<T> : IRequest
-        where T : class, ITypeArgument
-    { }
-    class OpenGenericVoidRequestHandler<T> : IRequestHandler<OpenGenericVoidRequest<T>>
-        where T : class, ITypeArgument
-    {
-        public Task Handle(OpenGenericVoidRequest<T> request, CancellationToken cancellationToken) => Task.CompletedTask;
-    }
-    class OpenGenericReturnTypeRequest<T> : IRequest<string>
-        where T : class, ITypeArgument
-    { }
-    class OpenGenericReturnTypeRequestHandler<T> : IRequestHandler<OpenGenericReturnTypeRequest<T>, string>
-        where T : class, ITypeArgument
-    {
-        public Task<string> Handle(OpenGenericReturnTypeRequest<T> request, CancellationToken cancellationToken) => Task.FromResult(nameof(request));
-    }
-
-    public class GenericPing<T> : IRequest<T>
-        where T : Pong
-    {
-        public T? Pong { get; set; }
-    }
-
-    public class GenericPingHandler<T> : IRequestHandler<GenericPing<T>, T>
-        where T : Pong
-    {
-        public Task<T> Handle(GenericPing<T> request, CancellationToken cancellationToken) => Task.FromResult(request.Pong!);
-    }
-
-    public class VoidGenericPing<T> : IRequest
-        where T : Pong
-    { }
-
-    public class VoidGenericPingHandler<T> : IRequestHandler<VoidGenericPing<T>>
-        where T : Pong
-    {
-        public Task Handle(VoidGenericPing<T> request, CancellationToken cancellationToken) => Task.CompletedTask;
-    }
-
 }
 
 namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests.Included
