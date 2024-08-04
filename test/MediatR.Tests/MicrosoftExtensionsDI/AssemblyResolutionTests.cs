@@ -15,7 +15,10 @@ public class AssemblyResolutionTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+        });
         _provider = services.BuildServiceProvider();
     }
 
@@ -57,29 +60,5 @@ public class AssemblyResolutionTests
         Action registration = () => services.AddMediatR(_ => { });
 
         registration.ShouldThrow<ArgumentException>();
-    }
-
-    [Fact]
-    public void ShouldResolveGenericVoidRequestHandler()
-    {
-        _provider.GetService<IRequestHandler<OpenGenericVoidRequest<ConcreteTypeArgument>>>().ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void ShouldResolveGenericReturnTypeRequestHandler()
-    {
-        _provider.GetService<IRequestHandler<OpenGenericReturnTypeRequest<ConcreteTypeArgument>, string>>().ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void ShouldResolveGenericPingRequestHandler()
-    {
-        _provider.GetService<IRequestHandler<GenericPing<Pong>, Pong>>().ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void ShouldResolveVoidGenericPingRequestHandler()
-    {
-        _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldNotBeNull();
     }
 }

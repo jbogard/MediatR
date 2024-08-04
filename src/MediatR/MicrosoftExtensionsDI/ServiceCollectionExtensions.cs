@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">Service collection</param>
     /// <param name="configuration">The action used to configure the options</param>
     /// <returns>Service collection</returns>
-    public static IServiceCollection AddMediatR(this IServiceCollection services, 
+    public static IServiceCollection AddMediatR(this IServiceCollection services,
         Action<MediatRServiceConfiguration> configuration)
     {
         var serviceConfig = new MediatRServiceConfiguration();
@@ -32,14 +32,14 @@ public static class ServiceCollectionExtensions
 
         return services.AddMediatR(serviceConfig);
     }
-    
+
     /// <summary>
     /// Registers handlers and mediator types from the specified assemblies
     /// </summary>
     /// <param name="services">Service collection</param>
     /// <param name="configuration">Configuration options</param>
     /// <returns>Service collection</returns>
-    public static IServiceCollection AddMediatR(this IServiceCollection services, 
+    public static IServiceCollection AddMediatR(this IServiceCollection services,
         MediatRServiceConfiguration configuration)
     {
         if (!configuration.AssembliesToRegister.Any())
@@ -47,9 +47,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentException("No assemblies found to scan. Supply at least one assembly to scan for handlers.");
         }
 
-        ServiceRegistrar.SetGenericRequestHandlerRegistrationLimitations(configuration);
-
-        ServiceRegistrar.AddMediatRClassesWithTimeout(services, configuration);
+        ServiceRegistrar.AddMediatRClasses(services, configuration);
 
         ServiceRegistrar.AddRequiredServices(services, configuration);
 
