@@ -92,7 +92,7 @@ public class MediatRServiceConfiguration
     /// <summary>
     /// Flag that controlls whether MediatR will attempt to register handlers that containg generic type parameters.
     /// </summary>
-    public bool RegisterGenericHandlers { get; set; } = true;
+    public bool RegisterGenericHandlers { get; set; } = false;
 
     /// <summary>
     /// Register various handlers from assembly containing given type

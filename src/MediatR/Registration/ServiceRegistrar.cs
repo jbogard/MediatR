@@ -230,9 +230,6 @@ public static class ServiceRegistrar
             .Select(x => x.GetGenericParameterConstraints())
             .ToList();
 
-        if (constraintsForEachParameter.Count > 2 && constraintsForEachParameter.Any(constraints => !constraints.Where(x => x.IsInterface || x.IsClass).Any()))
-            throw new ArgumentException($"Error registering the generic handler type: {openRequestHandlerImplementation.FullName}. When registering generic requests with more than two type parameters, each type parameter must have at least one constraint of type interface or class.");
-
         var typesThatCanCloseForEachParameter = constraintsForEachParameter
             .Select(constraints => assembliesToScan
                 .SelectMany(assembly => assembly.GetTypes())
