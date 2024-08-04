@@ -21,7 +21,6 @@ public class SendTests
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
-            cfg.RegisterGenericHandlers = true;
         });
         services.AddSingleton(_dependency);
         _serviceProvider = services.BuildServiceProvider();

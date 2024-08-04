@@ -18,7 +18,6 @@ public class AssemblyResolutionTests
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
-            cfg.RegisterGenericHandlers = true;
         });
         _provider = services.BuildServiceProvider();
     }
