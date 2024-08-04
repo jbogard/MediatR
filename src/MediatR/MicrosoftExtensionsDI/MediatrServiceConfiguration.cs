@@ -15,7 +15,7 @@ public class MediatRServiceConfiguration
     /// Optional filter for types to register. Default value is a function returning true.
     /// </summary>
     public Func<Type, bool> TypeEvaluator { get; set; } = t => true;
-    
+
     /// <summary>
     /// Mediator implementation type to register. Default is <see cref="Mediator"/>
     /// </summary>
@@ -68,31 +68,6 @@ public class MediatRServiceConfiguration
     /// Automatically register processors during assembly scanning
     /// </summary>
     public bool AutoRegisterRequestProcessors { get; set; }
-
-    /// <summary>
-    /// Configure the maximum number of type parameters that a generic request handler can have. To Disable this constraint, set the value to 0.
-    /// </summary>
-    public int MaxGenericTypeParameters { get; set; } = 10;
-
-    /// <summary>
-    /// Configure the maximum number of types that can close a generic request type parameter constraint.  To Disable this constraint, set the value to 0.
-    /// </summary>
-    public int MaxTypesClosing { get; set; } = 100;
-
-    /// <summary>
-    /// Configure the Maximum Amount of Generic RequestHandler Types MediatR will try to register.  To Disable this constraint, set the value to 0.
-    /// </summary>
-    public int MaxGenericTypeRegistrations { get; set; } = 125000;
-
-    /// <summary>
-    /// Configure the Timeout in Milliseconds that the GenericHandler Registration Process will exit with error.  To Disable this constraint, set the value to 0.
-    /// </summary>
-    public int RegistrationTimeout { get; set; } = 15000;
-
-    /// <summary>
-    /// Flag that controlls whether MediatR will attempt to register handlers that containg generic type parameters.
-    /// </summary>
-    public bool RegisterGenericHandlers { get; set; } = false;
 
     /// <summary>
     /// Register various handlers from assembly containing given type
@@ -231,7 +206,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddStreamBehavior(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed stream behavior type
     /// </summary>
@@ -245,7 +220,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
-    
+
     /// <summary>
     /// Register a closed stream behavior type against all <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -254,7 +229,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddStreamBehavior<TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddStreamBehavior(typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed stream behavior type against all <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -277,7 +252,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open stream behavior type against the <see cref="IStreamPipelineBehavior{TRequest,TResponse}"/> open generic interface type
     /// </summary>
@@ -316,7 +291,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPreProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPreProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request pre processor type
     /// </summary>
@@ -360,10 +335,10 @@ public class MediatRServiceConfiguration
         {
             RequestPreProcessorsToRegister.Add(new ServiceDescriptor(implementedPreProcessorType, implementationType, serviceLifetime));
         }
-        
+
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open request pre processor type against the <see cref="IRequestPreProcessor{TRequest}"/> open generic interface type
     /// </summary>
@@ -392,7 +367,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
-    
+
     /// <summary>
     /// Register a closed request post processor type
     /// </summary>
@@ -402,7 +377,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor<TServiceType, TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPostProcessor(typeof(TServiceType), typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request post processor type
     /// </summary>
@@ -416,7 +391,7 @@ public class MediatRServiceConfiguration
 
         return this;
     }
- 
+
     /// <summary>
     /// Register a closed request post processor type against all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -425,7 +400,7 @@ public class MediatRServiceConfiguration
     /// <returns>This</returns>
     public MediatRServiceConfiguration AddRequestPostProcessor<TImplementationType>(ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         => AddRequestPostProcessor(typeof(TImplementationType), serviceLifetime);
-    
+
     /// <summary>
     /// Register a closed request post processor type against all <see cref="IRequestPostProcessor{TRequest,TResponse}"/> implementations
     /// </summary>
@@ -447,7 +422,7 @@ public class MediatRServiceConfiguration
         }
         return this;
     }
-    
+
     /// <summary>
     /// Registers an open request post processor type against the <see cref="IRequestPostProcessor{TRequest,TResponse}"/> open generic interface type
     /// </summary>
