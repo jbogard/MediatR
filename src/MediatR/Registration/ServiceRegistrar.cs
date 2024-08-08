@@ -14,7 +14,7 @@ public static class ServiceRegistrar
     private static int MaxGenericTypeParameters;
     private static int MaxTypesClosing;
     private static int MaxGenericTypeRegistrations;
-    private static int RegistrationTimeout; 
+    private static int RegistrationTimeout;
 
     public static void SetGenericRequestHandlerRegistrationLimitations(MediatRServiceConfiguration configuration)
     {
@@ -26,21 +26,20 @@ public static class ServiceRegistrar
 
     public static void AddMediatRClassesWithTimeout(IServiceCollection services, MediatRServiceConfiguration configuration)
     {
-        using(var cts = new CancellationTokenSource(RegistrationTimeout))
+        using var cts = new CancellationTokenSource(RegistrationTimeout);
+
+        try
         {
-            try
-            {
-                AddMediatRClasses(services, configuration, cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new TimeoutException("The generic handler registration process timed out.");
-            }
+            AddMediatRClasses(services, configuration, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException("The generic handler registration process timed out.");
         }
     }
 
     public static void AddMediatRClasses(IServiceCollection services, MediatRServiceConfiguration configuration, CancellationToken cancellationToken = default)
-    {   
+    {
 
         var assembliesToScan = configuration.AssembliesToRegister.Distinct().ToArray();
 
@@ -57,7 +56,7 @@ public static class ServiceRegistrar
             ConnectImplementationsToTypesClosing(typeof(IRequestPostProcessor<,>), services, assembliesToScan, true, configuration);
         }
 
-        var multiOpenInterfaces = new List<Type>
+        List<Type> multiOpenInterfaces = new()
         {
             typeof(INotificationHandler<>),
             typeof(IRequestExceptionHandler<,,>),
@@ -96,17 +95,17 @@ public static class ServiceRegistrar
         MediatRServiceConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
-        var concretions = new List<Type>();
-        var interfaces = new List<Type>();
-        var genericConcretions = new List<Type>();
-        var genericInterfaces = new List<Type>();
+        List<Type> concretions = new();
+        List<Type> interfaces = new();
+        List<Type> genericConcretions = new();
+        List<Type> genericInterfaces = new();
 
         var types = assembliesToScan
             .SelectMany(a => a.DefinedTypes)
             .Where(t => !t.ContainsGenericParameters || configuration.RegisterGenericHandlers)
             .Where(t => t.IsConcrete() && t.FindInterfacesThatClose(openRequestInterface).Any())
             .Where(configuration.TypeEvaluator)
-            .ToList();        
+            .ToList();
 
         foreach (var type in types)
         {
@@ -245,7 +244,7 @@ public static class ServiceRegistrar
             return null;
 
         var requestGenericTypeDefinition = requestType.GetGenericTypeDefinition();
-              
+
         var combinations = GenerateCombinations(requestType, typesThatCanCloseForEachParameter, 0, cancellationToken);
 
         return combinations.Select(types => requestGenericTypeDefinition.MakeGenericType(types.ToArray())).ToList();
@@ -278,18 +277,18 @@ public static class ServiceRegistrar
 
         if (depth >= lists.Count)
             return new List<List<Type>> { new List<Type>() };
-       
+
         cancellationToken.ThrowIfCancellationRequested();
 
         var currentList = lists[depth];
         var childCombinations = GenerateCombinations(requestType, lists, depth + 1, cancellationToken);
-        var combinations = new List<List<Type>>();
+        List<List<Type>> combinations = new();
 
         foreach (var item in currentList)
         {
             foreach (var childCombination in childCombinations)
             {
-                var currentCombination = new List<Type> { item };
+                List<Type> currentCombination = new() { item };
                 currentCombination.AddRange(childCombination);
                 combinations.Add(currentCombination);
             }
@@ -301,7 +300,7 @@ public static class ServiceRegistrar
     private static void AddAllConcretionsThatClose(Type openRequestInterface, List<Type> concretions, IServiceCollection services, IEnumerable<Assembly> assembliesToScan, CancellationToken cancellationToken)
     {
         foreach (var concretion in concretions)
-        {   
+        {
             var concreteRequests = GetConcreteRequestTypes(openRequestInterface, concretion, assembliesToScan, cancellationToken);
 
             if (concreteRequests is null)
@@ -337,14 +336,10 @@ public static class ServiceRegistrar
     }
 
     private static bool IsOpenGeneric(this Type type)
-    {
-        return type.IsGenericTypeDefinition || type.ContainsGenericParameters;
-    }
+        => type.IsGenericTypeDefinition || type.ContainsGenericParameters;
 
     internal static IEnumerable<Type> FindInterfacesThatClose(this Type pluggedType, Type templateType)
-    {
-        return FindInterfacesThatClosesCore(pluggedType, templateType).Distinct();
-    }
+        => FindInterfacesThatClosesCore(pluggedType, templateType).Distinct();
 
     private static IEnumerable<Type> FindInterfacesThatClosesCore(Type pluggedType, Type templateType)
     {
@@ -354,10 +349,11 @@ public static class ServiceRegistrar
 
         if (templateType.IsInterface)
         {
+            var interfaces = pluggedType.GetInterfaces().Where(type => type.IsGenericType && (type.GetGenericTypeDefinition() == templateType));
+
             foreach (
                 var interfaceType in
-                pluggedType.GetInterfaces()
-                    .Where(type => type.IsGenericType && (type.GetGenericTypeDefinition() == templateType)))
+                interfaces)
             {
                 yield return interfaceType;
             }
@@ -377,9 +373,7 @@ public static class ServiceRegistrar
     }
 
     private static bool IsConcrete(this Type type)
-    {
-        return !type.IsAbstract && !type.IsInterface;
-    }
+        => !type.IsAbstract && !type.IsInterface;
 
     private static void Fill<T>(this IList<T> list, T value)
     {
