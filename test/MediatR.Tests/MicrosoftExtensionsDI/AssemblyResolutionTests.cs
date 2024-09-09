@@ -15,7 +15,11 @@ public class AssemblyResolutionTests
     {
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton(new Logger());
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
+            cfg.RegisterGenericHandlers = true;
+        });
         _provider = services.BuildServiceProvider();
     }
 

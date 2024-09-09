@@ -18,7 +18,11 @@ public class SendTests
     {
         _dependency = new Dependency();
         var services = new ServiceCollection();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly));
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
+            cfg.RegisterGenericHandlers = true;
+        });
         services.AddSingleton(_dependency);
         _serviceProvider = services.BuildServiceProvider();
         _mediator = _serviceProvider.GetService<IMediator>()!;
@@ -248,8 +252,13 @@ public class SendTests
     {
         var dependency = new Dependency();
         var services = new ServiceCollection();
-        services.AddSingleton(dependency);       
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddSingleton(dependency);
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
+            cfg.RegisterGenericHandlers = true;
+        });
+
         services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>,TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;
@@ -267,7 +276,11 @@ public class SendTests
         var dependency = new Dependency();
         var services = new ServiceCollection();
         services.AddSingleton(dependency);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg => 
+        {
+            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
+            cfg.RegisterGenericHandlers = true;
+        });
         services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>, TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;
