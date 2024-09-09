@@ -21,7 +21,7 @@ public class SendTests
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
-            cfg.RegisterGenericHandlers = true;
+            //cfg.RegisterGenericHandlers = true;
         });
         services.AddSingleton(_dependency);
         _serviceProvider = services.BuildServiceProvider();
@@ -256,7 +256,7 @@ public class SendTests
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
-            cfg.RegisterGenericHandlers = true;
+            //cfg.RegisterGenericHandlers = true;
         });
 
         services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>,TestClass1PingRequestHandler>();
@@ -279,7 +279,7 @@ public class SendTests
         services.AddMediatR(cfg => 
         {
             cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
-            cfg.RegisterGenericHandlers = true;
+            //cfg.RegisterGenericHandlers = true;
         });
         services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>, TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();

@@ -32,7 +32,7 @@ namespace MediatR.Tests
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssemblies(dynamicAssembly);
-                cfg.RegisterGenericHandlers = true;
+               // cfg.RegisterGenericHandlers = true;
             });
 
             var provider = services.BuildServiceProvider();
@@ -107,7 +107,7 @@ namespace MediatR.Tests
                 services.AddMediatR(cfg =>
                 {
                     cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
+                    //cfg.RegisterGenericHandlers = true;
                 });
             })
             .Message.ShouldContain("One of the generic type parameter's count of types that can close exceeds the maximum length allowed");
@@ -126,7 +126,7 @@ namespace MediatR.Tests
                 services.AddMediatR(cfg =>
                 {
                     cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
+                    //cfg.RegisterGenericHandlers = true;
                 });
             })
             .Message.ShouldContain("The total number of generic type registrations exceeds the maximum allowed");
@@ -145,7 +145,7 @@ namespace MediatR.Tests
                 services.AddMediatR(cfg =>
                 {
                     cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
+                   // cfg.RegisterGenericHandlers = true;
                 });
             })
             .Message.ShouldContain("The number of generic type parameters exceeds the maximum allowed");
@@ -163,11 +163,11 @@ namespace MediatR.Tests
             {
                 services.AddMediatR(cfg =>
                 {
-                    cfg.MaxGenericTypeParameters = 0;
-                    cfg.MaxGenericTypeRegistrations = 0;
-                    cfg.MaxTypesClosing = 0;
-                    cfg.RegistrationTimeout = 1000;
-                    cfg.RegisterGenericHandlers = true;
+                    //cfg.MaxGenericTypeParameters = 0;
+                    //cfg.MaxGenericTypeRegistrations = 0;
+                    //cfg.MaxTypesClosing = 0;
+                    //cfg.RegistrationTimeout = 1000;
+                    //cfg.RegisterGenericHandlers = true;
                     cfg.RegisterServicesFromAssembly(assembly);
                 });
             })
@@ -184,7 +184,7 @@ namespace MediatR.Tests
             services.AddMediatR(cfg =>
             {
                 //opt out flag set
-                cfg.RegisterGenericHandlers = false;
+                //cfg.RegisterGenericHandlers = false;
                 cfg.RegisterServicesFromAssembly(assembly);
             });
 
