@@ -23,6 +23,7 @@ public class SendTests
         {
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
             cfg.AddOpenBehavior(typeof(TimeoutBehavior<,>), ServiceLifetime.Transient);
+            cfg.RegisterGenericHandlers = true;
         });
         services.AddSingleton(_dependency);
         _serviceProvider = services.BuildServiceProvider();
@@ -303,8 +304,13 @@ public class SendTests
         var dependency = new Dependency();
         var services = new ServiceCollection();
         services.AddSingleton(dependency);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
-        services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>, TestClass1PingRequestHandler>();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
+            cfg.RegisterGenericHandlers = true;
+        });
+
+        services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>,TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;
 
@@ -321,7 +327,11 @@ public class SendTests
         var dependency = new Dependency();
         var services = new ServiceCollection();
         services.AddSingleton(dependency);
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg => 
+        {
+            cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly());
+            cfg.RegisterGenericHandlers = true;
+        });
         services.AddTransient<IRequestHandler<VoidGenericPing<PongExtension>>, TestClass1PingRequestHandler>();
         var serviceProvider = services.BuildServiceProvider();
         var mediator = serviceProvider.GetService<IMediator>()!;

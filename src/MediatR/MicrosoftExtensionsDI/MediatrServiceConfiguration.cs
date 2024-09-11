@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MediatR;
+using MediatR.Entities;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
 using MediatR.Registration;
@@ -92,7 +93,7 @@ public class MediatRServiceConfiguration
     /// <summary>
     /// Flag that controlls whether MediatR will attempt to register handlers that containg generic type parameters.
     /// </summary>
-    public bool RegisterGenericHandlers { get; set; } = true;
+    public bool RegisterGenericHandlers { get; set; } = false;
 
     /// <summary>
     /// Register various handlers from assembly containing given type
@@ -222,6 +223,37 @@ public class MediatRServiceConfiguration
         return this;
     }
 
+    /// <summary>
+    /// Registers multiple open behavior types against the <see cref="IPipelineBehavior{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviorTypes">An open generic behavior type list includes multiple open generic behavior types.</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenBehaviors(IEnumerable<Type> openBehaviorTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        foreach (var openBehaviorType in openBehaviorTypes)
+        {
+            AddOpenBehavior(openBehaviorType, serviceLifetime);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Registers open behaviors against the <see cref="IPipelineBehavior{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviors">An open generic behavior list includes multiple <see cref="OpenBehavior"/> open generic behaviors.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenBehaviors(IEnumerable<OpenBehavior> openBehaviors)
+    {
+        foreach (var openBehavior in openBehaviors)
+        {
+            AddOpenBehavior(openBehavior.OpenBehaviorType!, openBehavior.ServiceLifetime);
+        }
+
+        return this;
+    }
+    
     /// <summary>
     /// Register a closed stream behavior type
     /// </summary>

@@ -9,11 +9,7 @@ using System.Threading.Tasks;
 namespace MediatR.Tests.MicrosoftExtensionsDI
 {
     public abstract class BaseGenericRequestHandlerTests
-    {      
-        
-        protected static Assembly GenerateMissingConstraintsAssembly() =>
-           CreateAssemblyModuleBuilder("MissingConstraintsAssembly", 3, 3, CreateHandlerForMissingConstraintsTest);
-
+    { 
         protected static Assembly GenerateTypesClosingExceedsMaximumAssembly() =>
             CreateAssemblyModuleBuilder("ExceedsMaximumTypesClosingAssembly", 201, 1, CreateHandlerForExceedsMaximumClassesTest);
 
