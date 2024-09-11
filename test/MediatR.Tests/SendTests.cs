@@ -6,6 +6,7 @@ using Shouldly;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using MediatR.Pipeline;
 
 namespace MediatR.Tests;
 public class SendTests
@@ -21,6 +22,7 @@ public class SendTests
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
+            cfg.AddOpenBehavior(typeof(TimeoutBehavior<,>), ServiceLifetime.Transient);
             cfg.RegisterGenericHandlers = true;
         });
         services.AddSingleton(_dependency);
@@ -135,7 +137,7 @@ public class SendTests
     public class TestClass2 : ITestInterface2 { }
     public class TestClass3 : ITestInterface3 { }
 
-    public class MultipleGenericTypeParameterRequest<T1, T2, T3> : IRequest<int> 
+    public class MultipleGenericTypeParameterRequest<T1, T2, T3> : IRequest<int>
        where T1 : ITestInterface1
        where T2 : ITestInterface2
        where T3 : ITestInterface3
@@ -156,6 +158,55 @@ public class SendTests
         {
             _dependency.Called = true;
             return Task.FromResult(1);
+        }
+    }
+
+    public class TimeoutBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            using (var cts = new CancellationTokenSource(500))
+            {
+                return await next(cts.Token);
+            }
+        }
+    }
+
+    public class TimeoutRequest : IRequest
+    {
+    }
+
+    public class TimeoutRequest2 : IRequest<int>
+    {
+    }
+
+    public class TimeoutRequestHandler : IRequestHandler<TimeoutRequest>
+    {
+        private readonly Dependency _dependency;
+
+        public TimeoutRequestHandler(Dependency dependency) => _dependency = dependency;
+
+        public async Task Handle(TimeoutRequest request, CancellationToken cancellationToken)
+        {
+            await Task.Delay(2000, cancellationToken);
+
+            _dependency.Called = true;
+        }
+    }
+
+    public class TimeoutRequest2Handler : IRequestHandler<TimeoutRequest2, int>
+    {
+        private readonly Dependency _dependency;
+
+        public TimeoutRequest2Handler(Dependency dependency) => _dependency = dependency;
+
+        public async Task<int> Handle(TimeoutRequest2 request, CancellationToken cancellationToken)
+        {
+            await Task.Delay(2000, cancellationToken);
+
+            _dependency.Called = true;
+            return 1;
         }
     }
 
@@ -290,5 +341,31 @@ public class SendTests
 
         dependency.Called.ShouldBeTrue();
         dependency.CalledSpecific.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task TimeoutBehavior_Void_Should_Cancel_Long_Running_Task_And_Throw_Exception()
+    {
+        var request = new TimeoutRequest();
+
+        var exception = await Should.ThrowAsync<TaskCanceledException>(() => _mediator.Send(request));
+
+        exception.ShouldNotBeNull();
+        exception.ShouldBeAssignableTo<TaskCanceledException>();
+        _dependency.Called.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task TimeoutBehavior_NonVoid_Should_Cancel_Long_Running_Task_And_Throw_Exception()
+    {
+        var request = new TimeoutRequest2();
+        int result = 0;
+
+        var exception = await Should.ThrowAsync<TaskCanceledException>(async () => { result = await _mediator.Send(request); });
+
+        exception.ShouldNotBeNull();
+        exception.ShouldBeAssignableTo<TaskCanceledException>();
+        _dependency.Called.ShouldBeFalse();
+        result.ShouldBe(0);
     }
 }
