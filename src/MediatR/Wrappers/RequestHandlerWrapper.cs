@@ -34,14 +34,14 @@ public class RequestHandlerWrapperImpl<TRequest, TResponse> : RequestHandlerWrap
     public override Task<TResponse> Handle(IRequest<TResponse> request, IServiceProvider serviceProvider,
         CancellationToken cancellationToken)
     {
-        Task<TResponse> Handler() => serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>()
-            .Handle((TRequest) request, cancellationToken);
+        Task<TResponse> Handler(CancellationToken t = default) => serviceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>()
+            .Handle((TRequest) request, t == default ? cancellationToken : t);
 
         return serviceProvider
             .GetServices<IPipelineBehavior<TRequest, TResponse>>()
             .Reverse()
             .Aggregate((RequestHandlerDelegate<TResponse>) Handler,
-                (next, pipeline) => () => pipeline.Handle((TRequest) request, next, cancellationToken))();
+                (next, pipeline) => (t) => pipeline.Handle((TRequest) request, next, t == default ? cancellationToken : t))();
     }
 }
 
@@ -55,10 +55,10 @@ public class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
     public override Task<Unit> Handle(IRequest request, IServiceProvider serviceProvider,
         CancellationToken cancellationToken)
     {
-        async Task<Unit> Handler()
+        async Task<Unit> Handler(CancellationToken t = default)
         {
             await serviceProvider.GetRequiredService<IRequestHandler<TRequest>>()
-                .Handle((TRequest) request, cancellationToken);
+                .Handle((TRequest) request, t == default ? cancellationToken : t);
 
             return Unit.Value;
         }
@@ -67,6 +67,6 @@ public class RequestHandlerWrapperImpl<TRequest> : RequestHandlerWrapper
             .GetServices<IPipelineBehavior<TRequest, Unit>>()
             .Reverse()
             .Aggregate((RequestHandlerDelegate<Unit>) Handler,
-                (next, pipeline) => () => pipeline.Handle((TRequest) request, next, cancellationToken))();
+                (next, pipeline) => (t) => pipeline.Handle((TRequest) request, next, t == default ? cancellationToken : t))();
     }
 }
