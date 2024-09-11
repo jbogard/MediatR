@@ -6,7 +6,6 @@
     <Description>Contracts package for requests, responses, and notifications</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <Features>strict</Features>
     <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
     <SignAssembly>true</SignAssembly>

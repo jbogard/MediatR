@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MediatR;
+using MediatR.Entities;
 using MediatR.NotificationPublishers;
 using MediatR.Pipeline;
 using MediatR.Registration;
@@ -197,6 +198,37 @@ public class MediatRServiceConfiguration
         return this;
     }
 
+    /// <summary>
+    /// Registers multiple open behavior types against the <see cref="IPipelineBehavior{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviorTypes">An open generic behavior type list includes multiple open generic behavior types.</param>
+    /// <param name="serviceLifetime">Optional service lifetime, defaults to <see cref="ServiceLifetime.Transient"/>.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenBehaviors(IEnumerable<Type> openBehaviorTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+    {
+        foreach (var openBehaviorType in openBehaviorTypes)
+        {
+            AddOpenBehavior(openBehaviorType, serviceLifetime);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Registers open behaviors against the <see cref="IPipelineBehavior{TRequest,TResponse}"/> open generic interface type
+    /// </summary>
+    /// <param name="openBehaviors">An open generic behavior list includes multiple <see cref="OpenBehavior"/> open generic behaviors.</param>
+    /// <returns>This</returns>
+    public MediatRServiceConfiguration AddOpenBehaviors(IEnumerable<OpenBehavior> openBehaviors)
+    {
+        foreach (var openBehavior in openBehaviors)
+        {
+            AddOpenBehavior(openBehavior.OpenBehaviorType!, openBehavior.ServiceLifetime);
+        }
+
+        return this;
+    }
+    
     /// <summary>
     /// Register a closed stream behavior type
     /// </summary>
