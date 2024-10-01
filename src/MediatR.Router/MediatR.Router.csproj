@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Paolo Possanzini,Teamdev s.r.l.</Authors>
+    <Description>RPC extensions for mediatr via pipeline</Description>
+    <Copyright>Copyright Paolo Possanzini</Copyright>
+    <Features>strict</Features>
+    <PackageTags>mediator;request;response;queries;commands;notifications;rpc</PackageTags>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <RootNamespace>MediatR.Router</RootNamespace>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <RepositoryUrl>https://github.com/teamdev-it/arbitrer</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.*"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.*"/>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.*"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.*"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Contracts\MediatR.Contracts.csproj"/>
+    <ProjectReference Include="..\MediatR\MediatR.csproj"/>
+  </ItemGroup>
+</Project>

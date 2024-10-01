@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+package MediatR.Router.GRPC;
+
+service GrpcServices {
+  rpc ManageRoutedMessage(RequestMessage) returns (MessageResponse);
+  rpc ManageRoutedNotification(NotifyMessage) returns (google.protobuf.Empty);
+}
+
+message RequestMessage {
+  string RoutingType = 1;
+  string Body = 2;
+}
+
+message MessageResponse {
+  string Body = 1;
+}
+
+message NotifyMessage{
+  string RoutingType = 1;
+  string Body = 2;
+}

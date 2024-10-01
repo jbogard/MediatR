@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <Authors>Paolo Possanzini,Teamdev s.r.l.</Authors>
+      <Description>RPC extensions for mediatr via pipeline using gRPC</Description>
+      <Copyright>Copyright Paolo Possanzini</Copyright>
+      <Features>strict</Features>
+      <PackageTags>mediator;request;response;queries;commands;notifications;rpc;grpc</PackageTags>
+      <GenerateDocumentationFile>false</GenerateDocumentationFile>
+      <MinVerTagPrefix>v</MinVerTagPrefix>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <PublishRepositoryUrl>true</PublishRepositoryUrl>
+      <IncludeSymbols>true</IncludeSymbols>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+      <EmbedUntrackedSources>true</EmbedUntrackedSources>
+      <Deterministic>true</Deterministic>
+      <TargetFrameworks>net8.0;</TargetFrameworks>
+
+      <RepositoryUrl>https://github.com/teamdev-it/arbitrer</RepositoryUrl>
+
+      <RootNamespace>MediatR.Router.GRPC</RootNamespace>
+    </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.25.2" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.66.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.*"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.60.0"/>
+    <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.61.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="Protos\RequestsManager.proto" GrpcServices="Both"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MediatR.Router\MediatR.Router.csproj" />
+  </ItemGroup>
+</Project>
