@@ -25,26 +25,26 @@ internal static class HandlersOrderer
 
     private static IEnumerable<ObjectDetails> RemoveOverridden(IList<ObjectDetails> handlersData)
     {
-        for (var i = 0; i < handlersData.Count - 1; i++)
-        {
-            for (var j = i + 1; j < handlersData.Count; j++)
-            {
-                if (handlersData[i].IsOverridden || handlersData[j].IsOverridden)
-                {
-                    continue;
-                }
+        var typeOverrides = new Dictionary<Type, bool>();
 
-                if (handlersData[i].Type.IsAssignableFrom(handlersData[j].Type))
-                {
-                    handlersData[i].IsOverridden = true;
-                }
-                else if (handlersData[j].Type.IsAssignableFrom(handlersData[i].Type))
-                {
-                    handlersData[j].IsOverridden = true;
-                }
+        foreach (var handler in handlersData)
+        {
+            if (handler.IsOverridden)
+            {
+                continue;
+            }
+
+            if (typeOverrides.TryGetValue(handler.Type, out var isOverridden))
+            {
+                handler.IsOverridden = isOverridden;
+            }
+            else
+            {
+                typeOverrides[handler.Type] = false;
             }
         }
 
         return handlersData.Where(static w => !w.IsOverridden);
+
     }
 }
