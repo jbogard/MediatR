@@ -117,4 +117,28 @@ public class NotificationPublisherTests
 
         publisher.ShouldBeOfType<TaskWhenAllPublisher>();
     }
+
+    [Fact]
+    public async Task ShouldSubstitutePublisherServiceTypeWithWhenAny()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(new Logger());
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining(typeof(CustomMediatorTests));
+            cfg.NotificationPublisherType = typeof(TaskWhenAnyPublisher);
+            cfg.Lifetime = ServiceLifetime.Singleton;
+        });
+
+        var provider = services.BuildServiceProvider();
+        var mediator = provider.GetService<IMediator>();
+        var publisher = provider.GetService<INotificationPublisher>();
+
+        mediator.ShouldNotBeNull();
+        publisher.ShouldNotBeNull();
+
+        await Should.NotThrowAsync(mediator.Publish(new Pinged()));
+
+        publisher.ShouldBeOfType<TaskWhenAnyPublisher>();
+    }
 }
