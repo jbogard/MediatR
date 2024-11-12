@@ -17,11 +17,11 @@ jobs:
       with:
         fetch-depth: 0
     - name: Setup dotnet 6.0
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '6.0.x'
     - name: Setup dotnet 8.0
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.100'
     - name: Build and Test
