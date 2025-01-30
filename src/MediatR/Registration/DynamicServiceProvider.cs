@@ -12,7 +12,6 @@ namespace MediatR.Registration
         private readonly IServiceProvider _rootProvider;
         private ServiceProvider _currentProvider;
         private readonly IServiceCollection _services;
-        private readonly Type[] RequestHandlerTypes = new Type[] { typeof(IRequestHandler<>), typeof(IRequestHandler<,>) };
 
         public DynamicServiceProvider(IServiceProvider rootProvider)
         {
@@ -67,8 +66,7 @@ namespace MediatR.Registration
             _services.Add(new ServiceDescriptor(serviceType, implementationFactory, lifetime));
             RebuildProvider();
         }
-
-        //public IServiceProvider RootProvider { get { return _rootProvider; } }
+        
         public object? GetService(Type serviceType)
         {
             // Handle requests for IEnumerable<T>
@@ -93,18 +91,15 @@ namespace MediatR.Registration
                 var genericArguments = serviceType.GetGenericArguments();
                 var hasResponseType = genericArguments.Length > 1;
                 var openInterface = hasResponseType ? typeof(IRequestHandler<,>) : typeof(IRequestHandler<>);
-
-                if(openInterface != null)
-                {   
-                    var requestType = genericArguments[0];                   
-                    Type? responseType = hasResponseType ? genericArguments[1] : null;
+                 
+                var requestType = genericArguments[0];                   
+                Type? responseType = hasResponseType ? genericArguments[1] : null;
                     
-                    var implementationType = FindOpenGenericHandlerType(requestType, responseType);
-                    if(implementationType == null)
-                        throw new InvalidOperationException($"No implementation found for {openInterface.FullName}");
+                var implementationType = FindOpenGenericHandlerType(requestType, responseType);
+                if(implementationType == null)
+                    throw new InvalidOperationException($"No implementation found for {openInterface.FullName}");
 
-                    AddService(serviceType, implementationType);
-                }
+                AddService(serviceType, implementationType);
             }
 
             //find the newly registered service
