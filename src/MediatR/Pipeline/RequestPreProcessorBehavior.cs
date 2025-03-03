@@ -24,6 +24,6 @@ public class RequestPreProcessorBehavior<TRequest, TResponse> : IPipelineBehavio
             await processor.Process(request, cancellationToken).ConfigureAwait(false);
         }
 
-        return await next().ConfigureAwait(false);
+        return await next(cancellationToken).ConfigureAwait(false);
     }
 }
