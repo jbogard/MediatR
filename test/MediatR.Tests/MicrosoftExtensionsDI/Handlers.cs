@@ -177,6 +177,10 @@ namespace MediatR.Extensions.Microsoft.DependencyInjection.Tests
 
     class MyCustomMediator : IMediator
     {
+        public MyCustomMediator() { }
+        public MyCustomMediator(IServiceProvider provider) { }
+        public MyCustomMediator(IServiceProvider provider, INotificationPublisher publisher) { }
+       
         public Task<object?> Send(object request, CancellationToken cancellationToken = new())
         {
             throw new System.NotImplementedException();

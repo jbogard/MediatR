@@ -24,6 +24,7 @@ public class SendTests
             cfg.RegisterServicesFromAssemblies(typeof(Ping).Assembly);
             cfg.AddOpenBehavior(typeof(TimeoutBehavior<,>), ServiceLifetime.Transient);
             cfg.RegisterGenericHandlers = true;
+            
         });
         services.AddSingleton(_dependency);
         _serviceProvider = services.BuildServiceProvider();
@@ -360,7 +361,7 @@ public class SendTests
     {
         var request = new TimeoutRequest2();
         int result = 0;
-
+       
         var exception = await Should.ThrowAsync<TaskCanceledException>(async () => { result = await _mediator.Send(request); });
 
         exception.ShouldNotBeNull();

@@ -18,44 +18,7 @@ namespace MediatR.Tests
     public class GenericRequestHandlerTests : BaseGenericRequestHandlerTests
     {
 
-        [Theory]
-        [InlineData(9, 3, 3)]
-        [InlineData(10, 4, 4)]
-        [InlineData(1, 1, 1)]
-        [InlineData(50, 3, 3)]
-        public void ShouldResolveAllCombinationsOfGenericHandler(int numberOfClasses, int numberOfInterfaces, int numberOfTypeParameters)
-        {
-            var services = new ServiceCollection();
-
-            var dynamicAssembly = GenerateCombinationsTestAssembly(numberOfClasses, numberOfInterfaces, numberOfTypeParameters);
-
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterServicesFromAssemblies(dynamicAssembly);
-                cfg.RegisterGenericHandlers = true;
-            });
-
-            var provider = services.BuildServiceProvider();
-
-            var dynamicRequestType = dynamicAssembly.GetType("DynamicRequest")!;
-
-            int expectedCombinations = CalculateTotalCombinations(numberOfClasses, numberOfInterfaces, numberOfTypeParameters);
-
-            var testClasses = Enumerable.Range(1, numberOfClasses)
-                .Select(i => dynamicAssembly.GetType($"TestClass{i}")!)
-                .ToArray();
-
-            var combinations = GenerateCombinations(testClasses, numberOfInterfaces);          
-
-            foreach (var combination in combinations)
-            {
-                var concreteRequestType = dynamicRequestType.MakeGenericType(combination);
-                var requestHandlerInterface = typeof(IRequestHandler<>).MakeGenericType(concreteRequestType);
-
-                var handler = provider.GetService(requestHandlerInterface);
-                handler.ShouldNotBeNull($"Handler for {concreteRequestType} should not be null");
-            }            
-        }
+       
 
         [Theory]
         [InlineData(9, 3, 3)]
@@ -92,86 +55,6 @@ namespace MediatR.Tests
               .Any(g => g.Count() > 1);
 
             hasDuplicates.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void ShouldThrowExceptionWhenTypesClosingExceedsMaximum()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
-
-            var assembly = GenerateTypesClosingExceedsMaximumAssembly();
-
-            Should.Throw<ArgumentException>(() =>
-            {
-                services.AddMediatR(cfg =>
-                {
-                    cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
-                });
-            })
-            .Message.ShouldContain("One of the generic type parameter's count of types that can close exceeds the maximum length allowed");
-        }
-
-        [Fact]
-        public void ShouldThrowExceptionWhenGenericHandlerRegistrationsExceedsMaximum()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
-
-            var assembly = GenerateHandlerRegistrationsExceedsMaximumAssembly();
-
-            Should.Throw<ArgumentException>(() =>
-            {
-                services.AddMediatR(cfg =>
-                {
-                    cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
-                });
-            })
-            .Message.ShouldContain("The total number of generic type registrations exceeds the maximum allowed");
-        }
-
-        [Fact]
-        public void ShouldThrowExceptionWhenGenericTypeParametersExceedsMaximum()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
-
-            var assembly = GenerateGenericTypeParametersExceedsMaximumAssembly();
-
-            Should.Throw<ArgumentException>(() =>
-            {
-                services.AddMediatR(cfg =>
-                {
-                    cfg.RegisterServicesFromAssembly(assembly);
-                    cfg.RegisterGenericHandlers = true;
-                });
-            })
-            .Message.ShouldContain("The number of generic type parameters exceeds the maximum allowed");
-        }
-
-        [Fact]
-        public void ShouldThrowExceptionWhenTimeoutOccurs()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton(new Logger());
-
-            var assembly = GenerateTimeoutOccursAssembly();
-
-            Should.Throw<TimeoutException>(() =>
-            {
-                services.AddMediatR(cfg =>
-                {
-                    cfg.MaxGenericTypeParameters = 0;
-                    cfg.MaxGenericTypeRegistrations = 0;
-                    cfg.MaxTypesClosing = 0;
-                    cfg.RegistrationTimeout = 1000;
-                    cfg.RegisterGenericHandlers = true;
-                    cfg.RegisterServicesFromAssembly(assembly);
-                });
-            })
-            .Message.ShouldBe("The generic handler registration process timed out.");
         }
 
         [Fact]

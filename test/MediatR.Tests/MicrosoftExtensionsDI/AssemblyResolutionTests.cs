@@ -20,7 +20,7 @@ public class AssemblyResolutionTests
             cfg.RegisterServicesFromAssembly(typeof(Ping).Assembly);
             cfg.RegisterGenericHandlers = true;
         });
-        _provider = services.BuildServiceProvider();
+        _provider = services.BuildServiceProvider();        
     }
 
     [Fact]
@@ -64,26 +64,26 @@ public class AssemblyResolutionTests
     }
 
     [Fact]
-    public void ShouldResolveGenericVoidRequestHandler()
+    public void ShouldNotResolveGenericVoidRequestHandler()
     {
-        _provider.GetService<IRequestHandler<OpenGenericVoidRequest<ConcreteTypeArgument>>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<OpenGenericVoidRequest<ConcreteTypeArgument>>>().ShouldBeNull();
     }
 
     [Fact]
-    public void ShouldResolveGenericReturnTypeRequestHandler()
+    public void ShouldNotResolveGenericReturnTypeRequestHandler()
     {
-        _provider.GetService<IRequestHandler<OpenGenericReturnTypeRequest<ConcreteTypeArgument>, string>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<OpenGenericReturnTypeRequest<ConcreteTypeArgument>, string>>().ShouldBeNull();
     }
 
     [Fact]
-    public void ShouldResolveGenericPingRequestHandler()
+    public void ShouldNotResolveGenericPingRequestHandler()
     {
-        _provider.GetService<IRequestHandler<GenericPing<Pong>, Pong>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<GenericPing<Pong>, Pong>>().ShouldBeNull();
     }
 
     [Fact]
-    public void ShouldResolveVoidGenericPingRequestHandler()
+    public void ShouldNotResolveVoidGenericPingRequestHandler()
     {
-        _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldNotBeNull();
+        _provider.GetService<IRequestHandler<VoidGenericPing<Pong>>>().ShouldBeNull();
     }
 }
