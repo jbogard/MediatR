@@ -27,7 +27,7 @@ public class RequestExceptionProcessorBehavior<TRequest, TResponse> : IPipelineB
     {
         try
         {
-            return await next().ConfigureAwait(false);
+            return await next(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception exception)
         {

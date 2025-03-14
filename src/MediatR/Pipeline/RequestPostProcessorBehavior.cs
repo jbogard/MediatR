@@ -19,7 +19,7 @@ public class RequestPostProcessorBehavior<TRequest, TResponse> : IPipelineBehavi
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var response = await next().ConfigureAwait(false);
+        var response = await next(cancellationToken).ConfigureAwait(false);
 
         foreach (var processor in _postProcessors)
         {
