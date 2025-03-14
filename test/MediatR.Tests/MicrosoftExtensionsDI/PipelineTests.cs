@@ -969,4 +969,96 @@ public class PipelineTests
             "Invoked Handler",
         });
     }
+
+
+    #region OpenBehaviorsForMultipleRegistration
+    sealed class OpenBehaviorMultipleRegistration0<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public OpenBehaviorMultipleRegistration0(IBlogger<OpenBehaviorMultipleRegistration0<TRequest, TResponse>> logger)
+        {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<OpenBehaviorMultipleRegistration0<TRequest, TResponse>> logger;
+
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            logger.Messages.Add("Invoked OpenBehaviorMultipleRegistration0");
+            return next();
+        }
+    }
+    sealed class OpenBehaviorMultipleRegistration1<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public OpenBehaviorMultipleRegistration1(IBlogger<OpenBehaviorMultipleRegistration1<TRequest, TResponse>> logger)
+        {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<OpenBehaviorMultipleRegistration1<TRequest, TResponse>> logger;
+
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            logger.Messages.Add("Invoked OpenBehaviorMultipleRegistration1");
+            return next();
+        }
+    }
+    sealed class OpenBehaviorMultipleRegistration2<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+    {
+        public OpenBehaviorMultipleRegistration2(IBlogger<OpenBehaviorMultipleRegistration2<TRequest, TResponse>> logger)
+        {
+            this.logger = logger;
+        }
+
+        readonly IBlogger<OpenBehaviorMultipleRegistration2<TRequest, TResponse>> logger;
+
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        {
+            logger.Messages.Add("Invoked OpenBehaviorMultipleRegistration2");
+            return next();
+        }
+    }
+    #endregion OpenBehaviorsForMultipleRegistration
+
+    [Fact]
+    public async Task Should_register_open_behaviors_correctly()
+    {
+        var behaviorTypeList = new List<Type>
+        {
+            typeof(OpenBehaviorMultipleRegistration0<,>),
+            typeof(OpenBehaviorMultipleRegistration1<,>),
+            typeof(OpenBehaviorMultipleRegistration2<,>)
+        };
+        var services = new ServiceCollection();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<FooRequest>();
+            cfg.AddOpenBehaviors(behaviorTypeList);
+        });
+        var logger = new Logger();
+        services.AddSingleton(logger);
+        services.AddSingleton(new MediatR.Tests.PipelineTests.Logger());
+        services.AddSingleton(new MediatR.Tests.StreamPipelineTests.Logger());
+        services.AddSingleton(new MediatR.Tests.SendTests.Dependency());
+        services.AddSingleton<System.IO.TextWriter>(new System.IO.StringWriter());
+        services.AddTransient(typeof(IBlogger<>), typeof(Blogger<>));
+        var provider = services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateOnBuild = true
+        });
+
+        var mediator = provider.GetRequiredService<IMediator>();
+        var request = new FooRequest();
+        await mediator.Send(request);
+
+        logger.Messages.ShouldBe(new[]
+        {
+            "Invoked OpenBehaviorMultipleRegistration0",
+            "Invoked OpenBehaviorMultipleRegistration1",
+            "Invoked OpenBehaviorMultipleRegistration2",
+            "Invoked Handler",
+        });
+    }
 }
