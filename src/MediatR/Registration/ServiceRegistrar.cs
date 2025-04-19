@@ -388,7 +388,7 @@ public static class ServiceRegistrar
     {
         // Use TryAdd, so any existing ServiceFactory/IMediator registration doesn't get overridden
         services.TryAdd(new ServiceDescriptor(typeof(IMediator), serviceConfiguration.MediatorImplementationType, serviceConfiguration.Lifetime));
-        services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetRequiredService<Chin.MediatR>(), serviceConfiguration.Lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetRequiredService<IMediator>(), serviceConfiguration.Lifetime));
 
         var notificationPublisherServiceDescriptor = serviceConfiguration.NotificationPublisherType != null

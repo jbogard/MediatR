@@ -1,26 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Authors>Jimmy Bogard</Authors>
-    <Description>Simple, unambitious mediator implementation in .NET</Description>
-    <Copyright>Copyright Jimmy Bogard</Copyright>
+    <AssemblyName>Chin.Mediator{Suffix}</AssemblyName>
+    <RootNamespace>Chin.Mediator{Suffix}</RootNamespace>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <Features>strict</Features>
-    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
+    <PackageId>Chin.Mediator{Suffix}</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>CHIN Team</Authors>
+    <Company>CHIN</Company>
+    <Description>Forked Mediator implementation by CHIN</Description>
+    <PackageTags>chin;mediator;commands;notifications</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Deterministic>true</Deterministic>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>gradient_128x128.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <MinVerTagPrefix>v</MinVerTagPrefix>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <Deterministic>true</Deterministic>
-    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +26,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MediatR.Contracts" Version="[2.0.1, 3.0.0)" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />

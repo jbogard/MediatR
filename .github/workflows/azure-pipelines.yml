@@ -1,0 +1,34 @@
+trigger:
+  branches: [ main ]
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '9.x'
+
+- script: dotnet restore
+  displayName: 'Restore'
+
+- script: dotnet build -c Release --no-restore
+  displayName: 'Build'
+
+- script: dotnet test --no-build
+  displayName: 'Test'
+
+- script: |
+    dotnet pack src/Chin.Mediator/Chin.Mediator.csproj \
+      -c Release --no-build -o $(Build.ArtifactStagingDirectory) \
+      /p:PackageVersion=$(Build.BuildNumber)
+  displayName: 'Pack Chin.Mediator'
+
+- task: NuGetCommand@2
+  displayName: 'Publish to Chin.Packages'
+  inputs:
+    command: push
+    publishVstsFeed: 'Chin.Packages'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    allowPackageConflicts: true

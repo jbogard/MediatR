@@ -1,18 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
-    <Authors>Jimmy Bogard</Authors>
-    <Description>Contracts package for requests, responses, and notifications</Description>
-    <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Features>strict</Features>
-    <PackageTags>mediator;request;response;queries;commands;notifications</PackageTags>
+    <AssemblyName>Chin.Mediator{Suffix}</AssemblyName>
+    <RootNamespace>Chin.Mediator{Suffix}</RootNamespace>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
+    <PackageId>Chin.Mediator{Suffix}</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>CHIN Team</Authors>
+    <Company>CHIN</Company>
+    <Description>Forked Mediator implementation by CHIN</Description>
+    <PackageTags>chin;mediator;commands;notifications</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MediatR.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageIcon>gradient_128x128.png</PackageIcon>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
